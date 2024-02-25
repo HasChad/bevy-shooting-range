@@ -1,15 +1,9 @@
 use bevy::{
-    animation::RepeatAnimation,
     ecs::event::ManualEventReader,
     input::mouse::MouseMotion,
     prelude::*,
     window::{CursorGrabMode, PrimaryWindow},
 };
-use bevy_xpbd_3d::math::PI;
-use bevy_xpbd_3d::prelude::*;
-
-#[derive(Resource)]
-pub struct Animations(Vec<Handle<AnimationClip>>);
 
 #[derive(Resource, Default)]
 pub struct InputState {
@@ -33,122 +27,6 @@ pub fn edit_mode_toggler(input: ResMut<ButtonInput<KeyCode>>, mut windows: Query
                 window.cursor.grab_mode = CursorGrabMode::Confined;
                 window.cursor.visible = false;
             }
-        }
-    }
-}
-
-pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    //gun animation load
-    commands.insert_resource(Animations(vec![
-        asset_server.load("models/p226_anim.glb#Animation0")
-    ]));
-
-    //crosshair test
-    commands.spawn(NodeBundle {
-        style: Style {
-            height: Val::Px(2.0),
-            width: Val::Px(6.0),
-            align_self: AlignSelf::Center,
-            justify_self: JustifySelf::Center,
-            ..default()
-        },
-        background_color: Color::WHITE.into(),
-        ..default()
-    });
-    commands.spawn(NodeBundle {
-        style: Style {
-            height: Val::Px(6.0),
-            width: Val::Px(2.0),
-            align_self: AlignSelf::Center,
-            justify_self: JustifySelf::Center,
-            ..default()
-        },
-        background_color: Color::WHITE.into(),
-        ..default()
-    });
-
-    //player
-    commands
-        .spawn((
-            Camera3dBundle {
-                transform: Transform::from_xyz(0.0, 0.8, 0.0),
-                projection: Projection::Perspective(PerspectiveProjection {
-                    fov: 90.0 / 180.0 * PI, // ! One PI = 180, first value is the real fov
-                    near: 0.01,
-                    ..default()
-                }),
-
-                ..default()
-            },
-            FogSettings {
-                color: Color::BLACK,
-                falloff: FogFalloff::Exponential { density: 1.0 },
-                ..default()
-            },
-        ))
-        .with_children(|parent| {
-            // child cube
-            parent.spawn((
-                SceneBundle {
-                    scene: asset_server.load("models/p226_anim.glb#Scene0"),
-                    transform: Transform::from_xyz(0.15, -0.1, -0.19),
-                    ..default()
-                },
-                Name::new("P226"),
-            ));
-        })
-        .with_children(|parent| {
-            parent.spawn((
-                Collider::sphere(0.01),
-                TransformBundle::from(Transform::from_xyz(0.0, 0.0, -1.0)),
-                Name::new("BulletSpawner"),
-            ));
-        });
-
-    //shooting range model
-    commands.spawn((
-        SceneBundle {
-            scene: asset_server.load("models/shooting-range.glb#Scene0"),
-            ..default()
-        },
-        Name::new("Shooting Range"),
-    ));
-    // ! Blender models looking at positive Y direction
-
-    //point light
-    commands.spawn(PointLightBundle {
-        point_light: PointLight {
-            intensity: 10_000_000.,
-            range: 100.,
-            ..default()
-        },
-        transform: Transform::from_xyz(0.0, 16.0, 0.0),
-        ..default()
-    });
-}
-
-pub fn run_animation(
-    animations: Res<Animations>,
-    mut gun_query: Query<&mut AnimationPlayer, Added<AnimationPlayer>>,
-) {
-    for mut gun in &mut gun_query {
-        gun.play(animations.0[0].clone_weak()).repeat();
-        gun.set_repeat(RepeatAnimation::Count(0));
-    }
-}
-
-pub fn keyboard_animation_control(
-    input: Res<ButtonInput<MouseButton>>,
-    mut gun_query: Query<&mut AnimationPlayer>,
-    windows: Query<&Window>,
-) {
-    let window = windows.single();
-    for mut gun in &mut gun_query {
-        if window.cursor.grab_mode == CursorGrabMode::Confined
-            && input.just_pressed(MouseButton::Left)
-        {
-            gun.set_repeat(RepeatAnimation::Count(1));
-            gun.replay();
         }
     }
 }
