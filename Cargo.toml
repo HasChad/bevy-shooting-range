@@ -1,0 +1,18 @@
+[package]
+name = "bevy-shooting-range"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bevy = { version = "0.13.0", features = ["dynamic_linking"] }
+bevy-inspector-egui = "0.23.2"
+bevy_xpbd_3d = "0.4.2"
+color-eyre = "0.6.2"
+
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
