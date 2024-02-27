@@ -91,7 +91,7 @@ pub fn setup(
     //shooting range model
     commands.spawn((
         SceneBundle {
-            scene: asset_server.load("models/shooting-range1.glb#Scene0"),
+            scene: asset_server.load("models/shooting-range.glb#Scene0"),
             ..default()
         },
         AsyncSceneCollider::new(Some(ComputedCollider::TriMesh)),
