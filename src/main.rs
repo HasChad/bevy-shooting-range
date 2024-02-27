@@ -25,7 +25,7 @@ fn main() -> Result<()> {
         //plugins
         .add_plugins(WorldInspectorPlugin::default())
         .add_plugins(PhysicsPlugins::default())
-        //.add_plugins(PhysicsDebugPlugin::default())
+        .add_plugins(PhysicsDebugPlugin::default())
         //mod plugins
         .add_plugins(InGamePlugin)
         .run();

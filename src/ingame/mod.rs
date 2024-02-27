@@ -23,9 +23,12 @@ impl Plugin for InGamePlugin {
                     run_animation,
                     keyboard_animation_control,
                     edit_mode_toggler,
+                    print_hits,
+                    //spawn_bullet,
                 ),
             )
             .insert_resource(SensitivitySettings { sensitivity: 0.10 })
-            .init_resource::<InputState>();
+            .init_resource::<InputState>()
+            .add_event::<P226ShootingEvent>();
     }
 }

@@ -1,7 +1,14 @@
 use bevy::prelude::*;
-use bevy_xpbd_3d::{math::PI, prelude::*};
+use bevy_xpbd_3d::prelude::*;
+use std::f32::consts::PI;
 
 use crate::ingame::Animations;
+
+#[derive(Component)]
+pub struct P226 {
+    pub lifetime: Timer,
+    pub okay_to_shoot: bool,
+}
 
 pub fn player_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
@@ -22,6 +29,7 @@ pub fn player_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 ..default()
             },
         ))
+        //gun model
         .with_children(|parent| {
             parent.spawn((
                 SceneBundle {
@@ -29,22 +37,31 @@ pub fn player_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                     transform: Transform::from_xyz(0.15, -0.1, -0.19),
                     ..default()
                 },
+                P226 {
+                    lifetime: Timer::from_seconds(0.2, TimerMode::Once),
+                    okay_to_shoot: true,
+                },
                 Name::new("P226"),
             ));
         })
+        //RayCast
         .with_children(|parent| {
             parent.spawn((
-                Collider::sphere(0.01),
-                TransformBundle::from(Transform::from_xyz(0.0, 0.0, -1.0)),
-                Name::new("BulletSpawner"),
+                RayCaster::new(Vec3::ZERO, Direction3d::NEG_Z),
+                Name::new("RayCast"),
             ));
         });
 }
 
-pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+pub fn setup(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut meshes: ResMut<Assets<Mesh>>,
+) {
     //gun animation load
     commands.insert_resource(Animations(vec![
-        asset_server.load("models/p226_anim.glb#Animation0")
+        asset_server.load("models/p226_anim.glb#Animation0"),
+        asset_server.load("models/p226_anim.glb#Animation1"),
     ]));
 
     //crosshair test
@@ -74,9 +91,10 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     //shooting range model
     commands.spawn((
         SceneBundle {
-            scene: asset_server.load("models/shooting-range.glb#Scene0"),
+            scene: asset_server.load("models/shooting-range1.glb#Scene0"),
             ..default()
         },
+        AsyncSceneCollider::new(Some(ComputedCollider::TriMesh)),
         Name::new("Shooting Range"),
     ));
     // ! Blender models looking at positive Y direction
