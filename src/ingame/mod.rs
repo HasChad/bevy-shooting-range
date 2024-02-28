@@ -19,16 +19,21 @@ impl Plugin for InGamePlugin {
             .add_systems(
                 Update,
                 (
-                    player_look,
-                    run_animation,
-                    keyboard_animation_control,
-                    edit_mode_toggler,
+                    //gun systems
+                    shooting_event,
+                    p226_firerate_timer,
+                    p226_animation_setup,
+                    p226_play_animation,
                     print_hits,
-                    //spawn_bullet,
+                    //player systems
+                    player_look,
+                    edit_mode_toggler,
                 ),
             )
+            //resources
             .insert_resource(SensitivitySettings { sensitivity: 0.10 })
             .init_resource::<InputState>()
+            //events
             .add_event::<P226ShootingEvent>();
     }
 }

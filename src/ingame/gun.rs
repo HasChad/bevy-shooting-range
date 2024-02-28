@@ -7,7 +7,38 @@ use crate::ingame::Animations;
 #[derive(Event)]
 pub struct P226ShootingEvent;
 
-pub fn run_animation(
+pub fn shooting_event(
+    input: Res<ButtonInput<MouseButton>>,
+    mut event_writer: EventWriter<P226ShootingEvent>,
+    mut p226_query: Query<&mut P226>,
+    windows: Query<&Window>,
+) {
+    for window in windows.iter() {
+        if window.cursor.grab_mode == CursorGrabMode::Confined {
+            for mut p226 in p226_query.iter_mut() {
+                if input.just_pressed(MouseButton::Left) && p226.okay_to_shoot {
+                    event_writer.send(P226ShootingEvent);
+                    p226.okay_to_shoot = false;
+                }
+            }
+        }
+    }
+}
+
+pub fn p226_firerate_timer(mut p226: Query<&mut P226>, time: Res<Time>) {
+    for mut p226 in p226.iter_mut() {
+        if !p226.okay_to_shoot {
+            p226.lifetime.tick(time.delta());
+
+            if p226.lifetime.finished() {
+                p226.okay_to_shoot = true;
+                p226.lifetime = Timer::from_seconds(0.16, TimerMode::Once);
+            }
+        }
+    }
+}
+
+pub fn p226_animation_setup(
     animations: Res<Animations>,
     mut gun_query: Query<&mut AnimationPlayer, Added<AnimationPlayer>>,
 ) {
@@ -17,46 +48,38 @@ pub fn run_animation(
     }
 }
 
-pub fn keyboard_animation_control(
-    input: Res<ButtonInput<MouseButton>>,
+pub fn p226_play_animation(
+    mut event_reader: EventReader<P226ShootingEvent>,
     mut gun_query: Query<&mut AnimationPlayer>,
-    windows: Query<&Window>,
 ) {
-    let window = windows.single();
-    for mut gun in &mut gun_query {
-        if window.cursor.grab_mode == CursorGrabMode::Confined
-            && input.just_pressed(MouseButton::Left)
-        {
+    for _event in event_reader.read() {
+        for mut gun in &mut gun_query {
             gun.set_repeat(RepeatAnimation::Count(1));
             gun.replay();
         }
     }
 }
 
-pub fn print_hits(query: Query<(&RayCaster, &RayHits)>, input: Res<ButtonInput<MouseButton>>) {
-    if input.just_pressed(MouseButton::Left) {
-        for (ray, hits) in &query {
+pub fn print_hits(
+    raycast_query: Query<(&RayCaster, &RayHits)>,
+    mut event_reader: EventReader<P226ShootingEvent>,
+    query: Query<&Name>,
+) {
+    for _event in event_reader.read() {
+        for (ray, hits) in &raycast_query {
             for hit in hits.iter() {
+                if let Ok(name) = query.get(hit.entity) {
+                    println!("Collider = {}", name);
+                }
+                /*
                 println!(
                     "Hit entity {:?} at {} with normal {}",
                     hit.entity,
                     ray.origin + *ray.direction * hit.time_of_impact,
                     hit.normal,
                 );
+                */
             }
-        }
-    }
-}
-
-pub fn p226_firerate_timer(mut m4: Query<&mut P226>, time: Res<Time>) {
-    let mut m4_timer = m4.single_mut();
-
-    if !m4_timer.okay_to_shoot {
-        m4_timer.lifetime.tick(time.delta());
-
-        if m4_timer.lifetime.finished() {
-            m4_timer.okay_to_shoot = true;
-            m4_timer.lifetime = Timer::from_seconds(0.2, TimerMode::Once);
         }
     }
 }

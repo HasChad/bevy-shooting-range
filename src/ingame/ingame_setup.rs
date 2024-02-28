@@ -47,17 +47,13 @@ pub fn player_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         //RayCast
         .with_children(|parent| {
             parent.spawn((
-                RayCaster::new(Vec3::ZERO, Direction3d::NEG_Z),
+                RayCaster::new(Vec3::ZERO, Direction3d::NEG_Z).with_max_hits(1),
                 Name::new("RayCast"),
             ));
         });
 }
 
-pub fn setup(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut meshes: ResMut<Assets<Mesh>>,
-) {
+pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     //gun animation load
     commands.insert_resource(Animations(vec![
         asset_server.load("models/p226_anim.glb#Animation0"),
@@ -98,6 +94,7 @@ pub fn setup(
         Name::new("Shooting Range"),
     ));
     // ! Blender models looking at positive Y direction
+    // ! for true mesh setup, in blender Ctrl + A -> All Transforms
 
     //point light
     commands.spawn(PointLightBundle {
