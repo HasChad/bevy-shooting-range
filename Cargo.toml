@@ -10,6 +10,7 @@ bevy = { version = "0.13.0", features = ["dynamic_linking"] }
 bevy-inspector-egui = "0.23.2"
 color-eyre = "0.6.2"
 bevy_xpbd_3d = "0.4.2"
+rand = "0.8.5"
 
 [profile.dev]
 opt-level = 1

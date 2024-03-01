@@ -25,10 +25,11 @@ pub fn player_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             },
             FogSettings {
                 color: Color::BLACK,
-                falloff: FogFalloff::Exponential { density: 1.0 },
+                falloff: FogFalloff::Exponential { density: 0.01 },
                 ..default()
             },
         ))
+        .insert(InheritedVisibility::VISIBLE)
         //gun model
         .with_children(|parent| {
             parent.spawn((

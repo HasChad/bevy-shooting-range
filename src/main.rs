@@ -1,4 +1,12 @@
-use bevy::{prelude::*, window::WindowMode};
+use bevy::{
+    diagnostic::FrameTimeDiagnosticsPlugin,
+    prelude::*,
+    render::{
+        settings::{Backends, WgpuSettings},
+        RenderPlugin,
+    },
+    window::WindowMode,
+};
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_xpbd_3d::prelude::*;
 use color_eyre::eyre::Result;
@@ -9,6 +17,7 @@ use ingame::InGamePlugin;
 
 fn main() -> Result<()> {
     color_eyre::install()?;
+
     App::new()
         .add_plugins(
             DefaultPlugins
@@ -20,8 +29,18 @@ fn main() -> Result<()> {
                     }),
                     ..default()
                 })
+                .set(RenderPlugin {
+                    render_creation: {
+                        bevy::render::settings::RenderCreation::Automatic(WgpuSettings {
+                            backends: Some(Backends::VULKAN),
+                            ..default()
+                        })
+                    },
+                    ..default()
+                })
                 .build(),
         )
+        .add_plugins(FrameTimeDiagnosticsPlugin)
         //plugins
         .add_plugins(WorldInspectorPlugin::default())
         .add_plugins(PhysicsPlugins::default())
