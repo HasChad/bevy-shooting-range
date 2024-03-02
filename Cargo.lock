@@ -391,6 +391,8 @@ dependencies = [
  "bevy_xpbd_3d",
  "color-eyre",
  "rand",
+ "ron",
+ "serde",
 ]
 
 [[package]]

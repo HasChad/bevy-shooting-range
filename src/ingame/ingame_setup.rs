@@ -2,7 +2,8 @@ use bevy::prelude::*;
 use bevy_xpbd_3d::prelude::*;
 use std::f32::consts::PI;
 
-use crate::ingame::Animations;
+use super::Animations;
+use super::GameSettings;
 
 #[derive(Component)]
 pub struct P226 {
@@ -10,13 +11,17 @@ pub struct P226 {
     pub okay_to_shoot: bool,
 }
 
-pub fn player_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+pub fn player_setup(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    settings: Res<GameSettings>,
+) {
     commands
         .spawn((
             Camera3dBundle {
                 transform: Transform::from_xyz(0.0, 0.8, 0.0),
                 projection: Projection::Perspective(PerspectiveProjection {
-                    fov: 90.0 / 180.0 * PI, // ! One PI = 180, first value is the real fov
+                    fov: settings.fov / 180.0 * PI, // ! One PI = 180, first value is the real fov
                     near: 0.01,
                     ..default()
                 }),
@@ -35,7 +40,7 @@ pub fn player_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             parent.spawn((
                 SceneBundle {
                     scene: asset_server.load("models/p226_anim.glb#Scene0"),
-                    transform: Transform::from_xyz(0.15, -0.1, -0.19),
+                    transform: Transform::from_xyz(0.1, -0.15, -0.2),
                     ..default()
                 },
                 P226 {

@@ -5,14 +5,11 @@ use bevy::{
     window::{CursorGrabMode, PrimaryWindow},
 };
 
+use super::GameSettings;
+
 #[derive(Resource, Default)]
 pub struct InputState {
     reader_motion: ManualEventReader<MouseMotion>,
-}
-
-#[derive(Resource)]
-pub struct SensitivitySettings {
-    pub sensitivity: f32,
 }
 
 pub fn edit_mode_toggler(input: ResMut<ButtonInput<KeyCode>>, mut windows: Query<&mut Window>) {
@@ -33,7 +30,7 @@ pub fn edit_mode_toggler(input: ResMut<ButtonInput<KeyCode>>, mut windows: Query
 
 pub fn player_look(
     time: Res<Time>,
-    settings: Res<SensitivitySettings>,
+    settings: Res<GameSettings>,
     primary_window: Query<&Window, With<PrimaryWindow>>,
     mut state: ResMut<InputState>,
     motion: Res<Events<MouseMotion>>,

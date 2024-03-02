@@ -42,11 +42,11 @@ fn main() -> Result<()> {
                 })
                 .build(),
         )
-        .add_plugins(FrameTimeDiagnosticsPlugin)
         //plugins
-        .add_plugins(WorldInspectorPlugin::default())
+        .add_plugins(FrameTimeDiagnosticsPlugin)
         .add_plugins(PhysicsPlugins::default())
         .add_plugins(PhysicsDebugPlugin::default())
+        .add_plugins(WorldInspectorPlugin::default())
         //mod plugins
         .add_plugins(InGamePlugin)
         //systems

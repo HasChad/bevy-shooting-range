@@ -13,18 +13,19 @@ pub fn setup_fps_counter(mut commands: Commands) {
             TextSection::new(
                 "FPS: ",
                 TextStyle {
-                    font_size: 15.0,
+                    font_size: 20.0,
                     ..default()
                 },
             ),
             TextSection::from_style(TextStyle {
-                font_size: 15.0,
+                font_size: 20.0,
                 color: Color::GOLD,
                 ..default()
             }),
         ])
         .with_style(Style {
             justify_self: JustifySelf::End,
+
             ..default()
         })
         .with_background_color(Color::BLACK),
