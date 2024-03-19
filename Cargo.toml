@@ -1,12 +1,12 @@
 [package]
 name = "bevy-shooting-range"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = { version = "0.13.0", default-features = false, features = [
+bevy = { version = "0.13.1", default-features = false, features = [
   # Bevy functionality:
   "multi-threaded",     # Run with multithreading
   "bevy_asset",         # Assets management
