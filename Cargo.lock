@@ -389,7 +389,7 @@ dependencies = [
 
 [[package]]
 name = "bevy-shooting-range"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "bevy",
  "bevy-inspector-egui",
