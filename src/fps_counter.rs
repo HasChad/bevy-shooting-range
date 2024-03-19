@@ -25,7 +25,6 @@ pub fn setup_fps_counter(mut commands: Commands) {
         ])
         .with_style(Style {
             justify_self: JustifySelf::End,
-
             ..default()
         })
         .with_background_color(Color::BLACK),

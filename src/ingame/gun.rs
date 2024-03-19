@@ -11,10 +11,14 @@ pub fn shooting_event(
     input: Res<ButtonInput<MouseButton>>,
     mut event_writer: EventWriter<P226ShootingEvent>,
     mut p226_query: Query<&mut P226>,
-    windows: Query<&Window>,
+    mut windows: Query<&mut Window>,
 ) {
-    for window in windows.iter() {
+    for mut window in windows.iter_mut() {
         if window.cursor.grab_mode == CursorGrabMode::Confined {
+            //Center mouse becasuse confined mod is not working on Windows right now
+            let center = Vec2::new(window.width() / 2.0, window.height() / 2.0);
+            window.set_cursor_position(Some(center));
+
             for mut p226 in p226_query.iter_mut() {
                 if input.just_pressed(MouseButton::Left) && p226.okay_to_shoot {
                     event_writer.send(P226ShootingEvent);

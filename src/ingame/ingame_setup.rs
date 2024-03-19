@@ -16,6 +16,7 @@ pub fn player_setup(
     asset_server: Res<AssetServer>,
     settings: Res<GameSettings>,
 ) {
+    //Player
     commands
         .spawn((
             Camera3dBundle {
@@ -65,30 +66,6 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         asset_server.load("models/p226_anim.glb#Animation0"),
         asset_server.load("models/p226_anim.glb#Animation1"),
     ]));
-
-    //crosshair test
-    commands.spawn(NodeBundle {
-        style: Style {
-            height: Val::Px(2.0),
-            width: Val::Px(6.0),
-            align_self: AlignSelf::Center,
-            justify_self: JustifySelf::Center,
-            ..default()
-        },
-        background_color: Color::WHITE.into(),
-        ..default()
-    });
-    commands.spawn(NodeBundle {
-        style: Style {
-            height: Val::Px(6.0),
-            width: Val::Px(2.0),
-            align_self: AlignSelf::Center,
-            justify_self: JustifySelf::Center,
-            ..default()
-        },
-        background_color: Color::WHITE.into(),
-        ..default()
-    });
 
     //shooting range model
     commands.spawn((

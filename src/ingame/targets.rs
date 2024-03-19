@@ -33,7 +33,7 @@ pub fn circle_target_controller(
                 if "Cylinder" == query.get(hit.entity).unwrap().as_str() {
                     for mut circletarget_entity in &mut circletarget_query {
                         circletarget_entity.translation =
-                            Vec3::new(rand::thread_rng().gen_range(-5.0..5.0), 0.8, -4.0);
+                            Vec3::new(rand::thread_rng().gen_range(-3.0..3.0), 0.8, -4.0);
                     }
                 }
             }
