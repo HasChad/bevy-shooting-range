@@ -24,6 +24,7 @@ pub fn setup_fps_counter(mut commands: Commands) {
             }),
         ])
         .with_style(Style {
+            position_type: PositionType::Absolute,
             justify_self: JustifySelf::End,
             ..default()
         })

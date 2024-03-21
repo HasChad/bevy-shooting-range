@@ -20,6 +20,7 @@ pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<InnerLine
     commands.spawn((
         NodeBundle {
             style: Style {
+                position_type: PositionType::Absolute,
                 height: Val::Px(crosshair_settings.thickness),
                 width: Val::Px(crosshair_settings.length),
                 right: Val::Percent(50.0),
@@ -43,6 +44,7 @@ pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<InnerLine
     commands.spawn((
         NodeBundle {
             style: Style {
+                position_type: PositionType::Absolute,
                 height: Val::Px(crosshair_settings.thickness),
                 width: Val::Px(crosshair_settings.length),
                 left: Val::Percent(50.0),
@@ -65,6 +67,7 @@ pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<InnerLine
     commands.spawn((
         NodeBundle {
             style: Style {
+                position_type: PositionType::Absolute,
                 height: Val::Px(crosshair_settings.length),
                 width: Val::Px(crosshair_settings.thickness),
                 bottom: Val::Percent(50.0),
@@ -88,6 +91,7 @@ pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<InnerLine
     commands.spawn((
         NodeBundle {
             style: Style {
+                position_type: PositionType::Absolute,
                 height: Val::Px(crosshair_settings.length),
                 width: Val::Px(crosshair_settings.thickness),
                 top: Val::Percent(50.0),

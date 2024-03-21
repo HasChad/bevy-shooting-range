@@ -70,7 +70,7 @@ pub fn print_hits(
     query: Query<&Name>,
 ) {
     for _event in event_reader.read() {
-        for (ray, hits) in &raycast_query {
+        for (_ray, hits) in &raycast_query {
             for hit in hits.iter() {
                 if let Ok(name) = query.get(hit.entity) {
                     println!("Collider = {}", name);

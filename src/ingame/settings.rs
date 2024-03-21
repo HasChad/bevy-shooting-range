@@ -21,7 +21,7 @@ pub fn egui_settings(
 ) {
     egui::Window::new("SETTINGS")
         .resizable(false)
-        .anchor(Align2::LEFT_BOTTOM, (10.0, -10.0))
+        .anchor(Align2::RIGHT_BOTTOM, (-5.0, -5.0))
         .show(contexts.ctx_mut(), |ui| {
             egui::Grid::new("my_grid")
                 .num_columns(2)
@@ -49,7 +49,8 @@ pub fn egui_settings(
                         .add(
                             egui::Slider::new(&mut settings.fov, 5.0..=175.0)
                                 .trailing_fill(true)
-                                .step_by(5.0),
+                                .step_by(5.0)
+                                .integer(),
                         )
                         .changed()
                     {
@@ -80,7 +81,8 @@ pub fn egui_settings(
                         .add(
                             egui::Slider::new(&mut crosshair_inner_settings.length, 1.0..=50.0)
                                 .trailing_fill(true)
-                                .step_by(1.0),
+                                .step_by(1.0)
+                                .integer(),
                         )
                         .changed()
                     {
@@ -103,7 +105,8 @@ pub fn egui_settings(
                         .add(
                             egui::Slider::new(&mut crosshair_inner_settings.thickness, 1.0..=25.0)
                                 .trailing_fill(true)
-                                .step_by(1.0),
+                                .step_by(1.0)
+                                .integer(),
                         )
                         .changed()
                     {
@@ -126,7 +129,8 @@ pub fn egui_settings(
                         .add(
                             egui::Slider::new(&mut crosshair_inner_settings.offset, 0.0..=50.0)
                                 .trailing_fill(true)
-                                .step_by(1.0),
+                                .step_by(1.0)
+                                .integer(),
                         )
                         .changed()
                     {

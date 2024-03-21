@@ -6,6 +6,7 @@ pub mod ingame_setup;
 pub mod player;
 pub mod settings;
 pub mod targets;
+pub mod ui;
 
 use crosshair::*;
 use gun::*;
@@ -13,6 +14,7 @@ use ingame_setup::*;
 use player::*;
 use settings::*;
 use targets::*;
+use ui::*;
 
 #[derive(Resource)]
 pub struct Animations(Vec<Handle<AnimationClip>>);
@@ -45,10 +47,12 @@ impl Plugin for InGamePlugin {
                 edit_mode_toggler,
                 //target systems
                 circle_target_controller,
+                silhouette_target_controller,
                 //settings system
                 egui_settings,
             ),
         )
+        .add_systems(Startup, setup_ui.after(setup))
         //plugins
         //resources
         .insert_resource(GameSettings {
