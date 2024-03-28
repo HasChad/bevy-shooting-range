@@ -31,7 +31,7 @@ impl Plugin for InGamePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Startup,
-            (player_setup, setup, first_target_setup, crosshair_setup),
+            (player_setup, setup, target_setup, crosshair_setup),
         )
         .add_systems(
             Update,
@@ -48,6 +48,7 @@ impl Plugin for InGamePlugin {
                 //target systems
                 circle_target_controller,
                 silhouette_target_controller,
+                silhouette_target_hostage_controller,
                 //settings system
                 egui_settings,
             ),
