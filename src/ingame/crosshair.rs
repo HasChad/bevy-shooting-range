@@ -57,6 +57,7 @@ pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<InnerLine
             },
             background_color: crosshair_settings.color.into(),
             inherited_visibility: crosshair_settings.enable,
+
             ..default()
         },
         Name::new("Right Line"),

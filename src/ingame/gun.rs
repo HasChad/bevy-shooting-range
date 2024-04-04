@@ -36,7 +36,7 @@ pub fn p226_firerate_timer(mut p226: Query<&mut P226>, time: Res<Time>) {
 
             if p226.lifetime.finished() {
                 p226.okay_to_shoot = true;
-                p226.lifetime = Timer::from_seconds(0.16, TimerMode::Once);
+                p226.lifetime = Timer::from_seconds(0.2, TimerMode::Once);
             }
         }
     }

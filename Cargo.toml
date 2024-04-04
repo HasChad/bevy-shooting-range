@@ -35,7 +35,7 @@ bevy = { version = "0.13.1", default-features = false, features = [
   "serialize",            # Support for `serde` Serialize/Deserialize
 
   # Development/Debug features:
-  "dynamic_linking",   # Dynamic linking for faster compile-times
+  # "dynamic_linking",   # Dynamic linking for faster compile-times
   "trace",             # Enable tracing for performance measurement
   "trace_tracy",       # Tracing using `tracy`
 ] }

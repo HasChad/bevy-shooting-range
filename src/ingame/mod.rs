@@ -31,7 +31,13 @@ impl Plugin for InGamePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Startup,
-            (player_setup, setup, target_setup, crosshair_setup),
+            (
+                player_setup,
+                setup,
+                target_setup,
+                crosshair_setup,
+                //setup_ui
+            ),
         )
         .add_systems(
             Update,
@@ -51,9 +57,9 @@ impl Plugin for InGamePlugin {
                 silhouette_target_hostage_controller,
                 //settings system
                 egui_settings,
+                //png_crosshair_changer,
             ),
         )
-        .add_systems(Startup, setup_ui.after(setup))
         //plugins
         //resources
         .insert_resource(GameSettings {

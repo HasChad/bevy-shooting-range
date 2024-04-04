@@ -103,7 +103,7 @@ pub fn egui_settings(
                     ui.label("Thickness: ");
                     if ui
                         .add(
-                            egui::Slider::new(&mut crosshair_inner_settings.thickness, 1.0..=25.0)
+                            egui::Slider::new(&mut crosshair_inner_settings.thickness, 1.0..=50.0)
                                 .trailing_fill(true)
                                 .step_by(1.0)
                                 .integer(),
@@ -148,6 +148,7 @@ pub fn egui_settings(
                             };
                         }
                     };
+                    ui.end_row();
                 });
         });
 }

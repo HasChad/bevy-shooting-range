@@ -7,6 +7,9 @@ use super::GameSettings;
 
 #[derive(Component)]
 pub struct P226 {
+    pub head_dmg: u8,
+    pub body_dmg: u8,
+    pub magazine: u8,
     pub lifetime: Timer,
     pub okay_to_shoot: bool,
 }
@@ -45,6 +48,9 @@ pub fn player_setup(
                     ..default()
                 },
                 P226 {
+                    head_dmg: 3,
+                    body_dmg: 1,
+                    magazine: 12,
                     lifetime: Timer::from_seconds(0.2, TimerMode::Once),
                     okay_to_shoot: true,
                 },
