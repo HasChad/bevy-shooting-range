@@ -1,7 +1,7 @@
 use bevy::{animation::RepeatAnimation, prelude::*, window::CursorGrabMode};
 use bevy_xpbd_3d::prelude::*;
 
-use super::P226;
+use crate::ingame::player_controller::player::P226;
 use crate::ingame::Animations;
 
 #[derive(Event)]

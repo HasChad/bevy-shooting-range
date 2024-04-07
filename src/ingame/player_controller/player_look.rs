@@ -5,7 +5,8 @@ use bevy::{
     window::{CursorGrabMode, PrimaryWindow},
 };
 
-use super::GameSettings;
+use super::Player;
+use crate::ingame::GameSettings;
 
 #[derive(Resource, Default)]
 pub struct InputState {
@@ -35,13 +36,15 @@ pub fn player_look(
     mut state: ResMut<InputState>,
     motion: Res<Events<MouseMotion>>,
     mut query_camera: Query<&mut Transform, With<Camera3d>>,
+    mut query_player: Query<&mut Transform, (With<Player>, Without<Camera3d>)>,
 ) {
     if let Ok(window) = primary_window.get_single() {
         for ev in state.reader_motion.read(&motion) {
             let mut camera_transform = query_camera.single_mut();
+            let mut player_transform = query_player.single_mut();
 
-            let (mut yaw_camera, mut pitch_camera, _) =
-                camera_transform.rotation.to_euler(EulerRot::YXZ);
+            let (mut yaw_player, _, _) = player_transform.rotation.to_euler(EulerRot::YXZ);
+            let (_, mut pitch_camera, _) = camera_transform.rotation.to_euler(EulerRot::YXZ);
 
             match window.cursor.grab_mode {
                 CursorGrabMode::None => (),
@@ -50,7 +53,7 @@ pub fn player_look(
                     let window_scale = window.height().min(window.width());
                     pitch_camera -= (settings.sensitivity * ev.delta.y * window_scale).to_radians()
                         * time.delta_seconds();
-                    yaw_camera -= (settings.sensitivity * ev.delta.x * window_scale).to_radians()
+                    yaw_player -= (settings.sensitivity * ev.delta.x * window_scale).to_radians()
                         * time.delta_seconds();
                 }
             }
@@ -58,8 +61,8 @@ pub fn player_look(
             pitch_camera = pitch_camera.clamp(-1.54, 1.54);
 
             // Order is important to prevent unintended roll
-            camera_transform.rotation = Quat::from_axis_angle(Vec3::Y, yaw_camera)
-                * Quat::from_axis_angle(Vec3::X, pitch_camera);
+            player_transform.rotation = Quat::from_axis_angle(Vec3::Y, yaw_player);
+            camera_transform.rotation = Quat::from_axis_angle(Vec3::X, pitch_camera);
         }
     } else {
         warn!("Primary window not found for `player_look`!");

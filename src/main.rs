@@ -46,9 +46,9 @@ fn main() -> Result<()> {
         //plugins
         .add_plugins(FrameTimeDiagnosticsPlugin)
         .add_plugins(PhysicsPlugins::default())
-        //.add_plugins(PhysicsDebugPlugin::default())
+        .add_plugins(PhysicsDebugPlugin::default())
         .add_plugins(
-            WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::F35)),
+            WorldInspectorPlugin::default().run_if(input_toggle_active(true, KeyCode::F35)),
         )
         //mod plugins
         .add_plugins(InGamePlugin)

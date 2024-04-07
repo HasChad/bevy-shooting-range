@@ -3,7 +3,7 @@ use bevy::prelude::*;
 pub mod crosshair;
 pub mod gun;
 pub mod ingame_setup;
-pub mod player;
+pub mod player_controller;
 pub mod settings;
 pub mod targets;
 pub mod ui;
@@ -11,7 +11,7 @@ pub mod ui;
 use crosshair::*;
 use gun::*;
 use ingame_setup::*;
-use player::*;
+use player_controller::PlayerControllerPlugin;
 use settings::*;
 use targets::*;
 use ui::*;
@@ -22,6 +22,7 @@ pub struct Animations(Vec<Handle<AnimationClip>>);
 #[derive(Resource)]
 pub struct GameSettings {
     pub sensitivity: f32,
+    pub player_speed: f32,
     pub fov: f32,
 }
 
@@ -32,7 +33,6 @@ impl Plugin for InGamePlugin {
         app.add_systems(
             Startup,
             (
-                player_setup,
                 setup,
                 target_setup,
                 crosshair_setup,
@@ -48,9 +48,6 @@ impl Plugin for InGamePlugin {
                 p226_animation_setup,
                 p226_play_animation,
                 print_hits,
-                //player systems
-                player_look,
-                edit_mode_toggler,
                 //target systems
                 circle_target_controller,
                 silhouette_target_controller,
@@ -61,9 +58,11 @@ impl Plugin for InGamePlugin {
             ),
         )
         //plugins
+        .add_plugins(PlayerControllerPlugin)
         //resources
         .insert_resource(GameSettings {
             sensitivity: 0.02,
+            player_speed: 1000.0,
             fov: 90.0,
         })
         .insert_resource(InnerLineSettings {
@@ -73,7 +72,6 @@ impl Plugin for InGamePlugin {
             thickness: 2.0,
             enable: InheritedVisibility::VISIBLE,
         })
-        .init_resource::<InputState>()
         //events
         .add_event::<P226ShootingEvent>();
     }
