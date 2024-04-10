@@ -37,6 +37,7 @@ impl Plugin for InGamePlugin {
                 target_setup,
                 crosshair_setup,
                 //setup_ui
+                setup_velocity_counter,
             ),
         )
         .add_systems(
@@ -54,7 +55,8 @@ impl Plugin for InGamePlugin {
                 silhouette_target_hostage_controller,
                 //settings system
                 egui_settings,
-                //png_crosshair_changer,
+                //ui systems
+                velocity_update_system,
             ),
         )
         //plugins
@@ -62,7 +64,7 @@ impl Plugin for InGamePlugin {
         //resources
         .insert_resource(GameSettings {
             sensitivity: 0.02,
-            player_speed: 1000.0,
+            player_speed: 5.0,
             fov: 90.0,
         })
         .insert_resource(InnerLineSettings {

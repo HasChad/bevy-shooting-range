@@ -42,7 +42,7 @@ pub fn fps_text_update_system(
         if let Some(fps) = diagnostics.get(&FrameTimeDiagnosticsPlugin::FPS) {
             if let Some(value) = fps.smoothed() {
                 // Update the value of the second section
-                text.sections[1].value = format!("{value:.2}");
+                text.sections[1].value = format!("{value:.0}");
             }
         }
     }

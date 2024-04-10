@@ -28,7 +28,7 @@ pub fn player_setup(
             Player,
             InheritedVisibility::VISIBLE,
             RigidBody::Dynamic,
-            Collider::capsule(0.5, 0.25),
+            Collider::capsule(1.0, 0.25),
             TransformBundle::from(Transform::from_xyz(0.0, 1.0, 0.0)),
             GravityScale(2.0),
             Restitution::new(0.0).with_combine_rule(CoefficientCombine::Min),
@@ -76,7 +76,9 @@ pub fn player_setup(
                 //RayCast
                 .with_children(|parent| {
                     parent.spawn((
-                        RayCaster::new(Vec3::ZERO, Direction3d::NEG_Z).with_max_hits(1),
+                        RayCaster::new(Vec3::ZERO, Direction3d::NEG_Z)
+                            .with_max_hits(1)
+                            .with_solidness(false),
                         Name::new("RayCast"),
                     ));
                 });

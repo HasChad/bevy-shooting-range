@@ -4,6 +4,7 @@ pub mod player;
 pub mod player_look;
 pub mod player_movement;
 
+use bevy_xpbd_3d::parry::na::ComplexField;
 use player::*;
 use player_look::*;
 use player_movement::*;
@@ -19,11 +20,21 @@ pub struct KeyBindings {
     pub run: KeyCode,
 }
 
+#[derive(Resource)]
+pub struct MovementControl {
+    pub max_velocity_air: f32,
+    pub max_velocity_ground: f32,
+    pub max_acceleration: f32,
+    pub gravity: f32,
+    pub stop_speed: f32,
+    pub jump_impulse: f32,
+}
+
 pub struct PlayerControllerPlugin;
 
 impl Plugin for PlayerControllerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, (player_setup, setup_velocity_counter))
+        app.add_systems(Startup, (player_setup,))
             .add_systems(
                 Update,
                 (
@@ -31,7 +42,6 @@ impl Plugin for PlayerControllerPlugin {
                     player_look,
                     player_move,
                     edit_mode_toggler,
-                    velocity_update_system,
                 ),
             )
             //plugins
@@ -46,8 +56,12 @@ impl Plugin for PlayerControllerPlugin {
                 run: KeyCode::ShiftLeft,
             })
             .insert_resource(MovementControl {
-                fmove: 0.0,
-                smove: 0.0,
+                max_velocity_air: 0.6,
+                max_velocity_ground: 6.0,
+                max_acceleration: 10.0 * 6.0, /* max_velocity_ground */
+                gravity: 15.34,
+                stop_speed: 1.5,
+                jump_impulse: (2.0 * 15.34 /* gravity */ * 0.85).sqrt(),
             });
 
         //events
