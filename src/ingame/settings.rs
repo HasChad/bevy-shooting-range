@@ -33,11 +33,14 @@ pub fn egui_settings(
                     ui.end_row();
 
                     ui.label("Sensitivity: ");
-                    ui.add(
-                        egui::Slider::new(&mut settings.sensitivity, 0.01..=0.2)
-                            .trailing_fill(true)
-                            .step_by(0.01),
-                    );
+                    if ui
+                        .add(
+                            egui::Slider::new(&mut settings.sensitivity, 0.1..=2.0)
+                                .trailing_fill(true)
+                                .step_by(0.1),
+                        )
+                        .changed()
+                    {};
                     ui.end_row();
 
                     let Projection::Perspective(persp) = camera_query.single_mut().into_inner()

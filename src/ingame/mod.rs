@@ -63,7 +63,7 @@ impl Plugin for InGamePlugin {
         .add_plugins(PlayerControllerPlugin)
         //resources
         .insert_resource(GameSettings {
-            sensitivity: 0.02,
+            sensitivity: 1.0,
             player_speed: 5.0,
             fov: 90.0,
         })

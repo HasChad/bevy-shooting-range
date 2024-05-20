@@ -5,7 +5,10 @@ use bevy_inspector_egui::{
 };
 use bevy_xpbd_3d::components::LinearVelocity;
 
-use super::player_controller::{player::Player, player_movement::VelocityText};
+use super::player_controller::player::Player;
+
+#[derive(Component)]
+pub struct VelocityText;
 
 pub fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
     //crosshair test

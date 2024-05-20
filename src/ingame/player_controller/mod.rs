@@ -1,10 +1,10 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, transform::TransformSystem};
 
 pub mod player;
 pub mod player_look;
 pub mod player_movement;
 
-use bevy_xpbd_3d::parry::na::ComplexField;
+use bevy_xpbd_3d::{parry::na::ComplexField, PhysicsSet};
 use player::*;
 use player_look::*;
 use player_movement::*;
@@ -30,6 +30,12 @@ pub struct MovementControl {
     pub jump_impulse: f32,
 }
 
+#[derive(Resource)]
+pub struct MovementInput {
+    pub fmove: f32,
+    pub smove: f32,
+}
+
 pub struct PlayerControllerPlugin;
 
 impl Plugin for PlayerControllerPlugin {
@@ -39,10 +45,24 @@ impl Plugin for PlayerControllerPlugin {
                 Update,
                 (
                     //player systems
-                    player_look,
-                    player_move,
                     edit_mode_toggler,
                 ),
+            )
+            .add_systems(PreUpdate, movement_input_changer)
+            .add_systems(PreUpdate, player_look)
+            .add_systems(
+                PostUpdate,
+                player_move
+                    .after(player_look)
+                    .after(PhysicsSet::Sync)
+                    .before(TransformSystem::TransformPropagate),
+            )
+            .add_systems(
+                PostUpdate,
+                camera_follow_player
+                    .after(player_move)
+                    .after(PhysicsSet::Sync)
+                    .before(TransformSystem::TransformPropagate),
             )
             //plugins
             //resources
@@ -62,6 +82,10 @@ impl Plugin for PlayerControllerPlugin {
                 gravity: 15.34,
                 stop_speed: 1.5,
                 jump_impulse: (2.0 * 15.34 /* gravity */ * 0.85).sqrt(),
+            })
+            .insert_resource(MovementInput {
+                fmove: 0.0,
+                smove: 0.0,
             });
 
         //events
