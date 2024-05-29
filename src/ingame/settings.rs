@@ -65,19 +65,22 @@ pub fn egui_settings(
                     ui.heading("- Crosshair Settings -");
                     ui.end_row();
 
-                    /*
+                    let mut cross_color: [f32; 4] =
+                        crosshair_inner_settings.color.as_linear_rgba_f32();
                     ui.label("Color: ");
-                    egui::ComboBox::from_label("Take your pick")
-                        .selected_text(format!("{:?}"))
-                        .show_ui(ui, |ui| {
-                            ui.style_mut().wrap = Some(false);
-                            ui.set_min_width(60.0);
-                            ui.selectable_value(radio, Enum::First, "First");
-                            ui.selectable_value(radio, Enum::Second, "Second");
-                            ui.selectable_value(radio, Enum::Third, "Third");
-                        });
+                    if ui
+                        .color_edit_button_rgba_unmultiplied(&mut cross_color)
+                        .changed()
+                    {
+                        let new_color = Color::rgba(
+                            cross_color[0],
+                            cross_color[1],
+                            cross_color[2],
+                            cross_color[3],
+                        );
+                        crosshair_inner_settings.color = new_color;
+                    };
                     ui.end_row();
-                    */
 
                     ui.label("Length: ");
                     if ui

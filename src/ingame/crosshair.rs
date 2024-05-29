@@ -8,10 +8,10 @@ pub struct InnerLineVertical;
 
 #[derive(Resource)]
 pub struct InnerLineSettings {
-    pub offset: f32,
-    pub color: Color,
     pub length: f32,
     pub thickness: f32,
+    pub offset: f32,
+    pub color: Color,
     pub enable: InheritedVisibility,
 }
 

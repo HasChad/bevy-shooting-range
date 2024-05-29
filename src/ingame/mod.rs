@@ -36,7 +36,7 @@ impl Plugin for InGamePlugin {
                 setup,
                 target_setup,
                 crosshair_setup,
-                //setup_ui
+                setup_ui,
                 setup_velocity_counter,
             ),
         )

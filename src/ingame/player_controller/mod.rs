@@ -1,13 +1,14 @@
+use bevy::input::InputSystem;
 use bevy::{prelude::*, transform::TransformSystem};
 
+pub mod body_control;
+pub mod head_control;
 pub mod player;
-pub mod player_look;
-pub mod player_movement;
 
 use bevy_xpbd_3d::{parry::na::ComplexField, PhysicsSet};
+use body_control::*;
+use head_control::*;
 use player::*;
-use player_look::*;
-use player_movement::*;
 
 /// Key configuration
 #[derive(Resource)]
@@ -48,12 +49,11 @@ impl Plugin for PlayerControllerPlugin {
                     edit_mode_toggler,
                 ),
             )
-            .add_systems(PreUpdate, movement_input_changer)
-            .add_systems(PreUpdate, player_look)
+            .add_systems(PreUpdate, movement_input_changer.after(InputSystem))
+            .add_systems(PreUpdate, player_look.after(InputSystem))
             .add_systems(
                 PostUpdate,
                 player_move
-                    .after(player_look)
                     .after(PhysicsSet::Sync)
                     .before(TransformSystem::TransformPropagate),
             )

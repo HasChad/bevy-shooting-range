@@ -3,7 +3,30 @@ use bevy_xpbd_3d::prelude::*;
 
 use super::Animations;
 
-pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+pub fn setup(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    /*
+    //testing purpose only 4 now
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    */
+) {
+    /*
+    //cube spawn
+    let mesh = Mesh::from(Cuboid::new(1.0, 1.0, 1.0));
+    commands.spawn((
+        RigidBody::Dynamic,
+        Collider::trimesh_from_mesh(&mesh).unwrap(),
+        PbrBundle {
+            mesh: meshes.add(mesh),
+            material: materials.add(Color::rgb_u8(0, 144, 0)),
+            transform: Transform::from_xyz(0.0, 0.5, -1.0),
+            ..default()
+        },
+    ));
+    */
+
     //gun animation load
     commands.insert_resource(Animations(vec![
         asset_server.load("models/p226_anim.glb#Animation0"),

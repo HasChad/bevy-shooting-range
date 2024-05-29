@@ -9,6 +9,7 @@ use bevy::{
     window::WindowMode,
 };
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use bevy_kira_audio::prelude::*;
 use bevy_xpbd_3d::prelude::*;
 use color_eyre::eyre::Result;
 
@@ -44,6 +45,7 @@ fn main() -> Result<()> {
                 .build(),
         )
         //plugins
+        .add_plugins(AudioPlugin)
         .add_plugins(FrameTimeDiagnosticsPlugin)
         .add_plugins(PhysicsPlugins::default())
         .add_plugins(PhysicsDebugPlugin::default())

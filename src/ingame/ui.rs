@@ -1,8 +1,4 @@
 use bevy::prelude::*;
-use bevy_inspector_egui::{
-    bevy_egui::{egui, EguiContexts},
-    egui::Align2,
-};
 use bevy_xpbd_3d::components::LinearVelocity;
 
 use super::player_controller::player::Player;
@@ -10,59 +6,32 @@ use super::player_controller::player::Player;
 #[derive(Component)]
 pub struct VelocityText;
 
-pub fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
-    //crosshair test
+#[derive(Component)]
+pub struct AmmoText;
+
+pub fn setup_ui(mut commands: Commands) {
+    //Ammo UI
     commands.spawn((
-        ImageBundle {
-            image: UiImage::new(asset_server.load("crosshairs/dot-cross.png")),
-            style: Style {
-                position_type: PositionType::Absolute,
-                justify_self: JustifySelf::Center,
-                align_self: AlignSelf::Center,
+        TextBundle::from_section(
+            "Ammo/Max",
+            TextStyle {
+                font_size: 50.0,
+                ..default()
+            },
+        )
+        .with_style(Style {
+            position_type: PositionType::Absolute,
+            align_self: AlignSelf::End,
+            justify_self: JustifySelf::Center,
+            margin: UiRect {
+                left: Val::Px(400.0),
                 ..default()
             },
             ..default()
-        },
-        Name::new("PNGCross"),
+        }),
+        AmmoText,
+        Name::new("Ammo Counter"),
     ));
-}
-
-pub fn png_crosshair_changer(
-    mut png_crosshair_query: Query<&mut UiImage>,
-    asset_server: Res<AssetServer>,
-    mut contexts: EguiContexts,
-) {
-    let mut png_crosshair_prop = png_crosshair_query.single_mut();
-
-    egui::Window::new("Test")
-        .resizable(false)
-        .anchor(Align2::RIGHT_CENTER, (-5.0, -5.0))
-        .show(contexts.ctx_mut(), |ui| {
-            egui::Grid::new("my_grid")
-                .num_columns(2)
-                .spacing([10.0, 5.0])
-                .striped(true)
-                .show(ui, |ui| {
-                    ui.horizontal(|ui| {
-                        if ui.button("Plus").clicked() {
-                            *png_crosshair_prop =
-                                UiImage::new(asset_server.load("crosshairs/plus-cross.png"));
-                        }
-                        if ui.button("Dot").clicked() {
-                            *png_crosshair_prop =
-                                UiImage::new(asset_server.load("crosshairs/dot-cross.png"));
-                        }
-                        if ui.button("Offset").clicked() {
-                            *png_crosshair_prop =
-                                UiImage::new(asset_server.load("crosshairs/offsetplus-cross.png"));
-                        }
-                        if ui.button("Triangle").clicked() {
-                            *png_crosshair_prop =
-                                UiImage::new(asset_server.load("crosshairs/triangle-cross.png"));
-                        }
-                    })
-                })
-        });
 }
 
 pub fn setup_velocity_counter(mut commands: Commands) {

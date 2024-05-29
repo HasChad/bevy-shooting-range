@@ -1,3 +1,4 @@
+use bevy::window::CursorGrabMode;
 use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_xpbd_3d::prelude::*;
 
@@ -53,34 +54,35 @@ pub fn player_move(
     mut query_player: Query<(&mut LinearVelocity, &mut Transform), With<Player>>,
 ) {
     if let Ok(window) = primary_window.get_single() {
-        for (mut linear_velocity, mut player_transform) in query_player.iter_mut() {
+        for (mut linear_velocity, player_transform) in query_player.iter_mut() {
             let (yaw_player, _, _) = player_transform.rotation.to_euler(EulerRot::YXZ);
 
-            /*
             match window.cursor.grab_mode {
                 CursorGrabMode::None => (),
                 _ => {
+                    // ! player looking direction
+                    let forward =
+                        vector_normalize(Vec3::new(-yaw_player.sin(), 0.0, -yaw_player.cos()));
+                    let right =
+                        vector_normalize(Vec3::new(-yaw_player.cos(), 0.0, yaw_player.sin()));
 
+                    // ! wishvel
+                    let wishvel = Vec3::new(
+                        forward.x * movement_input.fmove + right.x * movement_input.smove,
+                        0.0,
+                        forward.z * movement_input.fmove + right.z * movement_input.smove,
+                    );
+
+                    let wishdir = vector_normalize(wishvel);
+
+                    linear_velocity.x = wishdir.x * 5.;
+                    linear_velocity.z = wishdir.z * 5.;
+
+                    // ! changed from linear_velocity to player_transform.translation
+                    //player_transform.translation.x += wishdir.x * 0.03;
+                    //player_transform.translation.z += wishdir.z * 0.03;
                 }
             }
-            */
-
-            // ! player looking direction
-            let forward = vector_normalize(Vec3::new(-yaw_player.sin(), 0.0, -yaw_player.cos()));
-            let right = vector_normalize(Vec3::new(-yaw_player.cos(), 0.0, yaw_player.sin()));
-
-            // ! wishvel
-            let wishvel = Vec3::new(
-                forward.x * movement_input.fmove + right.x * movement_input.smove,
-                0.0,
-                forward.z * movement_input.fmove + right.z * movement_input.smove,
-            );
-
-            let wishdir = vector_normalize(wishvel);
-
-            // ! changed from linear_velocity to player_transform.translation
-            player_transform.translation.x += wishdir.x * 0.03;
-            player_transform.translation.z += wishdir.z * 0.03;
         }
     } else {
         warn!("Primary window not found for `player_move`!");
@@ -91,7 +93,7 @@ fn vector_normalize(mut v: Vec3) -> Vec3 {
     let mut length: f32;
 
     length = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
-    length = length.sqrt(); // FIXME
+    length = length.sqrt();
 
     if length > 0.0 {
         let ilength = 1.0 / length;

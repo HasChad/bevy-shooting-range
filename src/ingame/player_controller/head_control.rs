@@ -64,7 +64,9 @@ pub fn camera_follow_player(
     for mut camera_transform in query_camera.iter_mut() {
         for player_transform in query_player.iter() {
             camera_transform.translation = player_transform.translation;
-            camera_transform.translation.y = player_transform.translation.y + 0.5;
+            camera_transform.translation.y = player_transform.translation.y + 0.25;
+            //for inspecting player collider
+            //camera_transform.translation.z = player_transform.translation.z + 1.;
         }
     }
 }

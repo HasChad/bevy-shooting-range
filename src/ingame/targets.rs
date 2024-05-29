@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_kira_audio::prelude::*;
 use bevy_xpbd_3d::prelude::*;
 use rand::prelude::*;
 
@@ -22,7 +23,7 @@ pub fn target_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         SceneBundle {
             scene: asset_server.load("models/circle_target.glb#Scene0"),
-            transform: Transform::from_xyz(0.0, 0.8, -4.0),
+            transform: Transform::from_xyz(0.0, 0.75, -4.0),
             ..default()
         },
         AsyncSceneCollider::new(Some(ComputedCollider::TriMesh)),
@@ -34,7 +35,7 @@ pub fn target_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         SceneBundle {
             scene: asset_server.load("models/silhouette-target.glb#Scene0"),
-            transform: Transform::from_xyz(0.0, 0.8, -3.0),
+            transform: Transform::from_xyz(0.0, 0.5, -3.0),
             ..default()
         },
         AsyncSceneCollider::new(Some(ComputedCollider::TriMesh)),
@@ -53,6 +54,28 @@ pub fn target_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         Name::new("SilhouetteTargetHostage"),
         SilhouetteTargetHostage { health: 5 },
     ));
+}
+
+pub fn circle_target_controller(
+    raycast_query: Query<&RayHits>,
+    mut event_reader: EventReader<P226ShootingEvent>,
+    mut circletarget_query: Query<&mut Transform, With<CircleTarget>>,
+    query: Query<&Name>,
+    audio: Res<Audio>,
+    asset_server: Res<AssetServer>,
+) {
+    for _event in event_reader.read() {
+        for hits in &raycast_query {
+            for hit in hits.iter() {
+                if "Cylinder" == query.get(hit.entity).unwrap().as_str() {
+                    audio.play(asset_server.load("sounds/Hit_Marker.ogg"));
+                    for mut circletarget_entity in &mut circletarget_query {
+                        circletarget_entity.translation.x = thread_rng().gen_range(-3.0..3.0);
+                    }
+                }
+            }
+        }
+    }
 }
 
 pub fn silhouette_target_controller(
@@ -119,26 +142,6 @@ pub fn silhouette_target_hostage_controller(
                 for (silhotarget_prop, silhouettetarget_entity) in &mut silhouettetarget_query {
                     if silhotarget_prop.health <= 0 {
                         commands.entity(silhouettetarget_entity).despawn_recursive();
-                    }
-                }
-            }
-        }
-    }
-}
-
-pub fn circle_target_controller(
-    raycast_query: Query<&RayHits>,
-    mut event_reader: EventReader<P226ShootingEvent>,
-    mut circletarget_query: Query<&mut Transform, With<CircleTarget>>,
-    query: Query<&Name>,
-) {
-    for _event in event_reader.read() {
-        for hits in &raycast_query {
-            for hit in hits.iter() {
-                if "Cylinder" == query.get(hit.entity).unwrap().as_str() {
-                    for mut circletarget_entity in &mut circletarget_query {
-                        circletarget_entity.translation =
-                            Vec3::new(rand::thread_rng().gen_range(-3.0..3.0), 0.8, -4.0);
                     }
                 }
             }
