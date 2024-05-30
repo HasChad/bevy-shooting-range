@@ -15,8 +15,6 @@ pub struct InnerLineSettings {
     pub enable: InheritedVisibility,
 }
 
-pub fn test(mut test: Query<&BackgroundColor>) {}
-
 pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<InnerLineSettings>) {
     //Left Line
     commands.spawn((
