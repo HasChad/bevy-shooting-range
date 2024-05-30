@@ -11,13 +11,17 @@ use crate::ingame::crosshair;
 use crosshair::*;
 
 pub fn egui_settings(
+    //FIXME: tidy up queries
     mut settings: ResMut<GameSettings>,
     mut camera_query: Query<&mut Projection, With<Camera3d>>,
     mut contexts: EguiContexts,
     mut crosshair_inner_settings: ResMut<InnerLineSettings>,
-    mut innerhorizontal_query: Query<Entity, With<InnerLineHorizontal>>,
-    mut innervertical_query: Query<Entity, With<InnerLineVertical>>,
     mut style_query: Query<&mut Style>,
+    mut innerhorizontal_query: Query<(Entity, &mut BackgroundColor), With<InnerLineHorizontal>>,
+    mut innervertical_query: Query<
+        (Entity, &mut BackgroundColor),
+        (With<InnerLineVertical>, Without<InnerLineHorizontal>),
+    >,
 ) {
     egui::Window::new("SETTINGS")
         .resizable(false)
@@ -65,20 +69,22 @@ pub fn egui_settings(
                     ui.heading("- Crosshair Settings -");
                     ui.end_row();
 
-                    let mut cross_color: [f32; 4] =
-                        crosshair_inner_settings.color.as_linear_rgba_f32();
+                    //FIXME: color picker shifts
+                    let cross_color: [f32; 4] = crosshair_inner_settings.color.as_linear_rgba_f32();
+                    let mut new_one: [f32; 3] = [cross_color[0], cross_color[1], cross_color[2]];
                     ui.label("Color: ");
-                    if ui
-                        .color_edit_button_rgba_unmultiplied(&mut cross_color)
-                        .changed()
-                    {
-                        let new_color = Color::rgba(
-                            cross_color[0],
-                            cross_color[1],
-                            cross_color[2],
-                            cross_color[3],
-                        );
-                        crosshair_inner_settings.color = new_color;
+                    if ui.color_edit_button_rgb(&mut new_one).changed() {
+                        crosshair_inner_settings.color =
+                            Color::rgba(new_one[0], new_one[1], new_one[2], 1.0);
+
+                        for (_, mut node_color) in innerhorizontal_query.iter_mut() {
+                            *node_color =
+                                bevy::prelude::BackgroundColor(crosshair_inner_settings.color);
+                        }
+                        for (_, mut node_color) in innervertical_query.iter_mut() {
+                            *node_color =
+                                bevy::prelude::BackgroundColor(crosshair_inner_settings.color);
+                        }
                     };
                     ui.end_row();
 
@@ -92,13 +98,13 @@ pub fn egui_settings(
                         )
                         .changed()
                     {
-                        for node_style in innerhorizontal_query.iter() {
+                        for (node_style, _) in innerhorizontal_query.iter() {
                             if let Ok(mut style) = style_query.get_mut(node_style) {
                                 style.width = Val::Px(crosshair_inner_settings.length)
                             };
                         }
 
-                        for node_style in innervertical_query.iter_mut() {
+                        for (node_style, _) in innervertical_query.iter_mut() {
                             if let Ok(mut style) = style_query.get_mut(node_style) {
                                 style.height = Val::Px(crosshair_inner_settings.length)
                             };
@@ -116,13 +122,13 @@ pub fn egui_settings(
                         )
                         .changed()
                     {
-                        for node_style in innerhorizontal_query.iter_mut() {
+                        for (node_style, _) in innerhorizontal_query.iter_mut() {
                             if let Ok(mut style) = style_query.get_mut(node_style) {
                                 style.height = Val::Px(crosshair_inner_settings.thickness)
                             };
                         }
 
-                        for node_style in innervertical_query.iter_mut() {
+                        for (node_style, _) in innervertical_query.iter_mut() {
                             if let Ok(mut style) = style_query.get_mut(node_style) {
                                 style.width = Val::Px(crosshair_inner_settings.thickness)
                             };
@@ -140,14 +146,14 @@ pub fn egui_settings(
                         )
                         .changed()
                     {
-                        for node_style in innerhorizontal_query.iter_mut() {
+                        for (node_style, _) in innerhorizontal_query.iter_mut() {
                             if let Ok(mut style) = style_query.get_mut(node_style) {
                                 style.margin.left = Val::Px(crosshair_inner_settings.offset);
                                 style.margin.right = Val::Px(crosshair_inner_settings.offset);
                             };
                         }
 
-                        for node_style in innervertical_query.iter_mut() {
+                        for (node_style, _) in innervertical_query.iter_mut() {
                             if let Ok(mut style) = style_query.get_mut(node_style) {
                                 style.margin.top = Val::Px(crosshair_inner_settings.offset);
                                 style.margin.bottom = Val::Px(crosshair_inner_settings.offset);
