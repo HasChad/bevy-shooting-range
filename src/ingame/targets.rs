@@ -3,7 +3,7 @@ use bevy_kira_audio::prelude::*;
 use bevy_xpbd_3d::prelude::*;
 use rand::prelude::*;
 
-use super::P226ShootingEvent;
+use super::{WeaponPromp, WeaponShootingEvent};
 
 #[derive(Component)]
 pub struct CircleTarget;
@@ -58,7 +58,7 @@ pub fn target_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
 pub fn circle_target_controller(
     raycast_query: Query<&RayHits>,
-    mut event_reader: EventReader<P226ShootingEvent>,
+    mut event_reader: EventReader<WeaponShootingEvent>,
     mut circletarget_query: Query<&mut Transform, With<CircleTarget>>,
     query: Query<&Name>,
     audio: Res<Audio>,
@@ -70,7 +70,10 @@ pub fn circle_target_controller(
                 if "Cylinder" == query.get(hit.entity).unwrap().as_str() {
                     audio.play(asset_server.load("sounds/Hit_Marker.ogg"));
                     for mut circletarget_entity in &mut circletarget_query {
-                        circletarget_entity.translation.x = thread_rng().gen_range(-3.0..3.0);
+                        let old_position = circletarget_entity.translation.x;
+                        while (circletarget_entity.translation.x - old_position).abs() < 0.5 {
+                            circletarget_entity.translation.x = thread_rng().gen_range(-3.0..3.0);
+                        }
                     }
                 }
             }
@@ -81,23 +84,26 @@ pub fn circle_target_controller(
 pub fn silhouette_target_controller(
     mut commands: Commands,
     raycast_query: Query<&RayHits>,
-    mut event_reader: EventReader<P226ShootingEvent>,
+    mut event_reader: EventReader<WeaponShootingEvent>,
     mut silhouettetarget_query: Query<(&mut SilhouetteTarget, Entity)>,
+    weapon_query: Query<&WeaponPromp>,
     query: Query<&Name>,
 ) {
     for _event in event_reader.read() {
         for hits in &raycast_query {
             for hit in hits.iter() {
+                let weapon_promp = weapon_query.single();
                 match query.get(hit.entity).unwrap().as_str() {
                     "silhouette-target-head" => {
                         for (mut silhotarget_prop, _) in &mut silhouettetarget_query {
-                            silhotarget_prop.health -= 3;
+                            silhotarget_prop.health -= weapon_promp.head_damage as i8;
                             info!("{}", silhotarget_prop.health);
                         }
                     }
                     "silhouette-target-body" => {
                         for (mut silhotarget_prop, _) in &mut silhouettetarget_query {
-                            silhotarget_prop.health -= 1;
+                            silhotarget_prop.health -= weapon_promp.body_damage as i8;
+
                             info!("{}", silhotarget_prop.health);
                         }
                     }
@@ -116,23 +122,26 @@ pub fn silhouette_target_controller(
 pub fn silhouette_target_hostage_controller(
     mut commands: Commands,
     raycast_query: Query<&RayHits>,
-    mut event_reader: EventReader<P226ShootingEvent>,
+    mut event_reader: EventReader<WeaponShootingEvent>,
     mut silhouettetarget_query: Query<(&mut SilhouetteTargetHostage, Entity)>,
+    weapon_query: Query<&WeaponPromp>,
     query: Query<&Name>,
 ) {
     for _event in event_reader.read() {
         for hits in &raycast_query {
             for hit in hits.iter() {
+                let weapon_promp = weapon_query.single();
+
                 match query.get(hit.entity).unwrap().as_str() {
                     "silhouette-target-gun-head" => {
                         for (mut silhotarget_prop, _) in &mut silhouettetarget_query {
-                            silhotarget_prop.health -= 3;
+                            silhotarget_prop.health -= weapon_promp.head_damage as i8;
                             info!("{}", silhotarget_prop.health);
                         }
                     }
                     "silhouette-target-gun-body" => {
                         for (mut silhotarget_prop, _) in &mut silhouettetarget_query {
-                            silhotarget_prop.health -= 1;
+                            silhotarget_prop.health -= weapon_promp.body_damage as i8;
                             info!("{}", silhotarget_prop.health);
                         }
                     }

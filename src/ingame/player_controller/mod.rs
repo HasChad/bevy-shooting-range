@@ -47,6 +47,7 @@ impl Plugin for PlayerControllerPlugin {
                 (
                     //player systems
                     edit_mode_toggler,
+                    change_weapon,
                 ),
             )
             .add_systems(PreUpdate, movement_input_changer.after(InputSystem))

@@ -8,7 +8,7 @@ use bevy::{
 };
 
 use super::{Head, Player};
-use crate::ingame::GameSettings;
+use crate::ingame::{GameSettings, WeaponPromp};
 
 #[derive(Resource, Default)]
 pub struct InputState {
@@ -23,7 +23,6 @@ pub fn player_look(
     mut query_camera: Query<&mut Transform, With<Head>>,
     mut query_player: Query<&mut Transform, (With<Player>, Without<Head>)>,
 ) {
-    // ! point
     if let Ok(window) = primary_window.get_single() {
         for ev in state.reader_motion.read(&motion) {
             let mut camera_transform = query_camera.single_mut();
@@ -35,7 +34,6 @@ pub fn player_look(
             match window.cursor.grab_mode {
                 CursorGrabMode::None => (),
                 _ => {
-                    // Using smallest of height or width ensures equal vertical and horizontal sensitivity
                     let window_scale = window.height().min(window.width());
                     pitch_camera -=
                         (settings.sensitivity / 10000.0 * ev.delta.y * window_scale).to_radians();
@@ -47,13 +45,29 @@ pub fn player_look(
             pitch_camera = pitch_camera.clamp(-PI / 2.0, PI / 2.0);
 
             // Order is important to prevent unintended roll
-
             camera_transform.rotation = Quat::from_axis_angle(Vec3::Y, yaw_camera)
                 * Quat::from_axis_angle(Vec3::X, pitch_camera);
             player_transform.rotation = Quat::from_axis_angle(Vec3::Y, yaw_camera);
         }
     } else {
         warn!("Primary window not found for `player_look`!");
+    }
+}
+
+pub fn change_weapon(mut weapon_query: Query<&mut WeaponPromp>, input: Res<ButtonInput<KeyCode>>) {
+    for mut weapon_promp in weapon_query.iter_mut() {
+        for key in input.get_pressed() {
+            let key = *key;
+            if key == KeyCode::Digit1 {
+                *weapon_promp = WeaponPromp::p226();
+            }
+            if key == KeyCode::Digit2 {
+                *weapon_promp = WeaponPromp::ak15();
+            }
+            if key == KeyCode::Digit3 {
+                *weapon_promp = WeaponPromp::msr();
+            }
+        }
     }
 }
 

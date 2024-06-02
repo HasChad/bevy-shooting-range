@@ -1,6 +1,5 @@
 use bevy::{
     diagnostic::FrameTimeDiagnosticsPlugin,
-    input::common_conditions::input_toggle_active,
     prelude::*,
     render::{
         settings::{Backends, WgpuSettings},
@@ -49,9 +48,7 @@ fn main() -> Result<()> {
         .add_plugins(FrameTimeDiagnosticsPlugin)
         .add_plugins(PhysicsPlugins::default())
         //.add_plugins(PhysicsDebugPlugin::default())
-        .add_plugins(
-            WorldInspectorPlugin::default().run_if(input_toggle_active(true, KeyCode::F35)),
-        )
+        .add_plugins(WorldInspectorPlugin::default())
         //mod plugins
         .add_plugins(InGamePlugin)
         //systems

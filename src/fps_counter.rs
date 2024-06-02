@@ -8,7 +8,6 @@ pub struct FpsText;
 
 pub fn setup_fps_counter(mut commands: Commands) {
     commands.spawn((
-        // Create a TextBundle that has a Text with a list of sections.
         TextBundle::from_sections([
             TextSection::new(
                 "FPS: ",
@@ -30,7 +29,7 @@ pub fn setup_fps_counter(mut commands: Commands) {
         })
         .with_background_color(Color::BLACK),
         FpsText,
-        Name::new("FPSCounter"),
+        Name::new("UI - FPSCounter"),
     ));
 }
 
@@ -41,7 +40,6 @@ pub fn fps_text_update_system(
     for mut text in &mut query {
         if let Some(fps) = diagnostics.get(&FrameTimeDiagnosticsPlugin::FPS) {
             if let Some(value) = fps.smoothed() {
-                // Update the value of the second section
                 text.sections[1].value = format!("{value:.0}");
             }
         }

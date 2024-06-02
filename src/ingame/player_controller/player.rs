@@ -1,3 +1,4 @@
+use bevy::core_pipeline::bloom::BloomSettings;
 use bevy::prelude::*;
 use bevy_xpbd_3d::prelude::*;
 use std::f32::consts::PI;
@@ -12,6 +13,7 @@ pub struct P226 {
 }
 
 use crate::ingame::GameSettings;
+use crate::ingame::WeaponPromp;
 
 #[derive(Component)]
 pub struct Player;
@@ -53,7 +55,10 @@ pub fn player_setup(
                     near: 0.01,
                     ..default()
                 }),
-
+                camera: Camera {
+                    hdr: true, // HDR is required for bloom
+                    ..default()
+                },
                 ..default()
             },
             FogSettings {
@@ -61,6 +66,8 @@ pub fn player_setup(
                 falloff: FogFalloff::Exponential { density: 0.01 },
                 ..default()
             },
+            // Enable bloom for the camera
+            BloomSettings::NATURAL,
         ))
         .insert(InheritedVisibility::VISIBLE)
         .insert(Name::new("Head"))
@@ -73,14 +80,8 @@ pub fn player_setup(
                     transform: Transform::from_xyz(0.1, -0.15, -0.2),
                     ..default()
                 },
-                P226 {
-                    head_dmg: 3,
-                    body_dmg: 1,
-                    magazine: 12,
-                    lifetime: Timer::from_seconds(0.2, TimerMode::Once),
-                    okay_to_shoot: true,
-                },
-                Name::new("P226"),
+                WeaponPromp::p226(),
+                Name::new("Weapon"),
             ));
             //RayCast
             parent.spawn((

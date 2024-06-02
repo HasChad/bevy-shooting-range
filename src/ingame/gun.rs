@@ -1,16 +1,104 @@
+use std::f32::consts::PI;
+
 use bevy::{animation::RepeatAnimation, prelude::*, window::CursorGrabMode};
 use bevy_xpbd_3d::prelude::*;
 
-use crate::ingame::player_controller::player::P226;
 use crate::ingame::Animations;
 
 #[derive(Event)]
-pub struct P226ShootingEvent;
+pub struct WeaponShootingEvent;
+
+#[derive(Event)]
+pub struct WeaponReloadingEvent;
+
+#[derive(Component)]
+pub struct WeaponPromp {
+    pub name: String,
+    pub mag_capacity: u8,
+    pub ammo_capacity: u8,
+    pub head_damage: u8,
+    pub body_damage: u8,
+    pub is_auto: bool,
+    pub okay_to_shoot: bool,
+    pub firerate: Timer,
+    pub reload: Timer,
+}
+
+impl WeaponPromp {
+    pub fn p226() -> WeaponPromp {
+        WeaponPromp {
+            name: "P226".to_owned(),
+            mag_capacity: 15,
+            ammo_capacity: 60,
+            head_damage: 3,
+            body_damage: 1,
+            is_auto: false,
+            okay_to_shoot: true,
+            firerate: Timer::from_seconds(0.1, TimerMode::Once),
+            reload: Timer::from_seconds(1.0, TimerMode::Once),
+        }
+    }
+
+    pub fn ak15() -> WeaponPromp {
+        WeaponPromp {
+            name: "AK-15".to_owned(),
+            mag_capacity: 30,
+            ammo_capacity: 120,
+            head_damage: 10,
+            body_damage: 4,
+            is_auto: true,
+            okay_to_shoot: true,
+            firerate: Timer::from_seconds(0.05, TimerMode::Once),
+            reload: Timer::from_seconds(2.0, TimerMode::Once),
+        }
+    }
+
+    pub fn msr() -> WeaponPromp {
+        WeaponPromp {
+            name: "MSR".to_owned(),
+            mag_capacity: 5,
+            ammo_capacity: 20,
+            head_damage: 20,
+            body_damage: 7,
+            is_auto: false,
+            okay_to_shoot: true,
+            firerate: Timer::from_seconds(0.68, TimerMode::Once),
+            reload: Timer::from_seconds(2.5, TimerMode::Once),
+        }
+    }
+
+    pub fn self_mag_cap(&self) -> u8 {
+        match self.name.as_str() {
+            "P226" => WeaponPromp::p226().mag_capacity,
+            "AK-15" => WeaponPromp::ak15().mag_capacity,
+            "MSR" => WeaponPromp::msr().mag_capacity,
+            _ => panic!("No gun found for self_mag_cap"),
+        }
+    }
+
+    pub fn self_firerate(&self) -> Timer {
+        match self.name.as_str() {
+            "P226" => WeaponPromp::p226().firerate,
+            "AK-15" => WeaponPromp::ak15().firerate,
+            "MSR" => WeaponPromp::msr().firerate,
+            _ => panic!("No gun found for self_firerate"),
+        }
+    }
+
+    pub fn self_reload(&self) -> Timer {
+        match self.name.as_str() {
+            "P226" => WeaponPromp::p226().reload,
+            "AK-15" => WeaponPromp::ak15().reload,
+            "MSR" => WeaponPromp::msr().reload,
+            _ => panic!("No gun found for self_reload"),
+        }
+    }
+}
 
 pub fn shooting_event(
     input: Res<ButtonInput<MouseButton>>,
-    mut event_writer: EventWriter<P226ShootingEvent>,
-    mut p226_query: Query<&mut P226>,
+    mut event_writer: EventWriter<WeaponShootingEvent>,
+    mut weapon_query: Query<&mut WeaponPromp>,
     mut windows: Query<&mut Window>,
 ) {
     for mut window in windows.iter_mut() {
@@ -19,45 +107,77 @@ pub fn shooting_event(
             let center = Vec2::new(window.width() / 2.0, window.height() / 2.0);
             window.set_cursor_position(Some(center));
 
-            for mut p226 in p226_query.iter_mut() {
-                if input.just_pressed(MouseButton::Left) && p226.okay_to_shoot {
-                    event_writer.send(P226ShootingEvent);
-                    p226.okay_to_shoot = false;
+            for mut weapon_promp in weapon_query.iter_mut() {
+                //semi auto shot
+                if input.just_pressed(MouseButton::Left)
+                    && weapon_promp.okay_to_shoot
+                    && !weapon_promp.is_auto
+                    && weapon_promp.mag_capacity > 0
+                {
+                    weapon_promp.mag_capacity -= 1;
+                    event_writer.send(WeaponShootingEvent);
+                    weapon_promp.okay_to_shoot = false;
+                }
+                //full auto shot
+                if input.pressed(MouseButton::Left)
+                    && weapon_promp.okay_to_shoot
+                    && weapon_promp.is_auto
+                    && weapon_promp.mag_capacity > 0
+                {
+                    weapon_promp.mag_capacity -= 1;
+                    event_writer.send(WeaponShootingEvent);
+                    weapon_promp.okay_to_shoot = false;
                 }
             }
         }
     }
 }
 
-pub fn p226_firerate_timer(mut p226: Query<&mut P226>, time: Res<Time>) {
-    for mut p226 in p226.iter_mut() {
-        if !p226.okay_to_shoot {
-            p226.lifetime.tick(time.delta());
+pub fn firerate_timer(mut weapon_query: Query<&mut WeaponPromp>, time: Res<Time>) {
+    for mut weapon_promp in weapon_query.iter_mut() {
+        if !weapon_promp.okay_to_shoot {
+            weapon_promp.firerate.tick(time.delta());
 
-            if p226.lifetime.finished() {
-                p226.okay_to_shoot = true;
-                p226.lifetime = Timer::from_seconds(0.2, TimerMode::Once);
+            if weapon_promp.firerate.finished() {
+                weapon_promp.okay_to_shoot = true;
+                weapon_promp.firerate = weapon_promp.self_firerate();
             }
         }
     }
 }
 
-pub fn p226_animation_setup(
+pub fn reload_timer(mut weapon_query: Query<&mut WeaponPromp>, time: Res<Time>) {
+    for mut weapon_promp in weapon_query.iter_mut() {
+        if weapon_promp.mag_capacity == 0 {
+            weapon_promp.reload.tick(time.delta());
+            weapon_promp.okay_to_shoot = false;
+
+            if weapon_promp.reload.finished() {
+                weapon_promp.okay_to_shoot = true;
+                weapon_promp.reload = weapon_promp.self_reload();
+                weapon_promp.mag_capacity = weapon_promp.self_mag_cap();
+                weapon_promp.ammo_capacity -= weapon_promp.mag_capacity;
+            }
+        }
+    }
+}
+
+pub fn weapon_animation_setup(
     animations: Res<Animations>,
-    mut gun_query: Query<&mut AnimationPlayer, Added<AnimationPlayer>>,
+    mut animation_player_query: Query<&mut AnimationPlayer, Added<AnimationPlayer>>,
 ) {
-    for mut gun in &mut gun_query {
+    for mut gun in &mut animation_player_query {
         gun.play(animations.0[1].clone_weak()).repeat();
         gun.set_repeat(RepeatAnimation::Count(0));
     }
 }
 
-pub fn p226_play_animation(
-    mut event_reader: EventReader<P226ShootingEvent>,
-    mut gun_query: Query<&mut AnimationPlayer>,
+pub fn weapon_play_animation(
+    mut event_reader: EventReader<WeaponShootingEvent>,
+    mut animation_player_query: Query<&mut AnimationPlayer>,
 ) {
     for _event in event_reader.read() {
-        for mut gun in &mut gun_query {
+        for mut gun in &mut animation_player_query {
             gun.set_repeat(RepeatAnimation::Count(1));
             gun.replay();
         }
@@ -66,7 +186,7 @@ pub fn p226_play_animation(
 
 pub fn print_hits(
     raycast_query: Query<(&RayCaster, &RayHits)>,
-    mut event_reader: EventReader<P226ShootingEvent>,
+    mut event_reader: EventReader<WeaponShootingEvent>,
     query: Query<&Name>,
 ) {
     for _event in event_reader.read() {

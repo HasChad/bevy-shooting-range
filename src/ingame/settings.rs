@@ -69,10 +69,84 @@ pub fn egui_settings(
                     ui.heading("- Crosshair Settings -");
                     ui.end_row();
 
-                    //FIXME: color picker shifts
-                    let cross_color: [f32; 4] = crosshair_inner_settings.color.as_linear_rgba_f32();
-                    let mut new_one: [f32; 3] = [cross_color[0], cross_color[1], cross_color[2]];
                     ui.label("Color: ");
+                    let mut cross_color: Vec3 = crosshair_inner_settings.color.rgb_to_vec3();
+
+                    ui.horizontal(|ui| {
+                        //Red
+                        if ui
+                            .add(
+                                egui::DragValue::new(&mut cross_color[0])
+                                    .speed(0.005)
+                                    .clamp_range(0.0..=1.0)
+                                    .prefix("R: ")
+                                    .fixed_decimals(2),
+                            )
+                            .changed()
+                        {
+                            crosshair_inner_settings.color =
+                                Color::rgba(cross_color[0], cross_color[1], cross_color[2], 1.0);
+
+                            for (_, mut node_color) in innerhorizontal_query.iter_mut() {
+                                *node_color =
+                                    bevy::prelude::BackgroundColor(crosshair_inner_settings.color);
+                            }
+                            for (_, mut node_color) in innervertical_query.iter_mut() {
+                                *node_color =
+                                    bevy::prelude::BackgroundColor(crosshair_inner_settings.color);
+                            }
+                        };
+
+                        //Green
+                        if ui
+                            .add(
+                                egui::DragValue::new(&mut cross_color[1])
+                                    .speed(0.005)
+                                    .clamp_range(0.0..=1.0)
+                                    .prefix("G: ")
+                                    .fixed_decimals(2),
+                            )
+                            .changed()
+                        {
+                            crosshair_inner_settings.color =
+                                Color::rgba(cross_color[0], cross_color[1], cross_color[2], 1.0);
+
+                            for (_, mut node_color) in innerhorizontal_query.iter_mut() {
+                                *node_color =
+                                    bevy::prelude::BackgroundColor(crosshair_inner_settings.color);
+                            }
+                            for (_, mut node_color) in innervertical_query.iter_mut() {
+                                *node_color =
+                                    bevy::prelude::BackgroundColor(crosshair_inner_settings.color);
+                            }
+                        };
+
+                        //Blue
+                        if ui
+                            .add(
+                                egui::DragValue::new(&mut cross_color[2])
+                                    .speed(0.005)
+                                    .clamp_range(0.0..=1.0)
+                                    .prefix("B: ")
+                                    .fixed_decimals(2),
+                            )
+                            .changed()
+                        {
+                            crosshair_inner_settings.color =
+                                Color::rgba(cross_color[0], cross_color[1], cross_color[2], 1.0);
+
+                            for (_, mut node_color) in innerhorizontal_query.iter_mut() {
+                                *node_color =
+                                    bevy::prelude::BackgroundColor(crosshair_inner_settings.color);
+                            }
+                            for (_, mut node_color) in innervertical_query.iter_mut() {
+                                *node_color =
+                                    bevy::prelude::BackgroundColor(crosshair_inner_settings.color);
+                            }
+                        };
+                    });
+
+                    let mut new_one: [f32; 3] = [cross_color[0], cross_color[1], cross_color[2]];
                     if ui.color_edit_button_rgb(&mut new_one).changed() {
                         crosshair_inner_settings.color =
                             Color::rgba(new_one[0], new_one[1], new_one[2], 1.0);
@@ -87,6 +161,23 @@ pub fn egui_settings(
                         }
                     };
                     ui.end_row();
+
+                    /*
+
+                    if ui.color_edit_button_rgb(&mut new_one).changed() {
+                        crosshair_inner_settings.color =
+                            Color::rgba(new_one[0], new_one[1], new_one[2], 1.0);
+
+                        for (_, mut node_color) in innerhorizontal_query.iter_mut() {
+                            *node_color =
+                                bevy::prelude::BackgroundColor(crosshair_inner_settings.color);
+                        }
+                        for (_, mut node_color) in innervertical_query.iter_mut() {
+                            *node_color =
+                                bevy::prelude::BackgroundColor(crosshair_inner_settings.color);
+                        }
+                    };
+                    */
 
                     ui.label("Length: ");
                     if ui
