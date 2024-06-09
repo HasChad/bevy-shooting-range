@@ -1,7 +1,4 @@
-use std::f32::consts::PI;
-
 use bevy::{animation::RepeatAnimation, prelude::*, window::CursorGrabMode};
-use bevy_xpbd_3d::prelude::*;
 
 use crate::ingame::Animations;
 
@@ -20,6 +17,7 @@ pub struct WeaponPromp {
     pub body_damage: u8,
     pub is_auto: bool,
     pub okay_to_shoot: bool,
+    pub is_reloading: bool,
     pub firerate: Timer,
     pub reload: Timer,
 }
@@ -34,6 +32,7 @@ impl WeaponPromp {
             body_damage: 1,
             is_auto: false,
             okay_to_shoot: true,
+            is_reloading: false,
             firerate: Timer::from_seconds(0.1, TimerMode::Once),
             reload: Timer::from_seconds(1.0, TimerMode::Once),
         }
@@ -48,7 +47,8 @@ impl WeaponPromp {
             body_damage: 4,
             is_auto: true,
             okay_to_shoot: true,
-            firerate: Timer::from_seconds(0.05, TimerMode::Once),
+            is_reloading: false,
+            firerate: Timer::from_seconds(0.08, TimerMode::Once),
             reload: Timer::from_seconds(2.0, TimerMode::Once),
         }
     }
@@ -62,7 +62,8 @@ impl WeaponPromp {
             body_damage: 7,
             is_auto: false,
             okay_to_shoot: true,
-            firerate: Timer::from_seconds(0.68, TimerMode::Once),
+            is_reloading: false,
+            firerate: Timer::from_seconds(1.5, TimerMode::Once),
             reload: Timer::from_seconds(2.5, TimerMode::Once),
         }
     }
@@ -96,7 +97,8 @@ impl WeaponPromp {
 }
 
 pub fn shooting_event(
-    input: Res<ButtonInput<MouseButton>>,
+    mouse_input: Res<ButtonInput<MouseButton>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
     mut event_writer: EventWriter<WeaponShootingEvent>,
     mut weapon_query: Query<&mut WeaponPromp>,
     mut windows: Query<&mut Window>,
@@ -109,24 +111,30 @@ pub fn shooting_event(
 
             for mut weapon_promp in weapon_query.iter_mut() {
                 //semi auto shot
-                if input.just_pressed(MouseButton::Left)
+                if mouse_input.just_pressed(MouseButton::Left)
                     && weapon_promp.okay_to_shoot
                     && !weapon_promp.is_auto
-                    && weapon_promp.mag_capacity > 0
+                    && !weapon_promp.is_reloading
                 {
                     weapon_promp.mag_capacity -= 1;
                     event_writer.send(WeaponShootingEvent);
                     weapon_promp.okay_to_shoot = false;
                 }
                 //full auto shot
-                if input.pressed(MouseButton::Left)
+                if mouse_input.pressed(MouseButton::Left)
                     && weapon_promp.okay_to_shoot
                     && weapon_promp.is_auto
-                    && weapon_promp.mag_capacity > 0
+                    && !weapon_promp.is_reloading
                 {
                     weapon_promp.mag_capacity -= 1;
                     event_writer.send(WeaponShootingEvent);
                     weapon_promp.okay_to_shoot = false;
+                }
+                //reload
+                if (weapon_promp.mag_capacity == 0 || keyboard_input.just_pressed(KeyCode::KeyR))
+                    && weapon_promp.mag_capacity < weapon_promp.self_mag_cap()
+                {
+                    weapon_promp.is_reloading = true;
                 }
             }
         }
@@ -135,7 +143,7 @@ pub fn shooting_event(
 
 pub fn firerate_timer(mut weapon_query: Query<&mut WeaponPromp>, time: Res<Time>) {
     for mut weapon_promp in weapon_query.iter_mut() {
-        if !weapon_promp.okay_to_shoot {
+        if !weapon_promp.okay_to_shoot && !weapon_promp.is_reloading {
             weapon_promp.firerate.tick(time.delta());
 
             if weapon_promp.firerate.finished() {
@@ -148,15 +156,15 @@ pub fn firerate_timer(mut weapon_query: Query<&mut WeaponPromp>, time: Res<Time>
 
 pub fn reload_timer(mut weapon_query: Query<&mut WeaponPromp>, time: Res<Time>) {
     for mut weapon_promp in weapon_query.iter_mut() {
-        if weapon_promp.mag_capacity == 0 {
+        if weapon_promp.is_reloading {
             weapon_promp.reload.tick(time.delta());
-            weapon_promp.okay_to_shoot = false;
 
             if weapon_promp.reload.finished() {
-                weapon_promp.okay_to_shoot = true;
+                weapon_promp.is_reloading = false;
+                weapon_promp.ammo_capacity -=
+                    weapon_promp.self_mag_cap() - weapon_promp.mag_capacity;
                 weapon_promp.reload = weapon_promp.self_reload();
                 weapon_promp.mag_capacity = weapon_promp.self_mag_cap();
-                weapon_promp.ammo_capacity -= weapon_promp.mag_capacity;
             }
         }
     }
@@ -180,30 +188,6 @@ pub fn weapon_play_animation(
         for mut gun in &mut animation_player_query {
             gun.set_repeat(RepeatAnimation::Count(1));
             gun.replay();
-        }
-    }
-}
-
-pub fn print_hits(
-    raycast_query: Query<(&RayCaster, &RayHits)>,
-    mut event_reader: EventReader<WeaponShootingEvent>,
-    query: Query<&Name>,
-) {
-    for _event in event_reader.read() {
-        for (_ray, hits) in &raycast_query {
-            for hit in hits.iter() {
-                if let Ok(name) = query.get(hit.entity) {
-                    println!("Collider = {}", name);
-                }
-                /*
-                println!(
-                    "Hit entity {:?} at {} with normal {}",
-                    hit.entity,
-                    ray.origin + *ray.direction * hit.time_of_impact,
-                    hit.normal,
-                );
-                */
-            }
         }
     }
 }

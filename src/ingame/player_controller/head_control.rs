@@ -34,11 +34,8 @@ pub fn player_look(
             match window.cursor.grab_mode {
                 CursorGrabMode::None => (),
                 _ => {
-                    let window_scale = window.height().min(window.width());
-                    pitch_camera -=
-                        (settings.sensitivity / 10000.0 * ev.delta.y * window_scale).to_radians();
-                    yaw_camera -=
-                        (settings.sensitivity / 10000.0 * ev.delta.x * window_scale).to_radians();
+                    pitch_camera -= (settings.sensitivity / 10.0 * ev.delta.y).to_radians();
+                    yaw_camera -= (settings.sensitivity / 10.0 * ev.delta.x).to_radians();
                 }
             }
 
@@ -54,18 +51,51 @@ pub fn player_look(
     }
 }
 
-pub fn change_weapon(mut weapon_query: Query<&mut WeaponPromp>, input: Res<ButtonInput<KeyCode>>) {
+pub fn change_weapon(
+    mut commands: Commands,
+    mut weapon_query: Query<&mut WeaponPromp>,
+    input: Res<ButtonInput<KeyCode>>,
+    player_query: Query<Entity, With<Head>>,
+    children: Query<&Children>,
+    mut scene_query: Query<&mut Handle<Scene>>,
+    asset_server: Res<AssetServer>,
+) {
+    let player_entity = player_query.single();
     for mut weapon_promp in weapon_query.iter_mut() {
-        for key in input.get_pressed() {
+        for key in input.get_just_pressed() {
             let key = *key;
             if key == KeyCode::Digit1 {
                 *weapon_promp = WeaponPromp::p226();
+                for entity in children.iter_descendants(player_entity) {
+                    if let Ok(mut asset) = scene_query.get_mut(entity) {
+                        for last_entity in children.iter_descendants(entity) {
+                            commands.entity(last_entity).despawn_recursive();
+                        }
+                        *asset = asset_server.load("models/p226_anim.glb#Scene0");
+                    }
+                }
             }
             if key == KeyCode::Digit2 {
                 *weapon_promp = WeaponPromp::ak15();
+                for entity in children.iter_descendants(player_entity) {
+                    if let Ok(mut asset) = scene_query.get_mut(entity) {
+                        for last_entity in children.iter_descendants(entity) {
+                            commands.entity(last_entity).despawn_recursive();
+                        }
+                        *asset = asset_server.load("models/assault-rifle.glb#Scene0");
+                    }
+                }
             }
             if key == KeyCode::Digit3 {
                 *weapon_promp = WeaponPromp::msr();
+                for entity in children.iter_descendants(player_entity) {
+                    if let Ok(mut asset) = scene_query.get_mut(entity) {
+                        for last_entity in children.iter_descendants(entity) {
+                            commands.entity(last_entity).despawn_recursive();
+                        }
+                        *asset = asset_server.load("models/MSR.glb#Scene0");
+                    }
+                }
             }
         }
     }

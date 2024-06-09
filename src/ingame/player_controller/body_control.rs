@@ -61,10 +61,8 @@ pub fn player_move(
                 CursorGrabMode::None => (),
                 _ => {
                     // ! player looking direction
-                    let forward =
-                        vector_normalize(Vec3::new(-yaw_player.sin(), 0.0, -yaw_player.cos()));
-                    let right =
-                        vector_normalize(Vec3::new(-yaw_player.cos(), 0.0, yaw_player.sin()));
+                    let forward = Vec3::new(-yaw_player.sin(), 0.0, -yaw_player.cos()).normalize();
+                    let right = Vec3::new(-yaw_player.cos(), 0.0, yaw_player.sin()).normalize();
 
                     // ! wishvel
                     let wishvel = Vec3::new(
@@ -89,7 +87,7 @@ pub fn player_move(
     }
 }
 
-fn vector_normalize(mut v: Vec3) -> Vec3 {
+pub fn vector_normalize(mut v: Vec3) -> Vec3 {
     let mut length: f32;
 
     length = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];

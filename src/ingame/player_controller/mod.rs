@@ -1,4 +1,3 @@
-use bevy::input::InputSystem;
 use bevy::{prelude::*, transform::TransformSystem};
 
 pub mod body_control;
@@ -48,15 +47,10 @@ impl Plugin for PlayerControllerPlugin {
                     //player systems
                     edit_mode_toggler,
                     change_weapon,
+                    player_move,
+                    movement_input_changer,
+                    player_look,
                 ),
-            )
-            .add_systems(PreUpdate, movement_input_changer.after(InputSystem))
-            .add_systems(PreUpdate, player_look.after(InputSystem))
-            .add_systems(
-                PostUpdate,
-                player_move
-                    .after(PhysicsSet::Sync)
-                    .before(TransformSystem::TransformPropagate),
             )
             .add_systems(
                 PostUpdate,

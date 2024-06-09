@@ -27,6 +27,30 @@ pub fn setup(
     ));
     */
 
+    /*
+    //Png Scope
+    commands.spawn(ImageBundle {
+        image: UiImage::new(asset_server.load("png-scope.png")),
+        transform: Transform::from_scale(Vec3::new(0.35, 0.35, 1.0)),
+        style: Style {
+            position_type: PositionType::Absolute,
+            min_width: Val::Px(100.),
+            min_height: Val::Px(100.),
+            align_self: AlignSelf::Center,
+            justify_self: JustifySelf::Center,
+            margin: UiRect {
+                right: Val::Px(49.0),
+                top: Val::Px(95.0),
+                ..default()
+            },
+            ..default()
+        },
+        background_color: Color::WHITE.into(),
+
+        ..Default::default()
+    });
+    */
+
     //gun animation load
     commands.insert_resource(Animations(vec![
         asset_server.load("models/p226_anim.glb#Animation0"),

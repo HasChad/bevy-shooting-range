@@ -3,17 +3,11 @@ use bevy::prelude::*;
 use bevy_xpbd_3d::prelude::*;
 use std::f32::consts::PI;
 
-#[derive(Component)]
-pub struct P226 {
-    pub head_dmg: u8,
-    pub body_dmg: u8,
-    pub magazine: u8,
-    pub lifetime: Timer,
-    pub okay_to_shoot: bool,
-}
-
 use crate::ingame::GameSettings;
 use crate::ingame::WeaponPromp;
+
+#[derive(Component)]
+pub struct BulletSpawnPosition;
 
 #[derive(Component)]
 pub struct Player;
@@ -27,7 +21,7 @@ pub fn player_setup(
     settings: Res<GameSettings>,
 ) {
     //player body
-    let player_object_id = commands
+    let _player_object_id = commands
         .spawn((
             Player,
             InheritedVisibility::VISIBLE,
@@ -42,8 +36,7 @@ pub fn player_setup(
         .insert(Name::new("Player"))
         .id();
 
-    let query_filter =
-        SpatialQueryFilter::from_mask(0b1011).with_excluded_entities([player_object_id]);
+    //let query_filter = SpatialQueryFilter::from_mask(0b1011).with_excluded_entities([player_object_id]);
 
     //player head
     commands
@@ -73,6 +66,12 @@ pub fn player_setup(
         .insert(Name::new("Head"))
         .insert(Head)
         .with_children(|parent| {
+            //bullet spawn position
+            parent.spawn((
+                TransformBundle::from(Transform::from_xyz(0.0, 0.0, -0.5)),
+                BulletSpawnPosition,
+                Name::new("Bullet Spawn Position"),
+            ));
             //gun model
             parent.spawn((
                 SceneBundle {
@@ -84,12 +83,16 @@ pub fn player_setup(
                 Name::new("Weapon"),
             ));
             //RayCast
+
+            /*
             parent.spawn((
                 RayCaster::new(Vec3::ZERO, Direction3d::NEG_Z)
                     .with_query_filter(query_filter)
                     .with_max_hits(1)
+                    .with_max_time_of_impact(2.0)
                     .with_solidness(false),
                 Name::new("RayCast"),
             ));
+            */
         });
 }

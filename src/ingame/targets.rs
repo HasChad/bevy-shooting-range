@@ -3,7 +3,7 @@ use bevy_kira_audio::prelude::*;
 use bevy_xpbd_3d::prelude::*;
 use rand::prelude::*;
 
-use super::{WeaponPromp, WeaponShootingEvent};
+use super::{HitConfirmEvent, WeaponPromp};
 
 #[derive(Component)]
 pub struct CircleTarget;
@@ -58,7 +58,7 @@ pub fn target_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
 pub fn circle_target_controller(
     raycast_query: Query<&RayHits>,
-    mut event_reader: EventReader<WeaponShootingEvent>,
+    mut event_reader: EventReader<HitConfirmEvent>,
     mut circletarget_query: Query<&mut Transform, With<CircleTarget>>,
     query: Query<&Name>,
     audio: Res<Audio>,
@@ -84,7 +84,7 @@ pub fn circle_target_controller(
 pub fn silhouette_target_controller(
     mut commands: Commands,
     raycast_query: Query<&RayHits>,
-    mut event_reader: EventReader<WeaponShootingEvent>,
+    mut event_reader: EventReader<HitConfirmEvent>,
     mut silhouettetarget_query: Query<(&mut SilhouetteTarget, Entity)>,
     weapon_query: Query<&WeaponPromp>,
     query: Query<&Name>,
@@ -122,7 +122,7 @@ pub fn silhouette_target_controller(
 pub fn silhouette_target_hostage_controller(
     mut commands: Commands,
     raycast_query: Query<&RayHits>,
-    mut event_reader: EventReader<WeaponShootingEvent>,
+    mut event_reader: EventReader<HitConfirmEvent>,
     mut silhouettetarget_query: Query<(&mut SilhouetteTargetHostage, Entity)>,
     weapon_query: Query<&WeaponPromp>,
     query: Query<&Name>,

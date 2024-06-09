@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+pub mod bullet;
 pub mod crosshair;
 pub mod gun;
 pub mod ingame_setup;
@@ -8,6 +9,7 @@ pub mod settings;
 pub mod targets;
 pub mod ui;
 
+use bullet::*;
 use crosshair::*;
 use gun::*;
 use ingame_setup::*;
@@ -39,8 +41,12 @@ impl Plugin for InGamePlugin {
                     firerate_timer,
                     weapon_animation_setup,
                     weapon_play_animation,
-                    print_hits,
                     reload_timer,
+                    //bullet systems
+                    spawn_bullet,
+                    //hitmarker systems
+                    hitmarker_spawner,
+                    hitmarker_controller,
                     //target systems
                     circle_target_controller,
                     silhouette_target_controller,
@@ -53,6 +59,7 @@ impl Plugin for InGamePlugin {
                     ammo_text_updater,
                 ),
             )
+            .add_systems(FixedUpdate, bullet_controller)
             //plugins
             .add_plugins(PlayerControllerPlugin)
             //resources
@@ -66,10 +73,11 @@ impl Plugin for InGamePlugin {
                 color: Color::WHITE,
                 length: 5.0,
                 thickness: 2.0,
-                enable: InheritedVisibility::VISIBLE,
+                enable: Visibility::Inherited,
             })
             //events
             .add_event::<WeaponShootingEvent>()
-            .add_event::<WeaponReloadingEvent>();
+            .add_event::<WeaponReloadingEvent>()
+            .add_event::<HitConfirmEvent>();
     }
 }
