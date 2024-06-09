@@ -54,7 +54,7 @@ pub fn player_move(
     mut query_player: Query<(&mut LinearVelocity, &mut Transform), With<Player>>,
 ) {
     if let Ok(window) = primary_window.get_single() {
-        for (mut linear_velocity, player_transform) in query_player.iter_mut() {
+        for (mut linear_velocity, mut player_transform) in query_player.iter_mut() {
             let (yaw_player, _, _) = player_transform.rotation.to_euler(EulerRot::YXZ);
 
             match window.cursor.grab_mode {
@@ -71,34 +71,18 @@ pub fn player_move(
                         forward.z * movement_input.fmove + right.z * movement_input.smove,
                     );
 
-                    let wishdir = vector_normalize(wishvel);
+                    let wishdir = wishvel.normalize_or_zero();
 
-                    linear_velocity.x = wishdir.x * 5.;
-                    linear_velocity.z = wishdir.z * 5.;
+                    //linear_velocity.x = wishdir.x * 5.;
+                    //linear_velocity.z = wishdir.z * 5.;
 
                     // ! changed from linear_velocity to player_transform.translation
-                    //player_transform.translation.x += wishdir.x * 0.03;
-                    //player_transform.translation.z += wishdir.z * 0.03;
+                    player_transform.translation.x += wishdir.x * 0.03;
+                    player_transform.translation.z += wishdir.z * 0.03;
                 }
             }
         }
     } else {
         warn!("Primary window not found for `player_move`!");
     }
-}
-
-pub fn vector_normalize(mut v: Vec3) -> Vec3 {
-    let mut length: f32;
-
-    length = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
-    length = length.sqrt();
-
-    if length > 0.0 {
-        let ilength = 1.0 / length;
-        v[0] *= ilength;
-        v[1] *= ilength;
-        v[2] *= ilength;
-    }
-
-    v
 }

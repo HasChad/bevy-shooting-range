@@ -9,12 +9,12 @@ use super::{HitConfirmEvent, WeaponPromp};
 pub struct CircleTarget;
 
 #[derive(Component)]
-pub struct SilhouetteTarget {
+pub struct EnemyTarget {
     health: i8,
 }
 
 #[derive(Component)]
-pub struct SilhouetteTargetHostage {
+pub struct EnemyTargetHostage {
     health: i8,
 }
 
@@ -31,128 +31,115 @@ pub fn target_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         CircleTarget,
     ));
 
-    //silhouette target
+    //enemy target
     commands.spawn((
         SceneBundle {
-            scene: asset_server.load("models/silhouette-target.glb#Scene0"),
+            scene: asset_server.load("models/enemy-target.glb#Scene0"),
             transform: Transform::from_xyz(0.0, 0.5, -3.0),
             ..default()
         },
         AsyncSceneCollider::new(Some(ComputedCollider::TriMesh)),
-        Name::new("SilhouetteTarget"),
-        SilhouetteTarget { health: 5 },
+        Name::new("EnemyTarget"),
+        EnemyTarget { health: 5 },
     ));
 
-    //silhouette target hostage
+    //enemy target hostage
     commands.spawn((
         SceneBundle {
-            scene: asset_server.load("models/silhouette-target-hostage.glb#Scene0"),
+            scene: asset_server.load("models/enemy-target-hostage.glb#Scene0"),
             transform: Transform::from_xyz(1.0, 0.8, -3.0),
             ..default()
         },
         AsyncSceneCollider::new(Some(ComputedCollider::TriMesh)),
-        Name::new("SilhouetteTargetHostage"),
-        SilhouetteTargetHostage { health: 5 },
+        Name::new("EnemyTargetHostage"),
+        EnemyTargetHostage { health: 5 },
     ));
 }
 
 pub fn circle_target_controller(
-    raycast_query: Query<&RayHits>,
     mut event_reader: EventReader<HitConfirmEvent>,
     mut circletarget_query: Query<&mut Transform, With<CircleTarget>>,
     query: Query<&Name>,
     audio: Res<Audio>,
     asset_server: Res<AssetServer>,
 ) {
-    for _event in event_reader.read() {
-        for hits in &raycast_query {
-            for hit in hits.iter() {
-                if "Cylinder" == query.get(hit.entity).unwrap().as_str() {
-                    audio.play(asset_server.load("sounds/Hit_Marker.ogg"));
-                    for mut circletarget_entity in &mut circletarget_query {
-                        let old_position = circletarget_entity.translation.x;
-                        while (circletarget_entity.translation.x - old_position).abs() < 0.5 {
-                            circletarget_entity.translation.x = thread_rng().gen_range(-3.0..3.0);
-                        }
-                    }
+    for event in event_reader.read() {
+        if "Cylinder" == query.get(event.hit_entity).unwrap().as_str() {
+            audio.play(asset_server.load("sounds/Hit_Marker.ogg"));
+            for mut circletarget_entity in &mut circletarget_query {
+                let old_position = circletarget_entity.translation.x;
+                while (circletarget_entity.translation.x - old_position).abs() < 0.5 {
+                    circletarget_entity.translation.x = thread_rng().gen_range(-3.0..3.0);
                 }
             }
         }
     }
 }
 
-pub fn silhouette_target_controller(
+pub fn enemy_target_controller(
     mut commands: Commands,
-    raycast_query: Query<&RayHits>,
     mut event_reader: EventReader<HitConfirmEvent>,
-    mut silhouettetarget_query: Query<(&mut SilhouetteTarget, Entity)>,
+    mut enemytarget_query: Query<(&mut EnemyTarget, Entity)>,
     weapon_query: Query<&WeaponPromp>,
     query: Query<&Name>,
 ) {
-    for _event in event_reader.read() {
-        for hits in &raycast_query {
-            for hit in hits.iter() {
-                let weapon_promp = weapon_query.single();
-                match query.get(hit.entity).unwrap().as_str() {
-                    "silhouette-target-head" => {
-                        for (mut silhotarget_prop, _) in &mut silhouettetarget_query {
-                            silhotarget_prop.health -= weapon_promp.head_damage as i8;
-                            info!("{}", silhotarget_prop.health);
-                        }
-                    }
-                    "silhouette-target-body" => {
-                        for (mut silhotarget_prop, _) in &mut silhouettetarget_query {
-                            silhotarget_prop.health -= weapon_promp.body_damage as i8;
-
-                            info!("{}", silhotarget_prop.health);
-                        }
-                    }
-                    _ => (),
-                };
-                for (silhotarget_prop, silhouettetarget_entity) in &mut silhouettetarget_query {
-                    if silhotarget_prop.health <= 0 {
-                        commands.entity(silhouettetarget_entity).despawn_recursive();
-                    }
+    for event in event_reader.read() {
+        let weapon_promp = weapon_query.single();
+        match query.get(event.hit_entity).unwrap().as_str() {
+            "silhouette-target-head" => {
+                for (mut enemytarget_prop, _) in &mut enemytarget_query {
+                    enemytarget_prop.health -= weapon_promp.head_damage as i8;
+                    info!("{}", enemytarget_prop.health);
                 }
+            }
+            "silhouette-target-body" => {
+                for (mut enemytarget_prop, _) in &mut enemytarget_query {
+                    enemytarget_prop.health -= weapon_promp.body_damage as i8;
+
+                    info!("{}", enemytarget_prop.health);
+                }
+            }
+            _ => (),
+        };
+        for (enemytarget_prop, enemytarget_entity) in &mut enemytarget_query {
+            if enemytarget_prop.health <= 0 {
+                commands.entity(enemytarget_entity).despawn_recursive();
             }
         }
     }
 }
 
-pub fn silhouette_target_hostage_controller(
+pub fn enemy_target_hostage_controller(
     mut commands: Commands,
-    raycast_query: Query<&RayHits>,
     mut event_reader: EventReader<HitConfirmEvent>,
-    mut silhouettetarget_query: Query<(&mut SilhouetteTargetHostage, Entity)>,
+    mut enemytargethostage_query: Query<(&mut EnemyTargetHostage, Entity)>,
     weapon_query: Query<&WeaponPromp>,
     query: Query<&Name>,
 ) {
-    for _event in event_reader.read() {
-        for hits in &raycast_query {
-            for hit in hits.iter() {
-                let weapon_promp = weapon_query.single();
+    for event in event_reader.read() {
+        let weapon_promp = weapon_query.single();
 
-                match query.get(hit.entity).unwrap().as_str() {
-                    "silhouette-target-gun-head" => {
-                        for (mut silhotarget_prop, _) in &mut silhouettetarget_query {
-                            silhotarget_prop.health -= weapon_promp.head_damage as i8;
-                            info!("{}", silhotarget_prop.health);
-                        }
-                    }
-                    "silhouette-target-gun-body" => {
-                        for (mut silhotarget_prop, _) in &mut silhouettetarget_query {
-                            silhotarget_prop.health -= weapon_promp.body_damage as i8;
-                            info!("{}", silhotarget_prop.health);
-                        }
-                    }
-                    "hostage" => info!("you shot the hostage"),
-                    _ => (),
-                };
-                for (silhotarget_prop, silhouettetarget_entity) in &mut silhouettetarget_query {
-                    if silhotarget_prop.health <= 0 {
-                        commands.entity(silhouettetarget_entity).despawn_recursive();
-                    }
+        match query.get(event.hit_entity).unwrap().as_str() {
+            "silhouette-target-gun-head" => {
+                for (mut enemytargethostage_prop, _) in &mut enemytargethostage_query {
+                    enemytargethostage_prop.health -= weapon_promp.head_damage as i8;
+                    info!("{}", enemytargethostage_prop.health);
                 }
+            }
+            "silhouette-target-gun-body" => {
+                for (mut enemytargethostage_prop, _) in &mut enemytargethostage_query {
+                    enemytargethostage_prop.health -= weapon_promp.body_damage as i8;
+                    info!("{}", enemytargethostage_prop.health);
+                }
+            }
+            "hostage" => info!("you shot the hostage"),
+            _ => (),
+        };
+        for (enemytargethostage_prop, enemytargethostage_entity) in &mut enemytargethostage_query {
+            if enemytargethostage_prop.health <= 0 {
+                commands
+                    .entity(enemytargethostage_entity)
+                    .despawn_recursive();
             }
         }
     }

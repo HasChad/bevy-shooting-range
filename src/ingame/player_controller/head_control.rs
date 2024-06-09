@@ -71,7 +71,7 @@ pub fn change_weapon(
                         for last_entity in children.iter_descendants(entity) {
                             commands.entity(last_entity).despawn_recursive();
                         }
-                        *asset = asset_server.load("models/p226_anim.glb#Scene0");
+                        *asset = asset_server.load("models/P226.glb#Scene0");
                     }
                 }
             }
@@ -82,7 +82,7 @@ pub fn change_weapon(
                         for last_entity in children.iter_descendants(entity) {
                             commands.entity(last_entity).despawn_recursive();
                         }
-                        *asset = asset_server.load("models/assault-rifle.glb#Scene0");
+                        *asset = asset_server.load("models/AK15.glb#Scene0");
                     }
                 }
             }

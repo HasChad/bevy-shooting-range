@@ -8,7 +8,10 @@ use super::{
 };
 
 #[derive(Event)]
-pub struct HitConfirmEvent;
+pub struct HitConfirmEvent {
+    pub hit_entity: Entity,
+    pub hit_normal: Vec3,
+}
 
 #[derive(Component)]
 pub struct Bullet {
@@ -42,7 +45,7 @@ pub fn spawn_bullet(
             ))
             .with_children(|parent| {
                 parent.spawn(PbrBundle {
-                    mesh: meshes.add(Capsule3d::new(0.005, 0.3)),
+                    mesh: meshes.add(Capsule3d::new(0.01, 0.3)),
                     material: materials.add(StandardMaterial {
                         base_color: Color::rgb(1.0, 0.8, 0.0),
                         emissive: Color::rgb_linear(23000.0, 0.0, 10000.0),
@@ -66,27 +69,29 @@ pub fn bullet_controller(
     mut transforms: Query<&mut Transform, Without<Bullet>>,
 ) {
     for (mut bullet_transform, mut bullet_promp, bullet_entity) in bullet_query.iter_mut() {
-        //gravity drop
-        // bullet_promp.velocity.y -= 0.05 * time.delta_seconds() * bullet_promp.bullet_lifetime.elapsed().as_secs_f32();
-        //wind push
-        // bullet_promp.velocity.x -= 0.05 * time.delta_seconds() * bullet_promp.bullet_lifetime.elapsed().as_secs_f32();
-
-        let bullet_travel = bullet_promp.velocity * 30.0 * time.delta_seconds();
+        let bullet_travel = bullet_promp.velocity * 100.0 * time.delta_seconds();
         let distance = (bullet_travel).length();
 
         let prev_pos = bullet_transform.translation;
         bullet_transform.translation += bullet_travel;
 
-        if let Some(first_hit) = spatial_query.cast_ray(
+        //gravity drop
+        //bullet_transform.translation.y -= 0.5 * time.delta_seconds() * bullet_promp.bullet_lifetime.elapsed().as_secs_f32();
+        //wind push
+        //bullet_transform.translation.x -= 0.5 * time.delta_seconds() * bullet_promp.bullet_lifetime.elapsed().as_secs_f32();
+
+        if let Some(hit) = spatial_query.cast_ray(
             prev_pos,
             Direction3d::new_unchecked(bullet_promp.velocity.normalize()),
             distance,
             true,
             SpatialQueryFilter::default(),
         ) {
-            println!("First hit: {:?}", first_hit);
             commands.entity(bullet_entity).despawn_recursive();
-            event_writer.send(HitConfirmEvent);
+            event_writer.send(HitConfirmEvent {
+                hit_entity: hit.entity,
+                hit_normal: hit.normal,
+            });
         }
 
         for child in children_query.iter_descendants(bullet_entity) {

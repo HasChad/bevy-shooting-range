@@ -1,6 +1,10 @@
+use std::{f32::consts::PI, time::Duration};
+
 use bevy::{animation::RepeatAnimation, prelude::*, window::CursorGrabMode};
 
 use crate::ingame::Animations;
+
+use super::GameSettings;
 
 #[derive(Event)]
 pub struct WeaponShootingEvent;
@@ -96,6 +100,28 @@ impl WeaponPromp {
     }
 }
 
+pub fn scope(
+    mouse_input: Res<ButtonInput<MouseButton>>,
+    mut camera_query: Query<&mut Projection, With<Camera3d>>,
+    settings: ResMut<GameSettings>,
+    mut weapon_query: Query<&mut Transform, With<WeaponPromp>>,
+) {
+    let mut weapon_transform = weapon_query.single_mut();
+    let Projection::Perspective(persp) = camera_query.single_mut().into_inner() else {
+        return;
+    };
+    if mouse_input.pressed(MouseButton::Right) {
+        persp.fov = 50. + (settings.fov - 50.) * Duration::from_secs_f32(1.0).as_secs_f32();
+
+        //persp.fov = 50.0 / 180.0 * PI;
+        *weapon_transform = Transform::from_translation(Vec3::new(0.0, 0.0, -0.3));
+    }
+    if mouse_input.just_released(MouseButton::Right) {
+        persp.fov = settings.fov / 180.0 * PI;
+        *weapon_transform = Transform::from_translation(Vec3::new(0.1, -0.05, -0.2));
+    }
+}
+
 pub fn shooting_event(
     mouse_input: Res<ButtonInput<MouseButton>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
@@ -175,7 +201,7 @@ pub fn weapon_animation_setup(
     mut animation_player_query: Query<&mut AnimationPlayer, Added<AnimationPlayer>>,
 ) {
     for mut gun in &mut animation_player_query {
-        gun.play(animations.0[1].clone_weak()).repeat();
+        gun.play(animations.0[0].clone_weak()).repeat();
         gun.set_repeat(RepeatAnimation::Count(0));
     }
 }

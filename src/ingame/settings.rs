@@ -111,6 +111,33 @@ pub fn egui_settings(
                                 bevy::prelude::BackgroundColor(crosshair_inner_settings.color);
                         }
                     };
+
+                    /*
+                    //Drag Value
+                    ui.horizontal(|ui| {
+                        //Red
+                        if ui
+                            .add(
+                                egui::DragValue::new(&mut cross_color[0]) //1 for green 2 for blue
+                                    .speed(0.005)
+                                    .clamp_range(0.0..=1.0)
+                                    .prefix("R: ")
+                                    .fixed_decimals(2),
+                            )
+                            .changed()
+                        {
+                            crosshair_inner_settings.color =
+                                Color::rgba(cross_color[0], cross_color[1], cross_color[2], 1.0);
+
+                            for (_, mut node_color) in innerhorizontal_query.iter_mut() {
+                                *node_color =
+                                    bevy::prelude::BackgroundColor(crosshair_inner_settings.color);
+                            }
+                            for (_, mut node_color) in innervertical_query.iter_mut() {
+                                *node_color =
+                                    bevy::prelude::BackgroundColor(crosshair_inner_settings.color);
+                            }
+                        }; */
                     ui.end_row();
 
                     //MARK: Length

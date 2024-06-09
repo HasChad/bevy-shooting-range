@@ -42,6 +42,7 @@ impl Plugin for InGamePlugin {
                     weapon_animation_setup,
                     weapon_play_animation,
                     reload_timer,
+                    scope,
                     //bullet systems
                     spawn_bullet,
                     //hitmarker systems
@@ -49,8 +50,8 @@ impl Plugin for InGamePlugin {
                     hitmarker_controller,
                     //target systems
                     circle_target_controller,
-                    silhouette_target_controller,
-                    silhouette_target_hostage_controller,
+                    enemy_target_controller,
+                    enemy_target_hostage_controller,
                     //settings system
                     egui_settings,
                     //ui systems
