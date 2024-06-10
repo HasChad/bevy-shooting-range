@@ -3,7 +3,7 @@ use std::f32::consts::PI;
 use bevy::prelude::*;
 use rand::{thread_rng, Rng};
 
-use super::HitConfirmEvent;
+use crate::ingame::HitConfirmEvent;
 
 #[derive(Component)]
 pub struct HitMarker {
@@ -23,6 +23,18 @@ pub struct InnerLineSettings {
     pub offset: f32,
     pub color: Color,
     pub enable: Visibility,
+}
+
+impl Default for InnerLineSettings {
+    fn default() -> Self {
+        InnerLineSettings {
+            offset: 5.0,
+            color: Color::WHITE,
+            length: 5.0,
+            thickness: 2.0,
+            enable: Visibility::Inherited,
+        }
+    }
 }
 
 pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<InnerLineSettings>) {

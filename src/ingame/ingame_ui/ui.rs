@@ -1,7 +1,10 @@
-use bevy::prelude::*;
+use bevy::{
+    diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin},
+    prelude::*,
+};
 use bevy_xpbd_3d::components::LinearVelocity;
 
-use super::{player_controller::player::Player, WeaponPromp};
+use crate::ingame::{player_controller::player::Player, WeaponPromp};
 
 #[derive(Component)]
 pub struct VelocityText;
@@ -12,8 +15,11 @@ pub struct AmmoText;
 #[derive(Component)]
 pub struct WeaponNameText;
 
+#[derive(Component)]
+pub struct FpsText;
+
 pub fn setup_ui(mut commands: Commands) {
-    //Ammo UI
+    //MARK: Ammo UI
     commands.spawn((
         TextBundle::from_sections([
             TextSection::from_style(TextStyle {
@@ -49,7 +55,7 @@ pub fn setup_ui(mut commands: Commands) {
         Name::new("UI - Ammo Counter"),
     ));
 
-    //Weapon Name UI
+    //MARK: Weapon Name UI
     commands.spawn((
         TextBundle::from_sections([TextSection::from_style(TextStyle {
             font_size: 30.0,
@@ -72,7 +78,7 @@ pub fn setup_ui(mut commands: Commands) {
         Name::new("UI - Weapon Name"),
     ));
 
-    //Veclocity UI
+    //MARK: Veclocity UI
     commands.spawn((
         TextBundle::from_sections([
             TextSection::new(
@@ -97,6 +103,32 @@ pub fn setup_ui(mut commands: Commands) {
         .with_background_color(Color::BLACK),
         VelocityText,
         Name::new("UI - Velocity Counter"),
+    ));
+
+    //MARK: FPS UI
+    commands.spawn((
+        TextBundle::from_sections([
+            TextSection::new(
+                "FPS: ",
+                TextStyle {
+                    font_size: 20.0,
+                    ..default()
+                },
+            ),
+            TextSection::from_style(TextStyle {
+                font_size: 20.0,
+                color: Color::GOLD,
+                ..default()
+            }),
+        ])
+        .with_style(Style {
+            position_type: PositionType::Absolute,
+            justify_self: JustifySelf::End,
+            ..default()
+        })
+        .with_background_color(Color::BLACK),
+        FpsText,
+        Name::new("UI - FPSCounter"),
     ));
 }
 
@@ -133,6 +165,19 @@ pub fn velocity_text_updater(
                 + (linear_velocity.z * linear_velocity.z))
                 .sqrt();
             text.sections[1].value = format!("{sum_velocity:.1}");
+        }
+    }
+}
+
+pub fn fps_text_updater(
+    diagnostics: Res<DiagnosticsStore>,
+    mut query: Query<&mut Text, With<FpsText>>,
+) {
+    for mut text in &mut query {
+        if let Some(fps) = diagnostics.get(&FrameTimeDiagnosticsPlugin::FPS) {
+            if let Some(value) = fps.smoothed() {
+                text.sections[1].value = format!("{value:.0}");
+            }
         }
     }
 }

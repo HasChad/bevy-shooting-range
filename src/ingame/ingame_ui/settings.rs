@@ -6,8 +6,8 @@ use bevy_inspector_egui::{
     egui::Align2,
 };
 
-use super::GameSettings;
 use crate::ingame::crosshair;
+use crate::ingame::GameSettings;
 use crosshair::*;
 
 type InnerLineQueryType<'a> = (&'a mut Style, &'a mut Visibility, &'a mut BackgroundColor);

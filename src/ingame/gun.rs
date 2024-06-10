@@ -1,16 +1,21 @@
-use std::{f32::consts::PI, time::Duration};
-
 use bevy::{animation::RepeatAnimation, prelude::*, window::CursorGrabMode};
-
-use crate::ingame::Animations;
+use std::f32::consts::PI;
 
 use super::GameSettings;
+use crate::ingame::Animations;
 
 #[derive(Event)]
 pub struct WeaponShootingEvent;
 
 #[derive(Event)]
 pub struct WeaponReloadingEvent;
+
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Default, States)]
+pub enum WeaponState {
+    #[default]
+    Shooting,
+    Reloading,
+}
 
 #[derive(Component)]
 pub struct WeaponPromp {
@@ -21,7 +26,6 @@ pub struct WeaponPromp {
     pub body_damage: u8,
     pub is_auto: bool,
     pub okay_to_shoot: bool,
-    pub is_reloading: bool,
     pub firerate: Timer,
     pub reload: Timer,
 }
@@ -36,7 +40,6 @@ impl WeaponPromp {
             body_damage: 1,
             is_auto: false,
             okay_to_shoot: true,
-            is_reloading: false,
             firerate: Timer::from_seconds(0.1, TimerMode::Once),
             reload: Timer::from_seconds(1.0, TimerMode::Once),
         }
@@ -51,7 +54,6 @@ impl WeaponPromp {
             body_damage: 4,
             is_auto: true,
             okay_to_shoot: true,
-            is_reloading: false,
             firerate: Timer::from_seconds(0.08, TimerMode::Once),
             reload: Timer::from_seconds(2.0, TimerMode::Once),
         }
@@ -66,7 +68,6 @@ impl WeaponPromp {
             body_damage: 7,
             is_auto: false,
             okay_to_shoot: true,
-            is_reloading: false,
             firerate: Timer::from_seconds(1.5, TimerMode::Once),
             reload: Timer::from_seconds(2.5, TimerMode::Once),
         }
@@ -100,34 +101,13 @@ impl WeaponPromp {
     }
 }
 
-pub fn scope(
-    mouse_input: Res<ButtonInput<MouseButton>>,
-    mut camera_query: Query<&mut Projection, With<Camera3d>>,
-    settings: ResMut<GameSettings>,
-    mut weapon_query: Query<&mut Transform, With<WeaponPromp>>,
-) {
-    let mut weapon_transform = weapon_query.single_mut();
-    let Projection::Perspective(persp) = camera_query.single_mut().into_inner() else {
-        return;
-    };
-    if mouse_input.pressed(MouseButton::Right) {
-        persp.fov = 50. + (settings.fov - 50.) * Duration::from_secs_f32(1.0).as_secs_f32();
-
-        //persp.fov = 50.0 / 180.0 * PI;
-        *weapon_transform = Transform::from_translation(Vec3::new(0.0, 0.0, -0.3));
-    }
-    if mouse_input.just_released(MouseButton::Right) {
-        persp.fov = settings.fov / 180.0 * PI;
-        *weapon_transform = Transform::from_translation(Vec3::new(0.1, -0.05, -0.2));
-    }
-}
-
 pub fn shooting_event(
     mouse_input: Res<ButtonInput<MouseButton>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut event_writer: EventWriter<WeaponShootingEvent>,
     mut weapon_query: Query<&mut WeaponPromp>,
     mut windows: Query<&mut Window>,
+    mut next_state: ResMut<NextState<WeaponState>>,
 ) {
     for mut window in windows.iter_mut() {
         if window.cursor.grab_mode == CursorGrabMode::Confined {
@@ -140,7 +120,6 @@ pub fn shooting_event(
                 if mouse_input.just_pressed(MouseButton::Left)
                     && weapon_promp.okay_to_shoot
                     && !weapon_promp.is_auto
-                    && !weapon_promp.is_reloading
                 {
                     weapon_promp.mag_capacity -= 1;
                     event_writer.send(WeaponShootingEvent);
@@ -150,17 +129,18 @@ pub fn shooting_event(
                 if mouse_input.pressed(MouseButton::Left)
                     && weapon_promp.okay_to_shoot
                     && weapon_promp.is_auto
-                    && !weapon_promp.is_reloading
                 {
                     weapon_promp.mag_capacity -= 1;
                     event_writer.send(WeaponShootingEvent);
                     weapon_promp.okay_to_shoot = false;
                 }
                 //reload
-                if (weapon_promp.mag_capacity == 0 || keyboard_input.just_pressed(KeyCode::KeyR))
-                    && weapon_promp.mag_capacity < weapon_promp.self_mag_cap()
+                if (weapon_promp.mag_capacity == 0
+                    || (keyboard_input.just_pressed(KeyCode::KeyR))
+                        && weapon_promp.mag_capacity < weapon_promp.self_mag_cap())
+                    && weapon_promp.ammo_capacity > 0
                 {
-                    weapon_promp.is_reloading = true;
+                    next_state.set(WeaponState::Reloading)
                 }
             }
         }
@@ -169,7 +149,7 @@ pub fn shooting_event(
 
 pub fn firerate_timer(mut weapon_query: Query<&mut WeaponPromp>, time: Res<Time>) {
     for mut weapon_promp in weapon_query.iter_mut() {
-        if !weapon_promp.okay_to_shoot && !weapon_promp.is_reloading {
+        if !weapon_promp.okay_to_shoot {
             weapon_promp.firerate.tick(time.delta());
 
             if weapon_promp.firerate.finished() {
@@ -180,19 +160,40 @@ pub fn firerate_timer(mut weapon_query: Query<&mut WeaponPromp>, time: Res<Time>
     }
 }
 
-pub fn reload_timer(mut weapon_query: Query<&mut WeaponPromp>, time: Res<Time>) {
+pub fn reload_timer(
+    mut weapon_query: Query<&mut WeaponPromp>,
+    mut next_state: ResMut<NextState<WeaponState>>,
+    time: Res<Time>,
+) {
     for mut weapon_promp in weapon_query.iter_mut() {
-        if weapon_promp.is_reloading {
-            weapon_promp.reload.tick(time.delta());
+        weapon_promp.reload.tick(time.delta());
 
-            if weapon_promp.reload.finished() {
-                weapon_promp.is_reloading = false;
-                weapon_promp.ammo_capacity -=
-                    weapon_promp.self_mag_cap() - weapon_promp.mag_capacity;
-                weapon_promp.reload = weapon_promp.self_reload();
-                weapon_promp.mag_capacity = weapon_promp.self_mag_cap();
-            }
+        if weapon_promp.reload.finished() {
+            weapon_promp.ammo_capacity -= weapon_promp.self_mag_cap() - weapon_promp.mag_capacity;
+            weapon_promp.reload = weapon_promp.self_reload();
+            weapon_promp.mag_capacity = weapon_promp.self_mag_cap();
+            next_state.set(WeaponState::Shooting)
         }
+    }
+}
+
+pub fn scope(
+    mouse_input: Res<ButtonInput<MouseButton>>,
+    mut camera_query: Query<&mut Projection, With<Camera3d>>,
+    settings: ResMut<GameSettings>,
+    mut weapon_query: Query<&mut Transform, With<WeaponPromp>>,
+) {
+    let mut weapon_transform = weapon_query.single_mut();
+    let Projection::Perspective(persp) = camera_query.single_mut().into_inner() else {
+        return;
+    };
+    if mouse_input.pressed(MouseButton::Right) {
+        persp.fov = 50.0 / 180.0 * PI;
+        *weapon_transform = Transform::from_translation(Vec3::new(0.0, 0.0, -0.3));
+    }
+    if mouse_input.just_released(MouseButton::Right) {
+        persp.fov = settings.fov / 180.0 * PI;
+        *weapon_transform = Transform::from_translation(Vec3::new(0.1, -0.05, -0.2));
     }
 }
 

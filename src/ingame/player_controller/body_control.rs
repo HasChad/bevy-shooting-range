@@ -54,7 +54,7 @@ pub fn player_move(
     mut query_player: Query<(&mut LinearVelocity, &mut Transform), With<Player>>,
 ) {
     if let Ok(window) = primary_window.get_single() {
-        for (mut linear_velocity, mut player_transform) in query_player.iter_mut() {
+        for (mut _linear_velocity, mut player_transform) in query_player.iter_mut() {
             let (yaw_player, _, _) = player_transform.rotation.to_euler(EulerRot::YXZ);
 
             match window.cursor.grab_mode {
