@@ -11,7 +11,7 @@ use bullet::*;
 use gun::*;
 use ingame_setup::*;
 use ingame_ui::*;
-use player_controller::PlayerControllerPlugin;
+use player_controller::*;
 use targets::*;
 
 #[derive(Resource)]
