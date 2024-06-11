@@ -17,6 +17,19 @@ pub enum WeaponState {
     Reloading,
 }
 
+#[derive(Resource)]
+pub struct LerpTimer {
+    timer: Timer,
+}
+
+impl Default for LerpTimer {
+    fn default() -> Self {
+        LerpTimer {
+            timer: Timer::from_seconds(0.1, TimerMode::Once),
+        }
+    }
+}
+
 #[derive(Component)]
 pub struct WeaponPromp {
     pub name: String,
@@ -27,7 +40,7 @@ pub struct WeaponPromp {
     pub is_auto: bool,
     pub okay_to_shoot: bool,
     pub firerate: Timer,
-    pub reload: Timer,
+    pub reload_timer: Timer,
 }
 
 impl WeaponPromp {
@@ -41,7 +54,7 @@ impl WeaponPromp {
             is_auto: false,
             okay_to_shoot: true,
             firerate: Timer::from_seconds(0.1, TimerMode::Once),
-            reload: Timer::from_seconds(1.0, TimerMode::Once),
+            reload_timer: Timer::from_seconds(1.0, TimerMode::Once),
         }
     }
 
@@ -55,7 +68,7 @@ impl WeaponPromp {
             is_auto: true,
             okay_to_shoot: true,
             firerate: Timer::from_seconds(0.08, TimerMode::Once),
-            reload: Timer::from_seconds(2.0, TimerMode::Once),
+            reload_timer: Timer::from_seconds(2.0, TimerMode::Once),
         }
     }
 
@@ -69,7 +82,7 @@ impl WeaponPromp {
             is_auto: false,
             okay_to_shoot: true,
             firerate: Timer::from_seconds(1.5, TimerMode::Once),
-            reload: Timer::from_seconds(2.5, TimerMode::Once),
+            reload_timer: Timer::from_seconds(2.5, TimerMode::Once),
         }
     }
 
@@ -79,24 +92,6 @@ impl WeaponPromp {
             "AK-15" => WeaponPromp::ak15().mag_capacity,
             "MSR" => WeaponPromp::msr().mag_capacity,
             _ => panic!("No gun found for self_mag_cap"),
-        }
-    }
-
-    pub fn self_firerate(&self) -> Timer {
-        match self.name.as_str() {
-            "P226" => WeaponPromp::p226().firerate,
-            "AK-15" => WeaponPromp::ak15().firerate,
-            "MSR" => WeaponPromp::msr().firerate,
-            _ => panic!("No gun found for self_firerate"),
-        }
-    }
-
-    pub fn self_reload(&self) -> Timer {
-        match self.name.as_str() {
-            "P226" => WeaponPromp::p226().reload,
-            "AK-15" => WeaponPromp::ak15().reload,
-            "MSR" => WeaponPromp::msr().reload,
-            _ => panic!("No gun found for self_reload"),
         }
     }
 }
@@ -153,8 +148,8 @@ pub fn firerate_timer(mut weapon_query: Query<&mut WeaponPromp>, time: Res<Time>
             weapon_promp.firerate.tick(time.delta());
 
             if weapon_promp.firerate.finished() {
+                weapon_promp.firerate.reset();
                 weapon_promp.okay_to_shoot = true;
-                weapon_promp.firerate = weapon_promp.self_firerate();
             }
         }
     }
@@ -166,11 +161,11 @@ pub fn reload_timer(
     time: Res<Time>,
 ) {
     for mut weapon_promp in weapon_query.iter_mut() {
-        weapon_promp.reload.tick(time.delta());
+        weapon_promp.reload_timer.tick(time.delta());
 
-        if weapon_promp.reload.finished() {
+        if weapon_promp.reload_timer.finished() {
+            weapon_promp.reload_timer.reset();
             weapon_promp.ammo_capacity -= weapon_promp.self_mag_cap() - weapon_promp.mag_capacity;
-            weapon_promp.reload = weapon_promp.self_reload();
             weapon_promp.mag_capacity = weapon_promp.self_mag_cap();
             next_state.set(WeaponState::Shooting)
         }
@@ -178,20 +173,32 @@ pub fn reload_timer(
 }
 
 pub fn scope(
+    time: Res<Time>,
     mouse_input: Res<ButtonInput<MouseButton>>,
-    mut camera_query: Query<&mut Projection, With<Camera3d>>,
     settings: ResMut<GameSettings>,
+    mut lerp_timer: ResMut<LerpTimer>,
+    mut camera_query: Query<&mut Projection, With<Camera3d>>,
     mut weapon_query: Query<&mut Transform, With<WeaponPromp>>,
 ) {
     let mut weapon_transform = weapon_query.single_mut();
     let Projection::Perspective(persp) = camera_query.single_mut().into_inner() else {
         return;
     };
+
     if mouse_input.pressed(MouseButton::Right) {
-        persp.fov = 50.0 / 180.0 * PI;
-        *weapon_transform = Transform::from_translation(Vec3::new(0.0, 0.0, -0.3));
+        lerp_timer.timer.tick(time.delta());
+
+        let percentage_complete =
+            lerp_timer.timer.elapsed_secs() / lerp_timer.timer.duration().as_secs_f32();
+
+        persp.fov = (settings.fov + ((settings.fov - 40.0) - settings.fov) * percentage_complete)
+            / 180.0
+            * PI;
+
+        //*weapon_transform = Transform::from_translation(Vec3::new(0.0, 0.0, -0.3));
     }
     if mouse_input.just_released(MouseButton::Right) {
+        lerp_timer.timer.reset();
         persp.fov = settings.fov / 180.0 * PI;
         *weapon_transform = Transform::from_translation(Vec3::new(0.1, -0.05, -0.2));
     }

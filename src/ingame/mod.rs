@@ -55,6 +55,7 @@ impl Plugin for InGamePlugin {
                 player_speed: 5.0,
                 fov: 90.0,
             })
+            .init_resource::<LerpTimer>()
             //events
             .add_event::<WeaponShootingEvent>()
             .add_event::<WeaponReloadingEvent>()

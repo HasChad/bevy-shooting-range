@@ -88,6 +88,7 @@ pub fn bullet_controller(
             SpatialQueryFilter::default(),
         ) {
             commands.entity(bullet_entity).despawn_recursive();
+
             event_writer.send(HitConfirmEvent {
                 hit_entity: hit.entity,
                 hit_normal: hit.normal,

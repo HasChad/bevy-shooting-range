@@ -65,7 +65,7 @@ pub fn circle_target_controller(
 ) {
     for event in event_reader.read() {
         if "Cylinder" == query.get(event.hit_entity).unwrap().as_str() {
-            audio.play(asset_server.load("sounds/Hit_Marker.ogg"));
+            audio.play(asset_server.load("sounds/hitmarker.ogg"));
             for mut circletarget_entity in &mut circletarget_query {
                 let old_position = circletarget_entity.translation.x;
                 while (circletarget_entity.translation.x - old_position).abs() < 0.5 {
