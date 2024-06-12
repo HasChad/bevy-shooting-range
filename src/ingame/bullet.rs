@@ -76,9 +76,9 @@ pub fn bullet_controller(
         bullet_transform.translation += bullet_travel;
 
         //gravity drop
-        //bullet_transform.translation.y -= 0.5 * time.delta_seconds() * bullet_promp.bullet_lifetime.elapsed().as_secs_f32();
+        // bullet_transform.translation.y -= 0.5 * time.delta_seconds() * bullet_promp.bullet_lifetime.elapsed().as_secs_f32();
         //wind push
-        //bullet_transform.translation.x -= 0.5 * time.delta_seconds() * bullet_promp.bullet_lifetime.elapsed().as_secs_f32();
+        // bullet_transform.translation.x -= 0.5 * time.delta_seconds() * bullet_promp.bullet_lifetime.elapsed().as_secs_f32();
 
         if let Some(hit) = spatial_query.cast_ray(
             prev_pos,

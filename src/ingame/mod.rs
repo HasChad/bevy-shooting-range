@@ -37,6 +37,7 @@ impl Plugin for InGamePlugin {
                     reload_timer.run_if(in_state(WeaponState::Reloading)),
                     weapon_animation_setup,
                     weapon_play_animation,
+                    shooting_camera_shake,
                     //bullet systems
                     spawn_bullet,
                     //target systems

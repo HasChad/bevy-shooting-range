@@ -2,6 +2,7 @@
 name = "bevy-shooting-range"
 version = "0.4.0"
 edition = "2021"
+authors = ["HasChad"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

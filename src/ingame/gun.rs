@@ -1,7 +1,7 @@
 use bevy::{animation::RepeatAnimation, prelude::*, window::CursorGrabMode};
 use std::f32::consts::PI;
 
-use super::GameSettings;
+use super::{player::Head, GameSettings};
 use crate::ingame::Animations;
 
 #[derive(Event)]
@@ -41,6 +41,7 @@ pub struct WeaponPromp {
     pub okay_to_shoot: bool,
     pub firerate: Timer,
     pub reload_timer: Timer,
+    //pub time_to_aim: Timer,
 }
 
 impl WeaponPromp {
@@ -142,6 +143,27 @@ pub fn shooting_event(
     }
 }
 
+pub fn shooting_camera_shake(
+    mut event_reader: EventReader<WeaponShootingEvent>,
+    mut camera_query: Query<&mut Projection, With<Camera3d>>,
+    settings: ResMut<GameSettings>,
+    time: Res<Time>,
+    mut head_query: Query<&mut Transform, With<Head>>,
+) {
+    let Projection::Perspective(persp) = camera_query.single_mut().into_inner() else {
+        return;
+    };
+    for _event in event_reader.read() {
+        persp.fov += 3.0 / 180.0 * PI;
+        let mut head_transform = head_query.single_mut();
+        head_transform.rotate_local_x(0.03);
+    }
+
+    if settings.fov < (persp.fov / PI * 180.0) {
+        persp.fov -= (50.0 / 180.0 * PI) * time.delta_seconds();
+    }
+}
+
 pub fn firerate_timer(mut weapon_query: Query<&mut WeaponPromp>, time: Res<Time>) {
     for mut weapon_promp in weapon_query.iter_mut() {
         if !weapon_promp.okay_to_shoot {
@@ -195,7 +217,7 @@ pub fn scope(
             / 180.0
             * PI;
 
-        //*weapon_transform = Transform::from_translation(Vec3::new(0.0, 0.0, -0.3));
+        // *weapon_transform = Transform::from_translation(Vec3::new(0.0, 0.0, -0.3));
     }
     if mouse_input.just_released(MouseButton::Right) {
         lerp_timer.timer.reset();
