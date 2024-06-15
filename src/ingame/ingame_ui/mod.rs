@@ -19,6 +19,7 @@ impl Plugin for IngameUIPlugin {
                 (
                     //ui systems
                     ammo_text_updater,
+                    target_text_updater,
                     weapon_name_text_updater,
                     velocity_text_updater,
                     fps_text_updater,

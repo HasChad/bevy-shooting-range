@@ -8,6 +8,13 @@ use super::{HitConfirmEvent, WeaponPromp};
 #[derive(Component)]
 pub struct CircleTarget;
 
+#[derive(Resource, Default)]
+pub struct HitCounters {
+    pub circle_target: u32,
+    pub enemy_target: u32,
+    pub enemy_target_hostage: u32,
+}
+
 #[derive(Component)]
 pub struct EnemyTarget {
     health: i8,
@@ -31,6 +38,7 @@ pub fn target_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         CircleTarget,
     ));
 
+    /*
     //enemy target
     commands.spawn((
         SceneBundle {
@@ -54,6 +62,7 @@ pub fn target_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         Name::new("EnemyTargetHostage"),
         EnemyTargetHostage { health: 5 },
     ));
+    */
 }
 
 pub fn circle_target_controller(
@@ -62,10 +71,12 @@ pub fn circle_target_controller(
     query: Query<&Name>,
     audio: Res<Audio>,
     asset_server: Res<AssetServer>,
+    mut hit_counter: ResMut<HitCounters>,
 ) {
     for event in event_reader.read() {
         if "Cylinder" == query.get(event.hit_entity).unwrap().as_str() {
             audio.play(asset_server.load("sounds/hitmarker.ogg"));
+            hit_counter.circle_target += 1;
             for mut circletarget_entity in &mut circletarget_query {
                 let old_position = circletarget_entity.translation.x;
                 while (circletarget_entity.translation.x - old_position).abs() < 0.5 {

@@ -4,7 +4,7 @@ use bevy::{
 };
 use bevy_xpbd_3d::components::LinearVelocity;
 
-use crate::ingame::{player_controller::player::Player, WeaponPromp};
+use crate::ingame::{player_controller::player::Player, HitCounters, WeaponPromp};
 
 #[derive(Component)]
 pub struct VelocityText;
@@ -17,6 +17,9 @@ pub struct WeaponNameText;
 
 #[derive(Component)]
 pub struct FpsText;
+
+#[derive(Component)]
+pub struct TargetCounterText;
 
 pub fn setup_ui(mut commands: Commands) {
     //MARK: Ammo UI
@@ -53,6 +56,44 @@ pub fn setup_ui(mut commands: Commands) {
         .with_background_color(Color::rgba(0.0, 0.0, 0.0, 0.5)),
         AmmoText,
         Name::new("UI - Ammo Counter"),
+    ));
+
+    //MARK: Target Counter UI
+    commands.spawn((
+        TextBundle::from_sections([
+            TextSection::new(
+                "Kills: ",
+                TextStyle {
+                    font_size: 25.0,
+                    ..default()
+                },
+            ),
+            TextSection::from_style(TextStyle {
+                font_size: 25.0,
+                color: Color::WHITE,
+                ..default()
+            }),
+            TextSection::new(
+                " / 30",
+                TextStyle {
+                    font_size: 25.0,
+                    ..default()
+                },
+            ),
+        ])
+        .with_style(Style {
+            position_type: PositionType::Absolute,
+            align_self: AlignSelf::End,
+            justify_self: JustifySelf::Center,
+            margin: UiRect {
+                bottom: Val::Px(100.0),
+                ..default()
+            },
+            ..default()
+        })
+        .with_background_color(Color::rgba(0.0, 0.0, 0.0, 0.5)),
+        TargetCounterText,
+        Name::new("UI - Target Counter"),
     ));
 
     //MARK: Weapon Name UI
@@ -134,23 +175,32 @@ pub fn setup_ui(mut commands: Commands) {
 
 pub fn ammo_text_updater(
     mut query: Query<&mut Text, With<AmmoText>>,
-    p226_query: Query<&mut WeaponPromp>,
+    weapon_query: Query<&mut WeaponPromp>,
 ) {
     for mut text in &mut query {
-        for p226 in p226_query.iter() {
-            text.sections[0].value = format!("{}", p226.mag_capacity);
-            text.sections[2].value = format!("{}", p226.ammo_capacity);
+        for weapon_promp in weapon_query.iter() {
+            text.sections[0].value = format!("{}", weapon_promp.mag_capacity);
+            text.sections[2].value = format!("{}", weapon_promp.ammo_capacity);
         }
+    }
+}
+
+pub fn target_text_updater(
+    mut query: Query<&mut Text, With<TargetCounterText>>,
+    hit_counter: Res<HitCounters>,
+) {
+    for mut text in &mut query {
+        text.sections[1].value = format!("{}", hit_counter.circle_target);
     }
 }
 
 pub fn weapon_name_text_updater(
     mut query: Query<&mut Text, With<WeaponNameText>>,
-    p226_query: Query<&mut WeaponPromp>,
+    weapon_query: Query<&mut WeaponPromp>,
 ) {
     for mut text in &mut query {
-        for p226 in p226_query.iter() {
-            text.sections[0].value = p226.name.to_string();
+        for weapon_promp in weapon_query.iter() {
+            text.sections[0].value = weapon_promp.name.to_string();
         }
     }
 }

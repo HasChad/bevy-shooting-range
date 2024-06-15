@@ -1,4 +1,5 @@
 use bevy::{animation::RepeatAnimation, prelude::*, window::CursorGrabMode};
+use rand::{thread_rng, Rng};
 use std::f32::consts::PI;
 
 use super::{player::Head, GameSettings};
@@ -154,13 +155,22 @@ pub fn shooting_camera_shake(
         return;
     };
     for _event in event_reader.read() {
-        persp.fov += 3.0 / 180.0 * PI;
         let mut head_transform = head_query.single_mut();
-        head_transform.rotate_local_x(0.03);
+        let (mut yaw_camera, mut pitch_camera, _) = head_transform.rotation.to_euler(EulerRot::YXZ);
+
+        //FIXME: lerp
+        pitch_camera += 0.02;
+        //yaw_camera += thread_rng().gen_range(-0.01..0.01);
+
+        pitch_camera = pitch_camera.clamp(-PI / 2.0, PI / 2.0);
+        head_transform.rotation = Quat::from_axis_angle(Vec3::Y, yaw_camera)
+            * Quat::from_axis_angle(Vec3::X, pitch_camera);
+
+        persp.fov += 3.0 / 180.0 * PI;
     }
 
     if settings.fov < (persp.fov / PI * 180.0) {
-        persp.fov -= (50.0 / 180.0 * PI) * time.delta_seconds();
+        persp.fov -= (30.0 / 180.0 * PI) * time.delta_seconds();
     }
 }
 
@@ -207,22 +217,36 @@ pub fn scope(
         return;
     };
 
+    if mouse_input.just_pressed(MouseButton::Right) || mouse_input.just_released(MouseButton::Right)
+    {
+        lerp_timer.timer.reset()
+    }
     if mouse_input.pressed(MouseButton::Right) {
         lerp_timer.timer.tick(time.delta());
 
         let percentage_complete =
             lerp_timer.timer.elapsed_secs() / lerp_timer.timer.duration().as_secs_f32();
 
-        persp.fov = (settings.fov + ((settings.fov - 40.0) - settings.fov) * percentage_complete)
-            / 180.0
-            * PI;
+        persp.fov = persp
+            .fov
+            .lerp((settings.fov - 40.0) / 180.0 * PI, percentage_complete);
 
-        // *weapon_transform = Transform::from_translation(Vec3::new(0.0, 0.0, -0.3));
-    }
-    if mouse_input.just_released(MouseButton::Right) {
-        lerp_timer.timer.reset();
-        persp.fov = settings.fov / 180.0 * PI;
-        *weapon_transform = Transform::from_translation(Vec3::new(0.1, -0.05, -0.2));
+        weapon_transform.translation = weapon_transform
+            .translation
+            .lerp(Vec3::new(0.0, 0.0, -0.3), percentage_complete);
+    } else if !lerp_timer.timer.finished() {
+        lerp_timer.timer.tick(time.delta());
+
+        let percentage_complete =
+            lerp_timer.timer.elapsed_secs() / lerp_timer.timer.duration().as_secs_f32();
+
+        persp.fov = persp
+            .fov
+            .lerp(settings.fov / 180.0 * PI, percentage_complete);
+
+        weapon_transform.translation = weapon_transform
+            .translation
+            .lerp(Vec3::new(0.1, -0.05, -0.2), percentage_complete);
     }
 }
 

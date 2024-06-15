@@ -57,6 +57,7 @@ impl Plugin for InGamePlugin {
                 fov: 90.0,
             })
             .init_resource::<LerpTimer>()
+            .init_resource::<HitCounters>()
             //events
             .add_event::<WeaponShootingEvent>()
             .add_event::<WeaponReloadingEvent>()
