@@ -12,7 +12,7 @@ pub struct IngameUIPlugin;
 
 impl Plugin for IngameUIPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, (crosshair_setup, setup_ui))
+        app.add_systems(Startup, (crosshair_setup, ui_setup))
             .add_systems(Update, egui_settings)
             .add_systems(
                 FixedUpdate,
@@ -29,7 +29,7 @@ impl Plugin for IngameUIPlugin {
                 ),
             )
             //resources
-            .init_resource::<InnerLineSettings>();
+            .init_resource::<CrosshairLineSettings>();
         //plugins
         //events
     }

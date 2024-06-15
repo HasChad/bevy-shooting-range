@@ -11,24 +11,21 @@ pub struct HitMarker {
 }
 
 #[derive(Component)]
-pub struct InnerLineHorizontal;
-
-#[derive(Component)]
-pub struct InnerLineVertical;
+pub struct CrosshairLine;
 
 #[derive(Resource)]
-pub struct InnerLineSettings {
+pub struct CrosshairLineSettings {
     pub length: f32,
     pub thickness: f32,
-    pub offset: f32,
+    pub gap: f32,
     pub color: Color,
     pub enable: Visibility,
 }
 
-impl Default for InnerLineSettings {
+impl Default for CrosshairLineSettings {
     fn default() -> Self {
-        InnerLineSettings {
-            offset: 5.0,
+        CrosshairLineSettings {
+            gap: 5.0,
             color: Color::WHITE,
             length: 5.0,
             thickness: 2.0,
@@ -37,101 +34,141 @@ impl Default for InnerLineSettings {
     }
 }
 
-pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<InnerLineSettings>) {
-    //Left Line
-    commands.spawn((
-        NodeBundle {
-            style: Style {
-                position_type: PositionType::Absolute,
-                height: Val::Px(crosshair_settings.thickness),
-                width: Val::Px(crosshair_settings.length),
-                right: Val::Percent(50.0),
-                align_self: AlignSelf::Center,
-                justify_self: JustifySelf::End,
-                margin: UiRect {
-                    right: Val::Px(crosshair_settings.offset),
+pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<CrosshairLineSettings>) {
+    commands
+        .spawn((
+            NodeBundle {
+                style: Style {
+                    align_self: AlignSelf::Center,
+                    justify_self: JustifySelf::Center,
                     ..default()
                 },
                 ..default()
             },
-            background_color: crosshair_settings.color.into(),
-            visibility: crosshair_settings.enable,
-            ..default()
-        },
-        Name::new("Left Line"),
-        InnerLineHorizontal,
-    ));
-
-    //Right Line
-    commands.spawn((
-        NodeBundle {
-            style: Style {
-                position_type: PositionType::Absolute,
-                height: Val::Px(crosshair_settings.thickness),
-                width: Val::Px(crosshair_settings.length),
-                left: Val::Percent(50.0),
-                align_self: AlignSelf::Center,
-                margin: UiRect {
-                    left: Val::Px(crosshair_settings.offset),
+            Name::new("UI - Crosshair"),
+        ))
+        //MARK: Horizontal Lines
+        .with_children(|parent| {
+            parent
+                .spawn(NodeBundle {
+                    style: Style {
+                        align_self: AlignSelf::Center,
+                        justify_self: JustifySelf::Center,
+                        ..default()
+                    },
                     ..default()
-                },
-                ..default()
-            },
-            background_color: crosshair_settings.color.into(),
-            visibility: crosshair_settings.enable,
+                })
+                .with_children(|parent| {
+                    //Left Line
+                    parent.spawn((
+                        NodeBundle {
+                            style: Style {
+                                position_type: PositionType::Absolute,
+                                height: Val::Px(crosshair_settings.thickness),
+                                width: Val::Px(crosshair_settings.length),
+                                right: Val::Percent(50.0),
+                                align_self: AlignSelf::Center,
+                                justify_self: JustifySelf::End,
+                                margin: UiRect {
+                                    right: Val::Px(crosshair_settings.gap),
+                                    ..default()
+                                },
+                                ..default()
+                            },
+                            background_color: crosshair_settings.color.into(),
+                            visibility: crosshair_settings.enable,
+                            ..default()
+                        },
+                        Name::new("Left Line"),
+                        CrosshairLine,
+                    ));
 
-            ..default()
-        },
-        Name::new("Right Line"),
-        InnerLineHorizontal,
-    ));
+                    //Right Line
+                    parent.spawn((
+                        NodeBundle {
+                            style: Style {
+                                position_type: PositionType::Absolute,
+                                height: Val::Px(crosshair_settings.thickness),
+                                width: Val::Px(crosshair_settings.length),
+                                left: Val::Percent(50.0),
+                                align_self: AlignSelf::Center,
+                                margin: UiRect {
+                                    left: Val::Px(crosshair_settings.gap),
+                                    ..default()
+                                },
+                                ..default()
+                            },
+                            background_color: crosshair_settings.color.into(),
+                            visibility: crosshair_settings.enable,
 
-    //Top Line
-    commands.spawn((
-        NodeBundle {
-            style: Style {
-                position_type: PositionType::Absolute,
-                height: Val::Px(crosshair_settings.length),
-                width: Val::Px(crosshair_settings.thickness),
-                bottom: Val::Percent(50.0),
-                align_self: AlignSelf::End,
-                justify_self: JustifySelf::Center,
-                margin: UiRect {
-                    bottom: Val::Px(crosshair_settings.offset),
+                            ..default()
+                        },
+                        Name::new("Right Line"),
+                        CrosshairLine,
+                    ));
+                });
+
+            //MARK: Vertical Lines
+            parent
+                .spawn(NodeBundle {
+                    transform: Transform::from_rotation(Quat::from_rotation_z(PI / 2.)),
+                    style: Style {
+                        align_self: AlignSelf::Center,
+                        justify_self: JustifySelf::Center,
+                        ..default()
+                    },
                     ..default()
-                },
-                ..default()
-            },
-            background_color: crosshair_settings.color.into(),
-            visibility: crosshair_settings.enable,
-            ..default()
-        },
-        Name::new("Top Line"),
-        InnerLineVertical,
-    ));
+                })
+                .with_children(|parent| {
+                    //Top Line
+                    parent.spawn((
+                        NodeBundle {
+                            style: Style {
+                                position_type: PositionType::Absolute,
+                                height: Val::Px(crosshair_settings.thickness),
+                                width: Val::Px(crosshair_settings.length),
+                                right: Val::Percent(50.0),
+                                align_self: AlignSelf::Center,
+                                justify_self: JustifySelf::End,
+                                margin: UiRect {
+                                    right: Val::Px(crosshair_settings.gap),
+                                    ..default()
+                                },
+                                ..default()
+                            },
+                            background_color: crosshair_settings.color.into(),
+                            visibility: crosshair_settings.enable,
+                            ..default()
+                        },
+                        Name::new("Left Line"),
+                        CrosshairLine,
+                    ));
 
-    //Bottom Line
-    commands.spawn((
-        NodeBundle {
-            style: Style {
-                position_type: PositionType::Absolute,
-                height: Val::Px(crosshair_settings.length),
-                width: Val::Px(crosshair_settings.thickness),
-                top: Val::Percent(50.0),
-                justify_self: JustifySelf::Center,
-                margin: UiRect {
-                    top: Val::Px(crosshair_settings.offset),
-                    ..default()
-                },
-                ..default()
-            },
-            background_color: crosshair_settings.color.into(),
-            visibility: crosshair_settings.enable,
-            ..default()
-        },
-        Name::new("Bottom Line"),
-        InnerLineVertical,
-    ));
+                    //Bottom Line
+                    parent.spawn((
+                        NodeBundle {
+                            style: Style {
+                                position_type: PositionType::Absolute,
+                                height: Val::Px(crosshair_settings.thickness),
+                                width: Val::Px(crosshair_settings.length),
+                                left: Val::Percent(50.0),
+                                align_self: AlignSelf::Center,
+                                margin: UiRect {
+                                    left: Val::Px(crosshair_settings.gap),
+                                    ..default()
+                                },
+                                ..default()
+                            },
+                            background_color: crosshair_settings.color.into(),
+                            visibility: crosshair_settings.enable,
+
+                            ..default()
+                        },
+                        Name::new("Right Line"),
+                        CrosshairLine,
+                    ));
+                });
+        });
 }
 
 pub fn hitmarker_spawner(mut commands: Commands, mut event_reader: EventReader<HitConfirmEvent>) {

@@ -21,7 +21,7 @@ pub struct FpsText;
 #[derive(Component)]
 pub struct TargetCounterText;
 
-pub fn setup_ui(mut commands: Commands) {
+pub fn ui_setup(mut commands: Commands) {
     //MARK: Ammo UI
     commands.spawn((
         TextBundle::from_sections([
@@ -185,6 +185,7 @@ pub fn ammo_text_updater(
     }
 }
 
+//MARK: Updaters
 pub fn target_text_updater(
     mut query: Query<&mut Text, With<TargetCounterText>>,
     hit_counter: Res<HitCounters>,

@@ -1,9 +1,13 @@
+#![allow(clippy::too_many_arguments)]
+
 use bevy::{animation::RepeatAnimation, prelude::*, window::CursorGrabMode};
-use rand::{thread_rng, Rng};
 use std::f32::consts::PI;
 
-use super::{player::Head, GameSettings};
-use crate::ingame::Animations;
+use super::{
+    crosshair::{CrosshairLine, CrosshairLineSettings},
+    player::Head,
+    Animations, GameSettings,
+};
 
 #[derive(Event)]
 pub struct WeaponShootingEvent;
@@ -159,14 +163,14 @@ pub fn shooting_camera_shake(
         let (mut yaw_camera, mut pitch_camera, _) = head_transform.rotation.to_euler(EulerRot::YXZ);
 
         //FIXME: lerp
-        pitch_camera += 0.02;
+        //pitch_camera += 0.02;
         //yaw_camera += thread_rng().gen_range(-0.01..0.01);
 
         pitch_camera = pitch_camera.clamp(-PI / 2.0, PI / 2.0);
         head_transform.rotation = Quat::from_axis_angle(Vec3::Y, yaw_camera)
             * Quat::from_axis_angle(Vec3::X, pitch_camera);
 
-        persp.fov += 3.0 / 180.0 * PI;
+        persp.fov += 2.0 / 180.0 * PI;
     }
 
     if settings.fov < (persp.fov / PI * 180.0) {
@@ -206,11 +210,13 @@ pub fn reload_timer(
 
 pub fn scope(
     time: Res<Time>,
-    mouse_input: Res<ButtonInput<MouseButton>>,
     settings: ResMut<GameSettings>,
+    mouse_input: Res<ButtonInput<MouseButton>>,
     mut lerp_timer: ResMut<LerpTimer>,
     mut camera_query: Query<&mut Projection, With<Camera3d>>,
     mut weapon_query: Query<&mut Transform, With<WeaponPromp>>,
+    mut crosshair_query: Query<&mut Visibility, With<CrosshairLine>>,
+    crosshair_settings: Res<CrosshairLineSettings>,
 ) {
     let mut weapon_transform = weapon_query.single_mut();
     let Projection::Perspective(persp) = camera_query.single_mut().into_inner() else {
@@ -224,6 +230,10 @@ pub fn scope(
     if mouse_input.pressed(MouseButton::Right) {
         lerp_timer.timer.tick(time.delta());
 
+        for mut croshair_visib in crosshair_query.iter_mut() {
+            *croshair_visib = Visibility::Hidden;
+        }
+
         let percentage_complete =
             lerp_timer.timer.elapsed_secs() / lerp_timer.timer.duration().as_secs_f32();
 
@@ -236,6 +246,10 @@ pub fn scope(
             .lerp(Vec3::new(0.0, 0.0, -0.3), percentage_complete);
     } else if !lerp_timer.timer.finished() {
         lerp_timer.timer.tick(time.delta());
+
+        for mut croshair_visib in crosshair_query.iter_mut() {
+            *croshair_visib = crosshair_settings.enable;
+        }
 
         let percentage_complete =
             lerp_timer.timer.elapsed_secs() / lerp_timer.timer.duration().as_secs_f32();
