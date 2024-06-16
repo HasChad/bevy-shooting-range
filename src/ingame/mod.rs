@@ -33,8 +33,9 @@ impl Plugin for InGamePlugin {
                 Update,
                 (
                     //gun systems
-                    (shooting_event, scope, firerate_timer).run_if(in_state(WeaponState::Shooting)),
+                    (shooting_event, firerate_timer).run_if(in_state(WeaponState::Shooting)),
                     reload_timer.run_if(in_state(WeaponState::Reloading)),
+                    scope,
                     weapon_animation_setup,
                     weapon_play_animation,
                     shooting_camera_shake,
@@ -63,6 +64,7 @@ impl Plugin for InGamePlugin {
             .add_event::<WeaponReloadingEvent>()
             .add_event::<HitConfirmEvent>()
             //states
-            .init_state::<WeaponState>();
+            .init_state::<WeaponState>()
+            .init_state::<WeaponChangeState>();
     }
 }

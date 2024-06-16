@@ -8,7 +8,7 @@ use bevy::{
 };
 
 use super::{Head, Player};
-use crate::ingame::{GameSettings, WeaponPromp};
+use crate::ingame::{GameSettings, WeaponChangeState, WeaponPromp};
 
 #[derive(Resource, Default)]
 pub struct InputState {
@@ -55,6 +55,7 @@ pub fn change_weapon(
     mut weapon_query: Query<(&mut WeaponPromp, &mut Handle<Scene>)>,
     input: Res<ButtonInput<KeyCode>>,
     asset_server: Res<AssetServer>,
+    mut weapon_state: ResMut<NextState<WeaponChangeState>>,
 ) {
     for key in input.get_just_pressed() {
         for (mut weapon_promp, mut weapon_scene) in weapon_query.iter_mut() {
@@ -63,14 +64,17 @@ pub fn change_weapon(
                 KeyCode::Digit1 => {
                     *weapon_promp = WeaponPromp::p226();
                     *weapon_scene = asset_server.load("models/P226.glb#Scene0");
+                    weapon_state.set(WeaponChangeState::P226);
                 }
                 KeyCode::Digit2 => {
                     *weapon_promp = WeaponPromp::ak15();
                     *weapon_scene = asset_server.load("models/AK15.glb#Scene0");
+                    weapon_state.set(WeaponChangeState::AK15);
                 }
                 KeyCode::Digit3 => {
                     *weapon_promp = WeaponPromp::msr();
                     *weapon_scene = asset_server.load("models/MSR.glb#Scene0");
+                    weapon_state.set(WeaponChangeState::MSR);
                 }
                 _ => (),
             }

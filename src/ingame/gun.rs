@@ -1,6 +1,7 @@
 #![allow(clippy::too_many_arguments)]
 
 use bevy::{animation::RepeatAnimation, prelude::*, window::CursorGrabMode};
+use rand::{thread_rng, Rng};
 use std::f32::consts::PI;
 
 use super::{
@@ -20,6 +21,14 @@ pub enum WeaponState {
     #[default]
     Shooting,
     Reloading,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Default, States)]
+pub enum WeaponChangeState {
+    #[default]
+    P226,
+    AK15,
+    MSR,
 }
 
 #[derive(Resource)]
@@ -73,7 +82,7 @@ impl WeaponPromp {
             body_damage: 4,
             is_auto: true,
             okay_to_shoot: true,
-            firerate: Timer::from_seconds(0.08, TimerMode::Once),
+            firerate: Timer::from_seconds(0.09, TimerMode::Once),
             reload_timer: Timer::from_seconds(2.0, TimerMode::Once),
         }
     }
@@ -162,19 +171,18 @@ pub fn shooting_camera_shake(
         let mut head_transform = head_query.single_mut();
         let (mut yaw_camera, mut pitch_camera, _) = head_transform.rotation.to_euler(EulerRot::YXZ);
 
-        //FIXME: lerp
-        //pitch_camera += 0.02;
-        //yaw_camera += thread_rng().gen_range(-0.01..0.01);
+        pitch_camera += 0.015;
+        yaw_camera += thread_rng().gen_range(-0.005..0.005);
 
         pitch_camera = pitch_camera.clamp(-PI / 2.0, PI / 2.0);
         head_transform.rotation = Quat::from_axis_angle(Vec3::Y, yaw_camera)
             * Quat::from_axis_angle(Vec3::X, pitch_camera);
 
-        persp.fov += 2.0 / 180.0 * PI;
+        persp.fov += 3.0 / 180.0 * PI;
     }
 
     if settings.fov < (persp.fov / PI * 180.0) {
-        persp.fov -= (30.0 / 180.0 * PI) * time.delta_seconds();
+        persp.fov -= (50.0 / 180.0 * PI) * time.delta_seconds();
     }
 }
 
@@ -239,7 +247,7 @@ pub fn scope(
 
         persp.fov = persp
             .fov
-            .lerp((settings.fov - 40.0) / 180.0 * PI, percentage_complete);
+            .lerp((settings.fov) * 0.6 / 180.0 * PI, percentage_complete);
 
         weapon_transform.translation = weapon_transform
             .translation
@@ -260,16 +268,21 @@ pub fn scope(
 
         weapon_transform.translation = weapon_transform
             .translation
-            .lerp(Vec3::new(0.1, -0.05, -0.2), percentage_complete);
+            .lerp(Vec3::new(0.1, -0.05, -0.15), percentage_complete);
     }
 }
 
 pub fn weapon_animation_setup(
     animations: Res<Animations>,
+    weapon_state: Res<State<WeaponChangeState>>,
     mut animation_player_query: Query<&mut AnimationPlayer, Added<AnimationPlayer>>,
 ) {
     for mut gun in &mut animation_player_query {
-        gun.play(animations.0[0].clone_weak()).repeat();
+        match weapon_state.get() {
+            WeaponChangeState::P226 => gun.play(animations.0[0].clone_weak()).repeat(),
+            WeaponChangeState::AK15 => gun.play(animations.0[1].clone_weak()).repeat(),
+            WeaponChangeState::MSR => gun.play(animations.0[0].clone_weak()).repeat(), //FIXME: neeed msr animation
+        };
         gun.set_repeat(RepeatAnimation::Count(0));
     }
 }

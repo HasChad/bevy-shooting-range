@@ -76,7 +76,7 @@ pub fn player_setup(
             parent.spawn((
                 SceneBundle {
                     scene: asset_server.load("models/P226.glb#Scene0"),
-                    transform: Transform::from_xyz(0.1, -0.05, -0.2),
+                    transform: Transform::from_xyz(0.1, -0.05, -0.15),
                     ..default()
                 },
                 WeaponPromp::p226(),

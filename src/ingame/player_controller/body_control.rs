@@ -52,6 +52,7 @@ pub fn player_move(
     primary_window: Query<&Window, With<PrimaryWindow>>,
     movement_input: Res<MovementInput>,
     mut query_player: Query<(&mut LinearVelocity, &mut Transform), With<Player>>,
+    time: Res<Time>,
 ) {
     if let Ok(window) = primary_window.get_single() {
         for (mut _linear_velocity, mut player_transform) in query_player.iter_mut() {
@@ -77,8 +78,8 @@ pub fn player_move(
                     //linear_velocity.z = wishdir.z * 5.;
 
                     // ! changed from linear_velocity to player_transform.translation
-                    player_transform.translation.x += wishdir.x * 0.03;
-                    player_transform.translation.z += wishdir.z * 0.03;
+                    player_transform.translation.x += wishdir.x * 3.0 * time.delta_seconds();
+                    player_transform.translation.z += wishdir.z * 3.0 * time.delta_seconds();
                 }
             }
         }

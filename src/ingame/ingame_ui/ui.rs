@@ -38,7 +38,7 @@ pub fn ui_setup(mut commands: Commands) {
                 },
             ),
             TextSection::from_style(TextStyle {
-                font_size: 40.0,
+                font_size: 30.0,
                 color: Color::WHITE,
                 ..default()
             }),
