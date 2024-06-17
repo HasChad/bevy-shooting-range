@@ -53,8 +53,10 @@ pub fn setup(
 
     //gun animation load
     commands.insert_resource(Animations(vec![
-        asset_server.load("models/P226.glb#Animation0"),
-        asset_server.load("models/AK15.glb#Animation0"),
+        //shooting animations
+        asset_server.load("models/weapons/P226.glb#Animation1"),
+        asset_server.load("models/weapons/AK15.glb#Animation0"),
+        asset_server.load("models/weapons/FNFAL.glb#Animation0"),
     ]));
 
     //shooting range model

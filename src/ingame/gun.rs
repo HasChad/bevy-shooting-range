@@ -1,6 +1,7 @@
 #![allow(clippy::too_many_arguments)]
 
 use bevy::{animation::RepeatAnimation, prelude::*, window::CursorGrabMode};
+use bevy_kira_audio::prelude::*;
 use rand::{thread_rng, Rng};
 use std::f32::consts::PI;
 
@@ -28,18 +29,21 @@ pub enum WeaponChangeState {
     #[default]
     P226,
     AK15,
+    FNFAL,
     MSR,
 }
 
 #[derive(Resource)]
 pub struct LerpTimer {
-    timer: Timer,
+    scope_timer: Timer,
+    recoil_timer: Timer,
 }
 
 impl Default for LerpTimer {
     fn default() -> Self {
         LerpTimer {
-            timer: Timer::from_seconds(0.1, TimerMode::Once),
+            scope_timer: Timer::from_seconds(0.1, TimerMode::Once),
+            recoil_timer: Timer::from_seconds(0.2, TimerMode::Once),
         }
     }
 }
@@ -87,13 +91,27 @@ impl WeaponPromp {
         }
     }
 
+    pub fn fn_fal() -> WeaponPromp {
+        WeaponPromp {
+            name: "FN-FAL".to_owned(),
+            mag_capacity: 20,
+            ammo_capacity: 80,
+            head_damage: 15,
+            body_damage: 8,
+            is_auto: false,
+            okay_to_shoot: true,
+            firerate: Timer::from_seconds(0.12, TimerMode::Once),
+            reload_timer: Timer::from_seconds(2.2, TimerMode::Once),
+        }
+    }
+
     pub fn msr() -> WeaponPromp {
         WeaponPromp {
             name: "MSR".to_owned(),
             mag_capacity: 5,
             ammo_capacity: 20,
             head_damage: 20,
-            body_damage: 7,
+            body_damage: 12,
             is_auto: false,
             okay_to_shoot: true,
             firerate: Timer::from_seconds(1.5, TimerMode::Once),
@@ -105,6 +123,7 @@ impl WeaponPromp {
         match self.name.as_str() {
             "P226" => WeaponPromp::p226().mag_capacity,
             "AK-15" => WeaponPromp::ak15().mag_capacity,
+            "FN-FAL" => WeaponPromp::fn_fal().mag_capacity,
             "MSR" => WeaponPromp::msr().mag_capacity,
             _ => panic!("No gun found for self_mag_cap"),
         }
@@ -126,23 +145,19 @@ pub fn shooting_event(
             window.set_cursor_position(Some(center));
 
             for mut weapon_promp in weapon_query.iter_mut() {
-                //semi auto shot
-                if mouse_input.just_pressed(MouseButton::Left)
-                    && weapon_promp.okay_to_shoot
-                    && !weapon_promp.is_auto
-                {
-                    weapon_promp.mag_capacity -= 1;
-                    event_writer.send(WeaponShootingEvent);
-                    weapon_promp.okay_to_shoot = false;
-                }
-                //full auto shot
-                if mouse_input.pressed(MouseButton::Left)
-                    && weapon_promp.okay_to_shoot
-                    && weapon_promp.is_auto
-                {
-                    weapon_promp.mag_capacity -= 1;
-                    event_writer.send(WeaponShootingEvent);
-                    weapon_promp.okay_to_shoot = false;
+                if weapon_promp.okay_to_shoot {
+                    //semi auto shot
+                    if mouse_input.just_pressed(MouseButton::Left) && !weapon_promp.is_auto {
+                        weapon_promp.mag_capacity -= 1;
+                        event_writer.send(WeaponShootingEvent);
+                        weapon_promp.okay_to_shoot = false;
+                    }
+                    //full auto shot
+                    if mouse_input.pressed(MouseButton::Left) && weapon_promp.is_auto {
+                        weapon_promp.mag_capacity -= 1;
+                        event_writer.send(WeaponShootingEvent);
+                        weapon_promp.okay_to_shoot = false;
+                    }
                 }
                 //reload
                 if (weapon_promp.mag_capacity == 0
@@ -154,35 +169,6 @@ pub fn shooting_event(
                 }
             }
         }
-    }
-}
-
-pub fn shooting_camera_shake(
-    mut event_reader: EventReader<WeaponShootingEvent>,
-    mut camera_query: Query<&mut Projection, With<Camera3d>>,
-    settings: ResMut<GameSettings>,
-    time: Res<Time>,
-    mut head_query: Query<&mut Transform, With<Head>>,
-) {
-    let Projection::Perspective(persp) = camera_query.single_mut().into_inner() else {
-        return;
-    };
-    for _event in event_reader.read() {
-        let mut head_transform = head_query.single_mut();
-        let (mut yaw_camera, mut pitch_camera, _) = head_transform.rotation.to_euler(EulerRot::YXZ);
-
-        pitch_camera += 0.015;
-        yaw_camera += thread_rng().gen_range(-0.005..0.005);
-
-        pitch_camera = pitch_camera.clamp(-PI / 2.0, PI / 2.0);
-        head_transform.rotation = Quat::from_axis_angle(Vec3::Y, yaw_camera)
-            * Quat::from_axis_angle(Vec3::X, pitch_camera);
-
-        persp.fov += 3.0 / 180.0 * PI;
-    }
-
-    if settings.fov < (persp.fov / PI * 180.0) {
-        persp.fov -= (50.0 / 180.0 * PI) * time.delta_seconds();
     }
 }
 
@@ -216,6 +202,35 @@ pub fn reload_timer(
     }
 }
 
+pub fn shooting_camera_shake(
+    mut event_reader: EventReader<WeaponShootingEvent>,
+    mut camera_query: Query<&mut Projection, With<Camera3d>>,
+    settings: ResMut<GameSettings>,
+    time: Res<Time>,
+    mut head_query: Query<&mut Transform, With<Head>>,
+) {
+    let Projection::Perspective(persp) = camera_query.single_mut().into_inner() else {
+        return;
+    };
+    for _event in event_reader.read() {
+        let mut head_transform = head_query.single_mut();
+        let (mut yaw_camera, mut pitch_camera, _) = head_transform.rotation.to_euler(EulerRot::YXZ);
+
+        pitch_camera += 0.015;
+        yaw_camera += thread_rng().gen_range(-0.005..0.005);
+
+        pitch_camera = pitch_camera.clamp(-PI / 2.0, PI / 2.0);
+        head_transform.rotation = Quat::from_axis_angle(Vec3::Y, yaw_camera)
+            * Quat::from_axis_angle(Vec3::X, pitch_camera);
+
+        persp.fov += 3.0 / 180.0 * PI;
+    }
+
+    if settings.fov < (persp.fov / PI * 180.0) {
+        persp.fov -= (50.0 / 180.0 * PI) * time.delta_seconds();
+    }
+}
+
 pub fn scope(
     time: Res<Time>,
     settings: ResMut<GameSettings>,
@@ -233,17 +248,17 @@ pub fn scope(
 
     if mouse_input.just_pressed(MouseButton::Right) || mouse_input.just_released(MouseButton::Right)
     {
-        lerp_timer.timer.reset()
+        lerp_timer.scope_timer.reset()
     }
     if mouse_input.pressed(MouseButton::Right) {
-        lerp_timer.timer.tick(time.delta());
+        lerp_timer.scope_timer.tick(time.delta());
 
         for mut croshair_visib in crosshair_query.iter_mut() {
             *croshair_visib = Visibility::Hidden;
         }
 
         let percentage_complete =
-            lerp_timer.timer.elapsed_secs() / lerp_timer.timer.duration().as_secs_f32();
+            lerp_timer.scope_timer.elapsed_secs() / lerp_timer.scope_timer.duration().as_secs_f32();
 
         persp.fov = persp
             .fov
@@ -251,16 +266,16 @@ pub fn scope(
 
         weapon_transform.translation = weapon_transform
             .translation
-            .lerp(Vec3::new(0.0, 0.0, -0.3), percentage_complete);
-    } else if !lerp_timer.timer.finished() {
-        lerp_timer.timer.tick(time.delta());
+            .lerp(Vec3::new(0.0, 0.0, -0.15), percentage_complete);
+    } else if !lerp_timer.scope_timer.finished() {
+        lerp_timer.scope_timer.tick(time.delta());
 
         for mut croshair_visib in crosshair_query.iter_mut() {
             *croshair_visib = crosshair_settings.enable;
         }
 
         let percentage_complete =
-            lerp_timer.timer.elapsed_secs() / lerp_timer.timer.duration().as_secs_f32();
+            lerp_timer.scope_timer.elapsed_secs() / lerp_timer.scope_timer.duration().as_secs_f32();
 
         persp.fov = persp
             .fov
@@ -268,7 +283,23 @@ pub fn scope(
 
         weapon_transform.translation = weapon_transform
             .translation
-            .lerp(Vec3::new(0.1, -0.05, -0.15), percentage_complete);
+            .lerp(Vec3::new(0.075, -0.04, -0.1), percentage_complete);
+    }
+}
+
+pub fn shooting_sound(
+    audio: Res<Audio>,
+    asset_server: Res<AssetServer>,
+    mut event_reader: EventReader<WeaponShootingEvent>,
+    weapon_state: Res<State<WeaponChangeState>>,
+) {
+    for _event in event_reader.read() {
+        match weapon_state.get() {
+            WeaponChangeState::P226 => audio.play(asset_server.load("sounds/p226_shot.ogg")),
+            WeaponChangeState::AK15 => audio.play(asset_server.load("sounds/ak15_shot.ogg")),
+            WeaponChangeState::FNFAL => audio.play(asset_server.load("sounds/fal_shot.ogg")),
+            WeaponChangeState::MSR => audio.play(asset_server.load("sounds/msr_shot.ogg")), //FIXME: neeed msr sound
+        };
     }
 }
 
@@ -281,6 +312,7 @@ pub fn weapon_animation_setup(
         match weapon_state.get() {
             WeaponChangeState::P226 => gun.play(animations.0[0].clone_weak()).repeat(),
             WeaponChangeState::AK15 => gun.play(animations.0[1].clone_weak()).repeat(),
+            WeaponChangeState::FNFAL => gun.play(animations.0[2].clone_weak()).repeat(),
             WeaponChangeState::MSR => gun.play(animations.0[0].clone_weak()).repeat(), //FIXME: neeed msr animation
         };
         gun.set_repeat(RepeatAnimation::Count(0));

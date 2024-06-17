@@ -36,6 +36,7 @@ impl Plugin for InGamePlugin {
                     (shooting_event, firerate_timer).run_if(in_state(WeaponState::Shooting)),
                     reload_timer.run_if(in_state(WeaponState::Reloading)),
                     scope,
+                    shooting_sound,
                     weapon_animation_setup,
                     weapon_play_animation,
                     shooting_camera_shake,
