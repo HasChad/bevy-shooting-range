@@ -8,13 +8,6 @@ use super::{HitConfirmEvent, WeaponPromp};
 #[derive(Component)]
 pub struct CircleTarget;
 
-#[derive(Resource, Default)]
-pub struct HitCounters {
-    pub circle_target: u32,
-    pub enemy_target: u32,
-    pub enemy_target_hostage: u32,
-}
-
 #[derive(Component)]
 pub struct EnemyTarget {
     health: i8,
@@ -23,6 +16,13 @@ pub struct EnemyTarget {
 #[derive(Component)]
 pub struct EnemyTargetHostage {
     health: i8,
+}
+
+#[derive(Resource, Default)]
+pub struct HitCounters {
+    pub circle_target: u32,
+    pub enemy_target: u32,
+    pub enemy_target_hostage: u32,
 }
 
 pub fn target_setup(mut commands: Commands, asset_server: Res<AssetServer>) {

@@ -1,7 +1,6 @@
-use std::f32::consts::PI;
-
 use bevy::prelude::*;
 use rand::{thread_rng, Rng};
+use std::f32::consts::PI;
 
 use crate::ingame::HitConfirmEvent;
 

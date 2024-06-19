@@ -14,6 +14,18 @@ use ingame_ui::*;
 use player_controller::*;
 use targets::*;
 
+#[derive(Event)]
+pub struct WeaponShootingEvent;
+
+#[derive(Event)]
+pub struct WeaponReloadingEvent;
+
+#[derive(Event)]
+pub struct HitConfirmEvent {
+    pub hit_entity: Entity,
+    pub hit_normal: Vec3,
+}
+
 #[derive(Resource)]
 pub struct Animations(Vec<Handle<AnimationClip>>);
 

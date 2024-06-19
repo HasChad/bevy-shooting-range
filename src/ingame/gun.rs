@@ -8,14 +8,8 @@ use std::f32::consts::PI;
 use super::{
     crosshair::{CrosshairLine, CrosshairLineSettings},
     player::Head,
-    Animations, GameSettings,
+    Animations, GameSettings, WeaponShootingEvent,
 };
-
-#[derive(Event)]
-pub struct WeaponShootingEvent;
-
-#[derive(Event)]
-pub struct WeaponReloadingEvent;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Default, States)]
 pub enum WeaponState {

@@ -1,23 +1,23 @@
-use std::f32::consts::PI;
-
 use bevy::prelude::*;
 use bevy_inspector_egui::{
     bevy_egui::{egui, EguiContexts},
     egui::Align2,
 };
+use std::f32::consts::PI;
 
 use crate::ingame::crosshair;
 use crate::ingame::GameSettings;
 use crosshair::*;
-
-type InnerLineQueryType<'a> = (&'a mut Style, &'a mut Visibility, &'a mut BackgroundColor);
 
 pub fn egui_settings(
     mut settings: ResMut<GameSettings>,
     mut camera_query: Query<&mut Projection, With<Camera3d>>,
     mut contexts: EguiContexts,
     mut crosshair_line_settings: ResMut<CrosshairLineSettings>,
-    mut crosshair_line_query: Query<InnerLineQueryType, With<CrosshairLine>>,
+    mut crosshair_line_query: Query<
+        (&mut Style, &mut Visibility, &mut BackgroundColor),
+        With<CrosshairLine>,
+    >,
 ) {
     egui::Window::new("SETTINGS")
         .resizable(false)
@@ -50,7 +50,7 @@ pub fn egui_settings(
                     ui.label("Fov: ");
                     if ui
                         .add(
-                            egui::Slider::new(&mut settings.fov, 5.0..=175.0)
+                            egui::Slider::new(&mut settings.fov, 1.0..=130.0)
                                 .trailing_fill(true)
                                 .step_by(5.0)
                                 .integer(),
