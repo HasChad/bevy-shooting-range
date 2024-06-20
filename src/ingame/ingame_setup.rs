@@ -7,7 +7,7 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     //gun animation load
     commands.insert_resource(Animations(vec![
         //shooting animations
-        asset_server.load("models/weapons/P226.glb#Animation1"),
+        asset_server.load("models/weapons/P226.glb#Animation0"),
         asset_server.load("models/weapons/AK15.glb#Animation0"),
         asset_server.load("models/weapons/FNFAL.glb#Animation0"),
     ]));

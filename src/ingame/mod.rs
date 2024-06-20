@@ -1,18 +1,18 @@
 use bevy::prelude::*;
 
 pub mod bullet;
-pub mod gun;
 pub mod ingame_setup;
 pub mod ingame_ui;
 pub mod player_controller;
 pub mod targets;
+pub mod weapon_control;
 
 use bullet::*;
-use gun::*;
 use ingame_setup::*;
 use ingame_ui::*;
 use player_controller::*;
 use targets::*;
+use weapon_control::*;
 
 #[derive(Event)]
 pub struct WeaponShootingEvent;

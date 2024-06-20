@@ -1,10 +1,12 @@
+#![allow(clippy::too_many_arguments)]
+
 use bevy::prelude::*;
 use bevy_xpbd_3d::plugins::spatial_query::{SpatialQuery, SpatialQueryFilter};
 use std::f32::consts::PI;
 
 use super::{
     player_controller::player::{BulletSpawnPosition, Head},
-    HitConfirmEvent, WeaponShootingEvent,
+    HitConfirmEvent, WeaponPromp, WeaponShootingEvent,
 };
 
 #[derive(Component)]
@@ -20,11 +22,30 @@ pub fn spawn_bullet(
     mut materials: ResMut<Assets<StandardMaterial>>,
     position_query: Query<&GlobalTransform, (With<BulletSpawnPosition>, Without<Head>)>,
     head_query: Query<&Transform, With<Head>>,
+    //
+    query: Query<(&Transform, Entity), With<WeaponPromp>>,
+    children: Query<&Children>,
+    names: Query<&Name>,
+    position: Query<&Transform>,
 ) {
     for _event in event_reader.read() {
         let spawn_position = position_query.single().compute_transform();
         let head_transform = head_query.single();
         let bullet_velocity = (spawn_position.translation - head_transform.translation).normalize();
+
+        let mut tracer_position: Vec3 = Vec3::ZERO;
+
+        for (gun_trans, entity) in query.iter() {
+            for child in children.iter_descendants(entity) {
+                if let Ok(name) = names.get(child) {
+                    if name.contains("tracer_point") {
+                        if let Ok(transform) = position.get(child) {
+                            tracer_position = transform.translation + gun_trans.translation;
+                        }
+                    }
+                }
+            }
+        }
 
         commands
             .spawn((
@@ -44,7 +65,7 @@ pub fn spawn_bullet(
                         emissive: Color::rgb_linear(23000.0, 10000.0, 0.0),
                         ..default()
                     }),
-                    transform: Transform::from_translation(Vec3::new(0.2, -0.13, -0.5))
+                    transform: Transform::from_translation(tracer_position)
                         .with_rotation(Quat::from_rotation_x(PI / 2.)),
                     ..default()
                 });
@@ -62,7 +83,7 @@ pub fn bullet_controller(
     mut transforms: Query<&mut Transform, Without<Bullet>>,
 ) {
     for (mut bullet_transform, mut bullet_promp, bullet_entity) in bullet_query.iter_mut() {
-        let bullet_travel = bullet_promp.velocity * 300.0 * time.delta_seconds();
+        let bullet_travel = bullet_promp.velocity * 100.0 * time.delta_seconds();
         let distance = (bullet_travel).length();
 
         let prev_pos = bullet_transform.translation;
