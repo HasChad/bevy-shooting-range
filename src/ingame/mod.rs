@@ -81,11 +81,7 @@ impl Plugin for InGamePlugin {
             .init_resource::<GameSettings>()
             .init_resource::<LerpTimer>()
             .init_resource::<HitCounters>()
-            //weapon resources
-            .init_resource::<P226Res>()
-            .init_resource::<AK15Res>()
-            .init_resource::<FnFalRes>()
-            .init_resource::<MSRRes>()
+            .init_resource::<WeaponRes>()
             //events
             .add_event::<WeaponShootingEvent>()
             .add_event::<WeaponReloadingEvent>()

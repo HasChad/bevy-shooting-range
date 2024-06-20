@@ -16,6 +16,7 @@ pub enum WeaponState {
     MSR,
 }
 
+//TODO: add mag_full and ammo_full for clarity
 #[derive(Component, Clone)]
 pub struct WeaponPromp {
     pub name: String,
@@ -30,42 +31,22 @@ pub struct WeaponPromp {
     //pub time_to_aim: Timer,
 }
 
-//MARK: P226
 #[derive(Resource, Clone)]
-pub struct P226Res(pub WeaponPromp);
-
-impl Default for P226Res {
-    fn default() -> Self {
-        P226Res(WeaponPromp::p226())
-    }
+pub struct WeaponRes {
+    p226: WeaponPromp,
+    ak15: WeaponPromp,
+    fnfal: WeaponPromp,
+    msr: WeaponPromp,
 }
 
-//MARK: AK-15
-#[derive(Resource, Clone)]
-pub struct AK15Res(pub WeaponPromp);
-
-impl Default for AK15Res {
+impl Default for WeaponRes {
     fn default() -> Self {
-        AK15Res(WeaponPromp::ak15())
-    }
-}
-
-//MARK: FN-FAL
-#[derive(Resource, Clone)]
-pub struct FnFalRes(pub WeaponPromp);
-
-impl Default for FnFalRes {
-    fn default() -> Self {
-        FnFalRes(WeaponPromp::fn_fal())
-    }
-}
-
-#[derive(Resource, Clone)]
-pub struct MSRRes(pub WeaponPromp);
-
-impl Default for MSRRes {
-    fn default() -> Self {
-        MSRRes(WeaponPromp::msr())
+        Self {
+            p226: WeaponPromp::p226(),
+            ak15: WeaponPromp::ak15(),
+            fnfal: WeaponPromp::fn_fal(),
+            msr: WeaponPromp::msr(),
+        }
     }
 }
 
@@ -144,43 +125,36 @@ pub fn change_weapon(
     mut next_weapon_state: ResMut<NextState<WeaponState>>,
     weapon_state: Res<State<WeaponState>>,
     weapon_action_state: Res<State<WeaponActionState>>,
-    mut p226_res: ResMut<P226Res>,
-    mut ak15_res: ResMut<AK15Res>,
-    mut fnfal_res: ResMut<FnFalRes>,
-    mut msr_res: ResMut<MSRRes>,
+    mut weapon_res: ResMut<WeaponRes>,
 ) {
     for key in input.get_just_pressed() {
         if *weapon_action_state.get() != WeaponActionState::Reloading {
             for (mut weapon_promp, mut weapon_scene) in weapon_query.iter_mut() {
-                if *weapon_state.get() == WeaponState::P226 {
-                    p226_res.0 = weapon_promp.clone();
-                }
-
                 match weapon_state.get() {
-                    WeaponState::P226 => p226_res.0 = weapon_promp.clone(),
-                    WeaponState::AK15 => ak15_res.0 = weapon_promp.clone(),
-                    WeaponState::FNFAL => fnfal_res.0 = weapon_promp.clone(),
-                    WeaponState::MSR => msr_res.0 = weapon_promp.clone(),
+                    WeaponState::P226 => weapon_res.p226 = weapon_promp.clone(),
+                    WeaponState::AK15 => weapon_res.ak15 = weapon_promp.clone(),
+                    WeaponState::FNFAL => weapon_res.fnfal = weapon_promp.clone(),
+                    WeaponState::MSR => weapon_res.msr = weapon_promp.clone(),
                 }
                 let key = *key;
                 match key {
                     KeyCode::Digit1 => {
-                        *weapon_promp = p226_res.0.clone();
+                        *weapon_promp = weapon_res.p226.clone();
                         *weapon_scene = asset_server.load("models/weapons/P226.glb#Scene0");
                         next_weapon_state.set(WeaponState::P226);
                     }
                     KeyCode::Digit2 => {
-                        *weapon_promp = ak15_res.0.clone();
+                        *weapon_promp = weapon_res.ak15.clone();
                         *weapon_scene = asset_server.load("models/weapons/AK15.glb#Scene0");
                         next_weapon_state.set(WeaponState::AK15);
                     }
                     KeyCode::Digit3 => {
-                        *weapon_promp = fnfal_res.0.clone();
+                        *weapon_promp = weapon_res.fnfal.clone();
                         *weapon_scene = asset_server.load("models/weapons/FNFAL.glb#Scene0");
                         next_weapon_state.set(WeaponState::FNFAL);
                     }
                     KeyCode::Digit4 => {
-                        *weapon_promp = msr_res.0.clone();
+                        *weapon_promp = weapon_res.msr.clone();
                         *weapon_scene = asset_server.load("models/weapons/MSR.glb#Scene0");
                         next_weapon_state.set(WeaponState::MSR);
                     }
