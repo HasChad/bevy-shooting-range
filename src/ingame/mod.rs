@@ -27,7 +27,7 @@ pub struct HitConfirmEvent {
 }
 
 #[derive(Resource)]
-pub struct Animations(Vec<Handle<AnimationClip>>);
+pub struct ShootingAnimations(Vec<Handle<AnimationClip>>);
 
 #[derive(Resource)]
 pub struct GameSettings {
@@ -45,8 +45,8 @@ impl Plugin for InGamePlugin {
                 Update,
                 (
                     //gun systems
-                    (shooting_event, firerate_timer).run_if(in_state(WeaponState::Shooting)),
-                    reload_timer.run_if(in_state(WeaponState::Reloading)),
+                    (shooting_event, firerate_timer).run_if(in_state(WeaponActionState::Shooting)),
+                    reload_timer.run_if(in_state(WeaponActionState::Reloading)),
                     scope,
                     shooting_sound,
                     weapon_animation_setup,
@@ -77,7 +77,7 @@ impl Plugin for InGamePlugin {
             .add_event::<WeaponReloadingEvent>()
             .add_event::<HitConfirmEvent>()
             //states
-            .init_state::<WeaponState>()
-            .init_state::<WeaponChangeState>();
+            .init_state::<WeaponActionState>()
+            .init_state::<WeaponState>();
     }
 }

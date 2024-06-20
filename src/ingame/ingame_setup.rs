@@ -1,11 +1,11 @@
 use bevy::prelude::*;
 use bevy_xpbd_3d::prelude::*;
 
-use super::Animations;
+use super::ShootingAnimations;
 
 pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     //gun animation load
-    commands.insert_resource(Animations(vec![
+    commands.insert_resource(ShootingAnimations(vec![
         //shooting animations
         asset_server.load("models/weapons/P226.glb#Animation0"),
         asset_server.load("models/weapons/AK15.glb#Animation0"),

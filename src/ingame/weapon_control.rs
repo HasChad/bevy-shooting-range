@@ -8,24 +8,8 @@ use std::f32::consts::PI;
 use super::{
     crosshair::{CrosshairLine, CrosshairLineSettings},
     player::Head,
-    Animations, GameSettings, WeaponShootingEvent,
+    GameSettings, ShootingAnimations, WeaponShootingEvent,
 };
-
-#[derive(Debug, Clone, Eq, PartialEq, Hash, Default, States)]
-pub enum WeaponState {
-    #[default]
-    Shooting,
-    Reloading,
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Hash, Default, States)]
-pub enum WeaponChangeState {
-    #[default]
-    P226,
-    AK15,
-    FNFAL,
-    MSR,
-}
 
 #[derive(Resource)]
 pub struct LerpTimer {
@@ -40,6 +24,22 @@ impl Default for LerpTimer {
             recoil_timer: Timer::from_seconds(0.2, TimerMode::Once),
         }
     }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Default, States)]
+pub enum WeaponActionState {
+    #[default]
+    Shooting,
+    Reloading,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Default, States)]
+pub enum WeaponState {
+    #[default]
+    P226,
+    AK15,
+    FNFAL,
+    MSR,
 }
 
 #[derive(Component)]
@@ -130,7 +130,7 @@ pub fn shooting_event(
     mut event_writer: EventWriter<WeaponShootingEvent>,
     mut weapon_query: Query<&mut WeaponPromp>,
     mut windows: Query<&mut Window>,
-    mut next_state: ResMut<NextState<WeaponState>>,
+    mut next_state: ResMut<NextState<WeaponActionState>>,
 ) {
     for mut window in windows.iter_mut() {
         if window.cursor.grab_mode == CursorGrabMode::Confined {
@@ -159,7 +159,7 @@ pub fn shooting_event(
                         && weapon_promp.mag_capacity < weapon_promp.self_mag_cap())
                     && weapon_promp.ammo_capacity > 0
                 {
-                    next_state.set(WeaponState::Reloading)
+                    next_state.set(WeaponActionState::Reloading)
                 }
             }
         }
@@ -181,7 +181,7 @@ pub fn firerate_timer(mut weapon_query: Query<&mut WeaponPromp>, time: Res<Time>
 
 pub fn reload_timer(
     mut weapon_query: Query<&mut WeaponPromp>,
-    mut next_state: ResMut<NextState<WeaponState>>,
+    mut next_state: ResMut<NextState<WeaponActionState>>,
     time: Res<Time>,
 ) {
     for mut weapon_promp in weapon_query.iter_mut() {
@@ -191,7 +191,7 @@ pub fn reload_timer(
             weapon_promp.reload_timer.reset();
             weapon_promp.ammo_capacity -= weapon_promp.self_mag_cap() - weapon_promp.mag_capacity;
             weapon_promp.mag_capacity = weapon_promp.self_mag_cap();
-            next_state.set(WeaponState::Shooting)
+            next_state.set(WeaponActionState::Shooting)
         }
     }
 }
@@ -285,31 +285,31 @@ pub fn shooting_sound(
     audio: Res<Audio>,
     asset_server: Res<AssetServer>,
     mut event_reader: EventReader<WeaponShootingEvent>,
-    weapon_state: Res<State<WeaponChangeState>>,
+    weapon_state: Res<State<WeaponState>>,
 ) {
     for _event in event_reader.read() {
         match weapon_state.get() {
-            WeaponChangeState::P226 => audio.play(asset_server.load("sounds/p226_shot.ogg")),
-            WeaponChangeState::AK15 => audio.play(asset_server.load("sounds/ak15_shot.ogg")),
-            WeaponChangeState::FNFAL => audio.play(asset_server.load("sounds/fal_shot.ogg")),
-            WeaponChangeState::MSR => audio.play(asset_server.load("sounds/msr_shot.ogg")), //FIXME: neeed msr sound
+            WeaponState::P226 => audio.play(asset_server.load("sounds/p226_shot.ogg")),
+            WeaponState::AK15 => audio.play(asset_server.load("sounds/ak15_shot.ogg")),
+            WeaponState::FNFAL => audio.play(asset_server.load("sounds/fal_shot.ogg")),
+            WeaponState::MSR => audio.play(asset_server.load("sounds/msr_shot.ogg")), //FIXME: neeed msr sound
         };
     }
 }
 
 pub fn weapon_animation_setup(
-    animations: Res<Animations>,
-    weapon_state: Res<State<WeaponChangeState>>,
+    shot_anim: Res<ShootingAnimations>,
+    weapon_state: Res<State<WeaponState>>,
     mut animation_player_query: Query<&mut AnimationPlayer, Added<AnimationPlayer>>,
 ) {
-    for mut gun in &mut animation_player_query {
+    for mut animation_player in &mut animation_player_query {
         match weapon_state.get() {
-            WeaponChangeState::P226 => gun.play(animations.0[0].clone_weak()).repeat(),
-            WeaponChangeState::AK15 => gun.play(animations.0[1].clone_weak()).repeat(),
-            WeaponChangeState::FNFAL => gun.play(animations.0[2].clone_weak()).repeat(),
-            WeaponChangeState::MSR => gun.play(animations.0[0].clone_weak()).repeat(), //FIXME: neeed msr animation
+            WeaponState::P226 => animation_player.play(shot_anim.0[0].clone_weak()).repeat(),
+            WeaponState::AK15 => animation_player.play(shot_anim.0[1].clone_weak()).repeat(),
+            WeaponState::FNFAL => animation_player.play(shot_anim.0[2].clone_weak()).repeat(),
+            WeaponState::MSR => animation_player.play(shot_anim.0[0].clone_weak()).repeat(), //FIXME: neeed msr animation
         };
-        gun.set_repeat(RepeatAnimation::Count(0));
+        animation_player.set_repeat(RepeatAnimation::Count(0));
     }
 }
 
@@ -318,9 +318,9 @@ pub fn weapon_play_animation(
     mut animation_player_query: Query<&mut AnimationPlayer>,
 ) {
     for _event in event_reader.read() {
-        for mut gun in &mut animation_player_query {
-            gun.set_repeat(RepeatAnimation::Count(1));
-            gun.replay();
+        for mut animation_player in &mut animation_player_query {
+            animation_player.set_repeat(RepeatAnimation::Count(1));
+            animation_player.replay();
         }
     }
 }

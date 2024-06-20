@@ -8,7 +8,7 @@ use bevy::{
 };
 
 use super::{Head, Player};
-use crate::ingame::{GameSettings, WeaponChangeState, WeaponPromp, WeaponState};
+use crate::ingame::{GameSettings, WeaponActionState, WeaponPromp, WeaponState};
 
 #[derive(Resource, Default)]
 pub struct InputState {
@@ -55,8 +55,8 @@ pub fn change_weapon(
     mut weapon_query: Query<(&mut WeaponPromp, &mut Handle<Scene>)>,
     input: Res<ButtonInput<KeyCode>>,
     asset_server: Res<AssetServer>,
-    mut weapon_change_state: ResMut<NextState<WeaponChangeState>>,
-    mut weapon_state: ResMut<NextState<WeaponState>>,
+    mut weapon_change_state: ResMut<NextState<WeaponState>>,
+    mut weapon_state: ResMut<NextState<WeaponActionState>>,
 ) {
     for key in input.get_just_pressed() {
         for (mut weapon_promp, mut weapon_scene) in weapon_query.iter_mut() {
@@ -65,26 +65,26 @@ pub fn change_weapon(
                 KeyCode::Digit1 => {
                     *weapon_promp = WeaponPromp::p226();
                     *weapon_scene = asset_server.load("models/weapons/P226.glb#Scene0");
-                    weapon_change_state.set(WeaponChangeState::P226);
-                    weapon_state.set(WeaponState::Shooting);
+                    weapon_change_state.set(WeaponState::P226);
+                    weapon_state.set(WeaponActionState::Shooting);
                 }
                 KeyCode::Digit2 => {
                     *weapon_promp = WeaponPromp::ak15();
                     *weapon_scene = asset_server.load("models/weapons/AK15.glb#Scene0");
-                    weapon_change_state.set(WeaponChangeState::AK15);
-                    weapon_state.set(WeaponState::Shooting);
+                    weapon_change_state.set(WeaponState::AK15);
+                    weapon_state.set(WeaponActionState::Shooting);
                 }
                 KeyCode::Digit3 => {
                     *weapon_promp = WeaponPromp::fn_fal();
                     *weapon_scene = asset_server.load("models/weapons/FNFAL.glb#Scene0");
-                    weapon_change_state.set(WeaponChangeState::FNFAL);
-                    weapon_state.set(WeaponState::Shooting);
+                    weapon_change_state.set(WeaponState::FNFAL);
+                    weapon_state.set(WeaponActionState::Shooting);
                 }
                 KeyCode::Digit4 => {
                     *weapon_promp = WeaponPromp::msr();
                     *weapon_scene = asset_server.load("models/weapons/MSR.glb#Scene0");
-                    weapon_change_state.set(WeaponChangeState::MSR);
-                    weapon_state.set(WeaponState::Shooting);
+                    weapon_change_state.set(WeaponState::MSR);
+                    weapon_state.set(WeaponActionState::Shooting);
                 }
                 _ => (),
             }
