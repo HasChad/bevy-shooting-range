@@ -21,7 +21,7 @@ pub fn player_setup(
     settings: Res<GameSettings>,
 ) {
     //player body
-    let _player_object_id = commands
+    commands
         .spawn((
             Player,
             InheritedVisibility::VISIBLE,
@@ -33,10 +33,7 @@ pub fn player_setup(
             LockedAxes::ROTATION_LOCKED,
             Friction::new(0.0).with_combine_rule(CoefficientCombine::Min), //can be changed with air friction
         ))
-        .insert(Name::new("Player"))
-        .id();
-
-    //let query_filter = SpatialQueryFilter::from_mask(0b1011).with_excluded_entities([player_object_id]);
+        .insert(Name::new("Player"));
 
     //player head
     commands
@@ -82,9 +79,9 @@ pub fn player_setup(
                 WeaponPromp::p226(),
                 Name::new("Weapon"),
             ));
-            //RayCast
 
             /*
+            //RayCast
             parent.spawn((
                 RayCaster::new(Vec3::ZERO, Direction3d::NEG_Z)
                     .with_query_filter(query_filter)

@@ -5,6 +5,7 @@ use bevy_xpbd_3d::plugins::spatial_query::{SpatialQuery, SpatialQueryFilter};
 use std::f32::consts::PI;
 
 use super::{
+    player::Player,
     player_controller::player::{BulletSpawnPosition, Head},
     HitConfirmEvent, WeaponPromp, WeaponShootingEvent,
 };
@@ -74,6 +75,7 @@ pub fn spawn_bullet(
 }
 
 pub fn bullet_controller(
+    player_query: Query<Entity, With<Player>>,
     time: Res<Time>,
     mut commands: Commands,
     mut bullet_query: Query<(&mut Transform, &mut Bullet, Entity)>,
@@ -83,6 +85,7 @@ pub fn bullet_controller(
     mut transforms: Query<&mut Transform, Without<Bullet>>,
 ) {
     for (mut bullet_transform, mut bullet_promp, bullet_entity) in bullet_query.iter_mut() {
+        let player_id = player_query.single();
         let bullet_travel = bullet_promp.velocity * 100.0 * time.delta_seconds();
         let distance = (bullet_travel).length();
 
@@ -100,7 +103,7 @@ pub fn bullet_controller(
             Direction3d::new_unchecked(bullet_promp.velocity.normalize()),
             distance,
             true,
-            SpatialQueryFilter::default(),
+            SpatialQueryFilter::from_mask(0b1011).with_excluded_entities([player_id]),
         ) {
             commands.entity(bullet_entity).despawn_recursive();
 
