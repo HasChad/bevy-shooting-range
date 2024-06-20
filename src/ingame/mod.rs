@@ -6,6 +6,7 @@ pub mod ingame_ui;
 pub mod player_controller;
 pub mod targets;
 pub mod weapon_control;
+pub mod weapons;
 
 use bullet::*;
 use ingame_setup::*;
@@ -13,6 +14,7 @@ use ingame_ui::*;
 use player_controller::*;
 use targets::*;
 use weapon_control::*;
+use weapons::*;
 
 #[derive(Event)]
 pub struct WeaponShootingEvent;
@@ -36,6 +38,16 @@ pub struct GameSettings {
     pub fov: f32,
 }
 
+impl Default for GameSettings {
+    fn default() -> Self {
+        GameSettings {
+            sensitivity: 1.0,
+            player_speed: 5.0,
+            fov: 90.0,
+        }
+    }
+}
+
 pub struct InGamePlugin;
 
 impl Plugin for InGamePlugin {
@@ -44,7 +56,7 @@ impl Plugin for InGamePlugin {
             .add_systems(
                 Update,
                 (
-                    //gun systems
+                    //weapon_control systems
                     (shooting_event, firerate_timer).run_if(in_state(WeaponActionState::Shooting)),
                     reload_timer.run_if(in_state(WeaponActionState::Reloading)),
                     scope,
@@ -52,6 +64,7 @@ impl Plugin for InGamePlugin {
                     weapon_animation_setup,
                     weapon_play_animation,
                     shooting_camera_shake,
+                    change_weapon,
                     //bullet systems
                     spawn_bullet,
                     //target systems
@@ -65,11 +78,7 @@ impl Plugin for InGamePlugin {
             .add_plugins(PlayerControllerPlugin)
             .add_plugins(IngameUIPlugin)
             //resources
-            .insert_resource(GameSettings {
-                sensitivity: 1.0,
-                player_speed: 5.0,
-                fov: 90.0,
-            })
+            .init_resource::<GameSettings>()
             .init_resource::<LerpTimer>()
             .init_resource::<HitCounters>()
             //events

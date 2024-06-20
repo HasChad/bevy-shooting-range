@@ -20,6 +20,19 @@ pub struct KeyBindings {
     pub run: KeyCode,
 }
 
+impl Default for KeyBindings {
+    fn default() -> Self {
+        KeyBindings {
+            move_forward: KeyCode::KeyW,
+            move_backward: KeyCode::KeyS,
+            move_left: KeyCode::KeyA,
+            move_right: KeyCode::KeyD,
+            jump: KeyCode::Space,
+            run: KeyCode::ShiftLeft,
+        }
+    }
+}
+
 #[derive(Resource)]
 pub struct MovementControl {
     pub max_velocity_air: f32,
@@ -30,7 +43,20 @@ pub struct MovementControl {
     pub jump_impulse: f32,
 }
 
-#[derive(Resource)]
+impl Default for MovementControl {
+    fn default() -> Self {
+        MovementControl {
+            max_velocity_air: 0.6,
+            max_velocity_ground: 6.0,
+            max_acceleration: 10.0 * 6.0, /* max_velocity_ground */
+            gravity: 15.34,
+            stop_speed: 1.5,
+            jump_impulse: (2.0 * 15.34 /* gravity */ * 0.85).sqrt(),
+        }
+    }
+}
+
+#[derive(Resource, Default)]
 pub struct MovementInput {
     pub fmove: f32,
     pub smove: f32,
@@ -46,7 +72,6 @@ impl Plugin for PlayerControllerPlugin {
                 (
                     //player systems
                     edit_mode_toggler,
-                    change_weapon,
                     player_move,
                     movement_input_changer,
                     player_look,
@@ -59,30 +84,11 @@ impl Plugin for PlayerControllerPlugin {
                     .after(PhysicsSet::Sync)
                     .before(TransformSystem::TransformPropagate),
             )
+            //events
             //plugins
             //resources
-            .init_resource::<InputState>()
-            .insert_resource(KeyBindings {
-                move_forward: KeyCode::KeyW,
-                move_backward: KeyCode::KeyS,
-                move_left: KeyCode::KeyA,
-                move_right: KeyCode::KeyD,
-                jump: KeyCode::Space,
-                run: KeyCode::ShiftLeft,
-            })
-            .insert_resource(MovementControl {
-                max_velocity_air: 0.6,
-                max_velocity_ground: 6.0,
-                max_acceleration: 10.0 * 6.0, /* max_velocity_ground */
-                gravity: 15.34,
-                stop_speed: 1.5,
-                jump_impulse: (2.0 * 15.34 /* gravity */ * 0.85).sqrt(),
-            })
-            .insert_resource(MovementInput {
-                fmove: 0.0,
-                smove: 0.0,
-            });
-
-        //events
+            .init_resource::<KeyBindings>()
+            .init_resource::<MovementControl>()
+            .init_resource::<MovementInput>();
     }
 }
