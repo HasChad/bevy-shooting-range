@@ -9,6 +9,7 @@ use super::{Head, Player};
 use crate::ingame::GameSettings;
 
 pub fn player_look(
+    time: Res<Time>,
     settings: Res<GameSettings>,
     primary_window: Query<&Window, With<PrimaryWindow>>,
     mut mouse_event: EventReader<MouseMotion>,
@@ -26,8 +27,12 @@ pub fn player_look(
             match window.cursor.grab_mode {
                 CursorGrabMode::None => (),
                 _ => {
-                    pitch_camera -= (settings.sensitivity / 10.0 * motion.delta.y).to_radians();
-                    yaw_camera -= (settings.sensitivity / 10.0 * motion.delta.x).to_radians();
+                    pitch_camera -=
+                        (settings.sensitivity * 20.0 * motion.delta.y * time.delta_seconds())
+                            .to_radians();
+                    yaw_camera -=
+                        (settings.sensitivity * 20.0 * motion.delta.x * time.delta_seconds())
+                            .to_radians();
                 }
             }
             pitch_camera = pitch_camera.clamp(-PI / 2.0, PI / 2.0);

@@ -65,6 +65,7 @@ impl Plugin for InGamePlugin {
                     weapon_play_animation,
                     shooting_camera_shake,
                     change_weapon,
+                    sway_weapon,
                     //bullet systems
                     spawn_bullet,
                     //target systems

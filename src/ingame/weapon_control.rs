@@ -1,6 +1,11 @@
 #![allow(clippy::too_many_arguments)]
 
-use bevy::{animation::RepeatAnimation, prelude::*, window::CursorGrabMode};
+use bevy::{
+    animation::RepeatAnimation,
+    input::mouse::MouseMotion,
+    prelude::*,
+    window::{CursorGrabMode, PrimaryWindow},
+};
 use bevy_kira_audio::prelude::*;
 use rand::{thread_rng, Rng};
 use std::f32::consts::PI;
@@ -8,8 +13,8 @@ use std::f32::consts::PI;
 use super::{
     crosshair::{CrosshairLine, CrosshairLineSettings},
     player::Head,
-    GameSettings, ShootingAnimations, WeaponActionState, WeaponPromp, WeaponShootingEvent,
-    WeaponState,
+    GameSettings, KeyBindings, ShootingAnimations, WeaponActionState, WeaponPromp,
+    WeaponShootingEvent, WeaponState,
 };
 
 #[derive(Resource)]
@@ -27,7 +32,45 @@ impl Default for LerpTimer {
     }
 }
 
+pub fn sway_weapon(
+    time: Res<Time>,
+    primary_window: Query<&Window, With<PrimaryWindow>>,
+    mut weapon_query: Query<&mut Transform, With<WeaponPromp>>,
+    mut mouse_event: EventReader<MouseMotion>,
+) {
+    for window in primary_window.iter() {
+        let mut weapon_transform = weapon_query.single_mut();
+        let (mut weapon_rot_y, mut weapon_rot_x, _) =
+            weapon_transform.rotation.to_euler(EulerRot::YXZ);
+
+        if mouse_event.is_empty() {
+            if weapon_rot_x.abs() > 0.0 {
+                weapon_rot_x /= 15000. * time.delta_seconds();
+            }
+            if weapon_rot_y.abs() > 0.0 {
+                weapon_rot_y /= 15000. * time.delta_seconds();
+            }
+        }
+
+        for motion in mouse_event.read() {
+            match window.cursor.grab_mode {
+                CursorGrabMode::None => (),
+                _ => {
+                    weapon_rot_y +=
+                        (motion.delta.x - weapon_rot_y * 300.) * time.delta_seconds() * 0.1;
+                    weapon_rot_x +=
+                        (motion.delta.y - weapon_rot_x * 300.) * time.delta_seconds() * 0.1;
+                }
+            }
+        }
+
+        weapon_transform.rotation = Quat::from_axis_angle(Vec3::Y, weapon_rot_y)
+            * Quat::from_axis_angle(Vec3::X, weapon_rot_x);
+    }
+}
+
 pub fn shooting_event(
+    key_bindings: Res<KeyBindings>,
     mouse_input: Res<ButtonInput<MouseButton>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut event_writer: EventWriter<WeaponShootingEvent>,
@@ -44,13 +87,13 @@ pub fn shooting_event(
             for mut weapon_promp in weapon_query.iter_mut() {
                 if weapon_promp.okay_to_shoot {
                     //semi auto shot
-                    if mouse_input.just_pressed(MouseButton::Left) && !weapon_promp.is_auto {
+                    if mouse_input.just_pressed(key_bindings.fire) && !weapon_promp.is_auto {
                         weapon_promp.mag_capacity -= 1;
                         event_writer.send(WeaponShootingEvent);
                         weapon_promp.okay_to_shoot = false;
                     }
                     //full auto shot
-                    if mouse_input.pressed(MouseButton::Left) && weapon_promp.is_auto {
+                    if mouse_input.pressed(key_bindings.fire) && weapon_promp.is_auto {
                         weapon_promp.mag_capacity -= 1;
                         event_writer.send(WeaponShootingEvent);
                         weapon_promp.okay_to_shoot = false;
@@ -58,7 +101,7 @@ pub fn shooting_event(
                 }
                 //reload
                 if (weapon_promp.mag_capacity == 0
-                    || (keyboard_input.just_pressed(KeyCode::KeyR))
+                    || (keyboard_input.just_pressed(key_bindings.reload))
                         && weapon_promp.mag_capacity < weapon_promp.self_mag_cap())
                     && weapon_promp.ammo_capacity > 0
                 {
@@ -131,6 +174,7 @@ pub fn shooting_camera_shake(
 pub fn scope(
     time: Res<Time>,
     settings: ResMut<GameSettings>,
+    key_bindings: Res<KeyBindings>,
     mouse_input: Res<ButtonInput<MouseButton>>,
     mut lerp_timer: ResMut<LerpTimer>,
     mut camera_query: Query<&mut Projection, With<Camera3d>>,
@@ -143,11 +187,11 @@ pub fn scope(
         return;
     };
 
-    if mouse_input.just_pressed(MouseButton::Right) || mouse_input.just_released(MouseButton::Right)
+    if mouse_input.just_pressed(key_bindings.scope) || mouse_input.just_released(key_bindings.scope)
     {
         lerp_timer.scope_timer.reset()
     }
-    if mouse_input.pressed(MouseButton::Right) {
+    if mouse_input.pressed(key_bindings.scope) {
         lerp_timer.scope_timer.tick(time.delta());
 
         for mut croshair_visib in crosshair_query.iter_mut() {

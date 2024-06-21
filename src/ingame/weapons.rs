@@ -16,7 +16,6 @@ pub enum WeaponState {
     MSR,
 }
 
-//TODO: add mag_full and ammo_full for clarity
 #[derive(Component, Clone)]
 pub struct WeaponPromp {
     pub name: String,
