@@ -3,8 +3,7 @@ use bevy::prelude::*;
 use bevy_xpbd_3d::prelude::*;
 use std::f32::consts::PI;
 
-use crate::ingame::GameSettings;
-use crate::ingame::WeaponPromp;
+use crate::ingame::{weapons::WeaponPromp, GameSettings};
 
 #[derive(Component)]
 pub struct BulletSpawnPosition;

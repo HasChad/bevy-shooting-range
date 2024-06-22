@@ -4,11 +4,8 @@ use bevy::prelude::*;
 use bevy_xpbd_3d::plugins::spatial_query::{SpatialQuery, SpatialQueryFilter};
 use std::f32::consts::PI;
 
-use super::{
-    player::Player,
-    player_controller::player::{BulletSpawnPosition, Head},
-    HitConfirmEvent, WeaponPromp, WeaponShootingEvent,
-};
+use super::{HitConfirmEvent, WeaponPromp, WeaponShootingEvent};
+use crate::ingame::player::{BulletSpawnPosition, Head, Player};
 
 #[derive(Component)]
 pub struct Bullet {
@@ -60,7 +57,7 @@ pub fn spawn_bullet(
             ))
             .with_children(|parent| {
                 parent.spawn(PbrBundle {
-                    mesh: meshes.add(Capsule3d::new(0.01, 0.3)),
+                    mesh: meshes.add(Capsule3d::new(0.005, 0.6)),
                     material: materials.add(StandardMaterial {
                         base_color: Color::rgb(1.0, 0.8, 0.0),
                         emissive: Color::rgb_linear(23000.0, 10000.0, 0.0),

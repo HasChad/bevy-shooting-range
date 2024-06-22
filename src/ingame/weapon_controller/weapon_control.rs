@@ -10,11 +10,11 @@ use bevy_kira_audio::prelude::*;
 use rand::{thread_rng, Rng};
 use std::f32::consts::PI;
 
-use super::{
+use super::{WeaponActionState, WeaponPromp, WeaponShootingEvent, WeaponState};
+use crate::ingame::{
     crosshair::{CrosshairLine, CrosshairLineSettings},
     player::Head,
-    GameSettings, KeyBindings, ShootingAnimations, WeaponActionState, WeaponPromp,
-    WeaponShootingEvent, WeaponState,
+    GameSettings, KeyBindings, ShootingAnimations,
 };
 
 #[derive(Resource)]

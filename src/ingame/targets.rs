@@ -3,7 +3,7 @@ use bevy_kira_audio::prelude::*;
 use bevy_xpbd_3d::prelude::*;
 use rand::prelude::*;
 
-use super::{HitConfirmEvent, WeaponPromp};
+use crate::ingame::{weapons::WeaponPromp, HitConfirmEvent};
 
 #[derive(Component)]
 pub struct CircleTarget;

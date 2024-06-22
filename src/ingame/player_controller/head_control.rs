@@ -5,8 +5,8 @@ use bevy::{
 };
 use std::f32::consts::PI;
 
-use super::{Head, Player};
 use crate::ingame::GameSettings;
+use crate::{Head, Player};
 
 pub fn player_look(
     time: Res<Time>,

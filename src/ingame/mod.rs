@@ -1,35 +1,16 @@
 use bevy::prelude::*;
 
-pub mod bullet;
 pub mod ingame_setup;
 pub mod ingame_ui;
 pub mod player_controller;
 pub mod targets;
-pub mod weapon_control;
-pub mod weapons;
+pub mod weapon_controller;
 
-use bullet::*;
 use ingame_setup::*;
 use ingame_ui::*;
 use player_controller::*;
 use targets::*;
-use weapon_control::*;
-use weapons::*;
-
-#[derive(Event)]
-pub struct WeaponShootingEvent;
-
-#[derive(Event)]
-pub struct WeaponReloadingEvent;
-
-#[derive(Event)]
-pub struct HitConfirmEvent {
-    pub hit_entity: Entity,
-    pub hit_normal: Vec3,
-}
-
-#[derive(Resource)]
-pub struct ShootingAnimations(Vec<Handle<AnimationClip>>);
+use weapon_controller::*;
 
 #[derive(Resource)]
 pub struct GameSettings {
@@ -56,39 +37,20 @@ impl Plugin for InGamePlugin {
             .add_systems(
                 Update,
                 (
-                    //weapon_control systems
-                    (shooting_event, firerate_timer).run_if(in_state(WeaponActionState::Shooting)),
-                    reload_timer.run_if(in_state(WeaponActionState::Reloading)),
-                    scope,
-                    shooting_sound,
-                    weapon_animation_setup,
-                    weapon_play_animation,
-                    shooting_camera_shake,
-                    change_weapon,
-                    sway_weapon,
-                    //bullet systems
-                    spawn_bullet,
                     //target systems
                     circle_target_controller,
                     enemy_target_controller,
                     enemy_target_hostage_controller,
                 ),
             )
-            .add_systems(FixedUpdate, bullet_controller)
+            //states
+            //events
             //plugins
             .add_plugins(PlayerControllerPlugin)
             .add_plugins(IngameUIPlugin)
+            .add_plugins(WeaponControllerPlugin)
             //resources
             .init_resource::<GameSettings>()
-            .init_resource::<LerpTimer>()
-            .init_resource::<HitCounters>()
-            .init_resource::<WeaponRes>()
-            //events
-            .add_event::<WeaponShootingEvent>()
-            .add_event::<WeaponReloadingEvent>()
-            .add_event::<HitConfirmEvent>()
-            //states
-            .init_state::<WeaponActionState>()
-            .init_state::<WeaponState>();
+            .init_resource::<HitCounters>();
     }
 }

@@ -4,7 +4,7 @@ use bevy::{
 };
 use bevy_xpbd_3d::components::LinearVelocity;
 
-use crate::ingame::{player_controller::player::Player, HitCounters, WeaponPromp};
+use crate::ingame::{player::Player, weapons::WeaponPromp, HitCounters};
 
 #[derive(Component)]
 pub struct VelocityText;

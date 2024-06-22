@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 use bevy_xpbd_3d::prelude::*;
 
-use super::ShootingAnimations;
+#[derive(Resource)]
+pub struct ShootingAnimations(pub Vec<Handle<AnimationClip>>);
 
 pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     //gun animation load

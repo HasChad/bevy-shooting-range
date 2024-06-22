@@ -2,10 +2,7 @@ use bevy::window::CursorGrabMode;
 use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_xpbd_3d::prelude::*;
 
-use crate::ingame::player_controller::player::Player;
-use crate::ingame::player_controller::KeyBindings;
-
-use super::MovementInput;
+use super::{player::Player, KeyBindings, MovementInput};
 
 pub fn movement_input_changer(
     mut movement_input: ResMut<MovementInput>,

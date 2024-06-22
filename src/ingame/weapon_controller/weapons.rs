@@ -8,6 +8,13 @@ pub enum WeaponActionState {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Default, States)]
+pub enum WeaponAimState {
+    #[default]
+    HipFire,
+    Scope,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Default, States)]
 pub enum WeaponState {
     #[default]
     P226,

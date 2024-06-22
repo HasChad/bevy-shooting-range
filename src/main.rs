@@ -14,7 +14,7 @@ use color_eyre::eyre::Result;
 
 pub mod ingame;
 
-use ingame::InGamePlugin;
+use ingame::*;
 
 fn main() -> Result<()> {
     color_eyre::install()?;

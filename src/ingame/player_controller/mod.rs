@@ -1,10 +1,10 @@
 use bevy::{prelude::*, transform::TransformSystem};
+use bevy_xpbd_3d::{parry::na::ComplexField, PhysicsSet};
 
 pub mod body_control;
 pub mod head_control;
 pub mod player;
 
-use bevy_xpbd_3d::{parry::na::ComplexField, PhysicsSet};
 use body_control::*;
 use head_control::*;
 use player::*;

@@ -5,9 +5,8 @@ use bevy_inspector_egui::{
 };
 use std::f32::consts::PI;
 
-use crate::ingame::crosshair;
+use super::{CrosshairLine, CrosshairLineSettings};
 use crate::ingame::GameSettings;
-use crosshair::*;
 
 pub fn egui_settings(
     mut settings: ResMut<GameSettings>,
