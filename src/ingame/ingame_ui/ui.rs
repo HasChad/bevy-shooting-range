@@ -1,10 +1,12 @@
+use std::time::Duration;
+
 use bevy::{
     diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin},
     prelude::*,
 };
 use bevy_xpbd_3d::components::LinearVelocity;
 
-use crate::ingame::{player::Player, weapons::WeaponPromp, HitCounters};
+use crate::ingame::{player::Player, weapons::WeaponPromp, CircleTarget};
 
 #[derive(Component)]
 pub struct VelocityText;
@@ -27,7 +29,6 @@ pub fn ui_setup(mut commands: Commands) {
         TextBundle::from_sections([
             TextSection::from_style(TextStyle {
                 font_size: 50.0,
-                color: Color::WHITE,
                 ..default()
             }),
             TextSection::new(
@@ -39,7 +40,6 @@ pub fn ui_setup(mut commands: Commands) {
             ),
             TextSection::from_style(TextStyle {
                 font_size: 30.0,
-                color: Color::WHITE,
                 ..default()
             }),
         ])
@@ -70,16 +70,29 @@ pub fn ui_setup(mut commands: Commands) {
             ),
             TextSection::from_style(TextStyle {
                 font_size: 25.0,
-                color: Color::WHITE,
+                color: Color::GOLD,
                 ..default()
             }),
             TextSection::new(
                 " / 30",
                 TextStyle {
                     font_size: 25.0,
+                    color: Color::GOLD,
                     ..default()
                 },
             ),
+            TextSection::new(
+                "\nTime: ",
+                TextStyle {
+                    font_size: 25.0,
+                    ..default()
+                },
+            ),
+            TextSection::from_style(TextStyle {
+                font_size: 25.0,
+                color: Color::GOLD,
+                ..default()
+            }),
         ])
         .with_style(Style {
             position_type: PositionType::Absolute,
@@ -173,6 +186,7 @@ pub fn ui_setup(mut commands: Commands) {
     ));
 }
 
+//MARK: Updaters
 pub fn ammo_text_updater(
     mut query: Query<&mut Text, With<AmmoText>>,
     weapon_query: Query<&mut WeaponPromp>,
@@ -185,13 +199,21 @@ pub fn ammo_text_updater(
     }
 }
 
-//MARK: Updaters
 pub fn target_text_updater(
+    time: Res<Time>,
     mut query: Query<&mut Text, With<TargetCounterText>>,
-    hit_counter: Res<HitCounters>,
+    mut circletarget_query: Query<&mut CircleTarget>,
 ) {
     for mut text in &mut query {
-        text.sections[1].value = format!("{}", hit_counter.circle_target);
+        for mut circletarget_prop in circletarget_query.iter_mut() {
+            text.sections[1].value = format!("{}", circletarget_prop.hit_counter);
+            text.sections[4].value = format!("{:.2}", circletarget_prop.timer.elapsed_secs());
+            if circletarget_prop.hit_counter > 0 && circletarget_prop.hit_counter < 30 {
+                circletarget_prop
+                    .timer
+                    .tick(Duration::from_secs_f32(time.delta_seconds()));
+            }
+        }
     }
 }
 

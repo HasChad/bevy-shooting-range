@@ -50,7 +50,6 @@ impl Plugin for InGamePlugin {
             .add_plugins(IngameUIPlugin)
             .add_plugins(WeaponControllerPlugin)
             //resources
-            .init_resource::<GameSettings>()
-            .init_resource::<HitCounters>();
+            .init_resource::<GameSettings>();
     }
 }

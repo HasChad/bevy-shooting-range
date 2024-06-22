@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, time::Stopwatch};
 use bevy_kira_audio::prelude::*;
 use bevy_xpbd_3d::prelude::*;
 use rand::prelude::*;
@@ -6,7 +6,10 @@ use rand::prelude::*;
 use crate::ingame::{weapons::WeaponPromp, HitConfirmEvent};
 
 #[derive(Component)]
-pub struct CircleTarget;
+pub struct CircleTarget {
+    pub hit_counter: u32,
+    pub timer: Stopwatch,
+}
 
 #[derive(Component)]
 pub struct EnemyTarget {
@@ -16,13 +19,6 @@ pub struct EnemyTarget {
 #[derive(Component)]
 pub struct EnemyTargetHostage {
     health: i8,
-}
-
-#[derive(Resource, Default)]
-pub struct HitCounters {
-    pub circle_target: u32,
-    pub enemy_target: u32,
-    pub enemy_target_hostage: u32,
 }
 
 pub fn target_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
@@ -35,7 +31,10 @@ pub fn target_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
         AsyncSceneCollider::new(Some(ComputedCollider::TriMesh)),
         Name::new("CircleTarget"),
-        CircleTarget,
+        CircleTarget {
+            hit_counter: 0,
+            timer: Stopwatch::new(),
+        },
     ));
 
     /*
@@ -67,20 +66,20 @@ pub fn target_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
 pub fn circle_target_controller(
     mut event_reader: EventReader<HitConfirmEvent>,
-    mut circletarget_query: Query<&mut Transform, With<CircleTarget>>,
+    mut circletarget_query: Query<(&mut Transform, &mut CircleTarget)>,
     query: Query<&Name>,
     audio: Res<Audio>,
     asset_server: Res<AssetServer>,
-    mut hit_counter: ResMut<HitCounters>,
 ) {
     for event in event_reader.read() {
         if "Cylinder" == query.get(event.hit_entity).unwrap().as_str() {
             audio.play(asset_server.load("sounds/hitmarker.ogg"));
-            hit_counter.circle_target += 1;
-            for mut circletarget_entity in &mut circletarget_query {
-                let old_position = circletarget_entity.translation.x;
-                while (circletarget_entity.translation.x - old_position).abs() < 0.5 {
-                    circletarget_entity.translation.x = thread_rng().gen_range(-3.0..3.0);
+            for (mut circletarget_transform, mut circletarget_prop) in circletarget_query.iter_mut()
+            {
+                let old_position = circletarget_transform.translation.x;
+                circletarget_prop.hit_counter += 1;
+                while (circletarget_transform.translation.x - old_position).abs() < 0.5 {
+                    circletarget_transform.translation.x = thread_rng().gen_range(-3.0..3.0);
                 }
             }
         }

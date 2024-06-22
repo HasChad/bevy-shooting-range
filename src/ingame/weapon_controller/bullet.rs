@@ -48,7 +48,7 @@ pub fn spawn_bullet(
         commands
             .spawn((
                 Bullet {
-                    bullet_lifetime: Timer::from_seconds(4., TimerMode::Once),
+                    bullet_lifetime: Timer::from_seconds(3., TimerMode::Once),
                     velocity: bullet_velocity,
                 },
                 TransformBundle::from(spawn_position),
