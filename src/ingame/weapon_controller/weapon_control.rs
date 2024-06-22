@@ -32,43 +32,6 @@ impl Default for LerpTimer {
     }
 }
 
-pub fn sway_weapon(
-    time: Res<Time>,
-    primary_window: Query<&Window, With<PrimaryWindow>>,
-    mut weapon_query: Query<&mut Transform, With<WeaponPromp>>,
-    mut mouse_event: EventReader<MouseMotion>,
-) {
-    for window in primary_window.iter() {
-        let mut weapon_transform = weapon_query.single_mut();
-        let (mut weapon_rot_y, mut weapon_rot_x, _) =
-            weapon_transform.rotation.to_euler(EulerRot::YXZ);
-
-        if mouse_event.is_empty() {
-            if weapon_rot_x.abs() > 0.0 {
-                weapon_rot_x /= 15000. * time.delta_seconds();
-            }
-            if weapon_rot_y.abs() > 0.0 {
-                weapon_rot_y /= 15000. * time.delta_seconds();
-            }
-        }
-
-        for motion in mouse_event.read() {
-            match window.cursor.grab_mode {
-                CursorGrabMode::None => (),
-                _ => {
-                    weapon_rot_y +=
-                        (motion.delta.x - weapon_rot_y * 300.) * time.delta_seconds() * 0.1;
-                    weapon_rot_x +=
-                        (motion.delta.y - weapon_rot_x * 300.) * time.delta_seconds() * 0.1;
-                }
-            }
-        }
-
-        weapon_transform.rotation = Quat::from_axis_angle(Vec3::Y, weapon_rot_y)
-            * Quat::from_axis_angle(Vec3::X, weapon_rot_x);
-    }
-}
-
 pub fn shooting_event(
     key_bindings: Res<KeyBindings>,
     mouse_input: Res<ButtonInput<MouseButton>>,
@@ -228,6 +191,43 @@ pub fn scope(
     }
 }
 
+pub fn sway_weapon(
+    time: Res<Time>,
+    primary_window: Query<&Window, With<PrimaryWindow>>,
+    mut weapon_query: Query<&mut Transform, With<WeaponPromp>>,
+    mut mouse_event: EventReader<MouseMotion>,
+) {
+    for window in primary_window.iter() {
+        let mut weapon_transform = weapon_query.single_mut();
+        let (mut weapon_rot_y, mut weapon_rot_x, _) =
+            weapon_transform.rotation.to_euler(EulerRot::YXZ);
+
+        if mouse_event.is_empty() {
+            if weapon_rot_x.abs() > 0.0 {
+                weapon_rot_x /= 15000. * time.delta_seconds();
+            }
+            if weapon_rot_y.abs() > 0.0 {
+                weapon_rot_y /= 15000. * time.delta_seconds();
+            }
+        }
+
+        for motion in mouse_event.read() {
+            match window.cursor.grab_mode {
+                CursorGrabMode::None => (),
+                _ => {
+                    weapon_rot_y +=
+                        (motion.delta.x - weapon_rot_y * 300.) * time.delta_seconds() * 0.1;
+                    weapon_rot_x +=
+                        (motion.delta.y - weapon_rot_x * 300.) * time.delta_seconds() * 0.1;
+                }
+            }
+        }
+
+        weapon_transform.rotation = Quat::from_axis_angle(Vec3::Y, weapon_rot_y)
+            * Quat::from_axis_angle(Vec3::X, weapon_rot_x);
+    }
+}
+
 pub fn shooting_sound(
     audio: Res<Audio>,
     asset_server: Res<AssetServer>,
@@ -251,10 +251,10 @@ pub fn weapon_animation_setup(
 ) {
     for mut animation_player in &mut animation_player_query {
         match weapon_state.get() {
-            WeaponState::P226 => animation_player.play(shot_anim.0[0].clone_weak()).repeat(),
-            WeaponState::AK15 => animation_player.play(shot_anim.0[1].clone_weak()).repeat(),
-            WeaponState::FNFAL => animation_player.play(shot_anim.0[2].clone_weak()).repeat(),
-            WeaponState::MSR => animation_player.play(shot_anim.0[0].clone_weak()).repeat(), //FIXME: neeed msr animation
+            WeaponState::P226 => animation_player.play(shot_anim.0[0].clone_weak()),
+            WeaponState::AK15 => animation_player.play(shot_anim.0[1].clone_weak()),
+            WeaponState::FNFAL => animation_player.play(shot_anim.0[2].clone_weak()),
+            WeaponState::MSR => animation_player.play(shot_anim.0[0].clone_weak()), //FIXME: neeed msr animation
         };
         animation_player.set_repeat(RepeatAnimation::Count(0));
     }

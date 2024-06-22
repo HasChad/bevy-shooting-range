@@ -33,7 +33,7 @@ impl Plugin for WeaponControllerPlugin {
                 scope,
                 shooting_sound,
                 weapon_animation_setup,
-                weapon_play_animation,
+                weapon_play_animation.after(weapon_animation_setup),
                 shooting_camera_shake,
                 change_weapon,
                 sway_weapon,
