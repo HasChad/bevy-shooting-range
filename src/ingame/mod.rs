@@ -37,19 +37,20 @@ impl Plugin for InGamePlugin {
             .add_systems(
                 Update,
                 (
+                    edit_mode_toggler,
                     //target systems
                     circle_target_controller,
                     enemy_target_controller,
                     enemy_target_hostage_controller,
                 ),
             )
+            //resources
+            .init_resource::<GameSettings>()
             //states
-            //events
+            .init_state::<PlayableState>()
             //plugins
             .add_plugins(PlayerControllerPlugin)
             .add_plugins(IngameUIPlugin)
-            .add_plugins(WeaponControllerPlugin)
-            //resources
-            .init_resource::<GameSettings>();
+            .add_plugins(WeaponControllerPlugin);
     }
 }

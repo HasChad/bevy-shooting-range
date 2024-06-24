@@ -49,7 +49,6 @@ fn main() -> Result<()> {
         .add_plugins(WorldInspectorPlugin::default())
         //mod plugins
         .add_plugins(InGamePlugin)
-        //systems
         .run();
 
     Ok(())

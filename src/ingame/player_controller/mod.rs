@@ -9,6 +9,8 @@ use body_control::*;
 use head_control::*;
 use player::*;
 
+use super::PlayableState;
+
 /// Key configuration
 #[derive(Resource)]
 pub struct KeyBindings {
@@ -77,10 +79,8 @@ impl Plugin for PlayerControllerPlugin {
                 Update,
                 (
                     //player systems
-                    edit_mode_toggler,
-                    player_move,
-                    movement_input_changer,
-                    player_look,
+                    (player_move, movement_input_changer, player_look)
+                        .run_if(in_state(PlayableState::Action)),
                 ),
             )
             .add_systems(
@@ -90,8 +90,6 @@ impl Plugin for PlayerControllerPlugin {
                     .after(PhysicsSet::Sync)
                     .before(TransformSystem::TransformPropagate),
             )
-            //events
-            //plugins
             //resources
             .init_resource::<KeyBindings>()
             .init_resource::<MovementControl>()

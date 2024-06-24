@@ -49,6 +49,7 @@ pub fn player_move(
     primary_window: Query<&Window, With<PrimaryWindow>>,
     movement_input: Res<MovementInput>,
     mut query_player: Query<(&mut LinearVelocity, &mut Transform), With<Player>>,
+    key_input: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
 ) {
     if let Ok(window) = primary_window.get_single() {
@@ -58,6 +59,10 @@ pub fn player_move(
             match window.cursor.grab_mode {
                 CursorGrabMode::None => (),
                 _ => {
+                    if key_input.just_pressed(KeyCode::KeyP) {
+                        player_transform.translation = Vec3::new(0.0, 0.5, 0.0);
+                    }
+
                     // ! player looking direction
                     let forward = Vec3::new(-yaw_player.sin(), 0.0, -yaw_player.cos()).normalize();
                     let right = Vec3::new(-yaw_player.cos(), 0.0, yaw_player.sin()).normalize();

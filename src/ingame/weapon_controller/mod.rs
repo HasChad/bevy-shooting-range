@@ -1,12 +1,16 @@
 use bevy::prelude::*;
 
+pub mod action_control;
 pub mod bullet;
 pub mod weapon_control;
 pub mod weapons;
 
+use action_control::*;
 use bullet::*;
 use weapon_control::*;
 use weapons::*;
+
+use super::PlayableState;
 
 #[derive(Event)]
 pub struct WeaponShootingEvent;
@@ -27,23 +31,24 @@ impl Plugin for WeaponControllerPlugin {
         app.add_systems(
             Update,
             (
-                //weapon_control systems
-                (shooting_event, firerate_timer).run_if(in_state(WeaponActionState::Shooting)),
-                reload_timer.run_if(in_state(WeaponActionState::Reloading)),
-                scope,
-                shooting_sound,
-                weapon_animation_setup,
-                weapon_play_animation.after(weapon_animation_setup),
-                shooting_camera_shake,
-                change_weapon,
                 sway_weapon,
-                //bullet systems
-                spawn_bullet,
+                shooting_sound,
+                scope,
+                weapon_play_animation,
+                firerate_timer.run_if(in_state(WeaponActionState::Shooting)),
+                reload_timer.run_if(in_state(WeaponActionState::Reloading)),
+                (
+                    shooting_event.run_if(in_state(WeaponActionState::Shooting)),
+                    //weapon control
+                    camera_recoil,
+                    change_weapon,
+                    //bullet systems
+                    spawn_bullet,
+                )
+                    .run_if(in_state(PlayableState::Action)),
             ),
         )
         .add_systems(FixedUpdate, bullet_controller)
-        //events
-        //plugins
         //resources
         .init_resource::<LerpTimer>()
         .init_resource::<WeaponRes>()

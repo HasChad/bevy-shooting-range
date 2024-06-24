@@ -170,6 +170,7 @@ pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<Crosshair
         });
 }
 
+//MARK: Hitmarker
 pub fn hitmarker_spawner(mut commands: Commands, mut event_reader: EventReader<HitConfirmEvent>) {
     for _event in event_reader.read() {
         commands

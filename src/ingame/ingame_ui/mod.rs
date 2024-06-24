@@ -30,7 +30,5 @@ impl Plugin for IngameUIPlugin {
             )
             //resources
             .init_resource::<CrosshairLineSettings>();
-        //plugins
-        //events
     }
 }

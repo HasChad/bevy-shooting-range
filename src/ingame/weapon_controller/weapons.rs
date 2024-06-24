@@ -81,7 +81,7 @@ impl WeaponPromp {
             is_auto: true,
             okay_to_shoot: true,
             firerate: Timer::from_seconds(0.09, TimerMode::Once),
-            reload_timer: Timer::from_seconds(2.0, TimerMode::Once),
+            reload_timer: Timer::from_seconds(1.75, TimerMode::Once),
         }
     }
 
@@ -134,7 +134,7 @@ pub fn change_weapon(
     mut weapon_res: ResMut<WeaponRes>,
 ) {
     for key in input.get_just_pressed() {
-        if *weapon_action_state.get() != WeaponActionState::Reloading {
+        if *weapon_action_state.get() == WeaponActionState::Shooting {
             for (mut weapon_promp, mut weapon_scene) in weapon_query.iter_mut() {
                 match weapon_state.get() {
                     WeaponState::P226 => weapon_res.p226 = weapon_promp.clone(),

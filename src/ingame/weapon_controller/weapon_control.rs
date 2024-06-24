@@ -10,11 +10,11 @@ use bevy_kira_audio::prelude::*;
 use rand::{thread_rng, Rng};
 use std::f32::consts::PI;
 
-use super::{WeaponActionState, WeaponPromp, WeaponShootingEvent, WeaponState};
+use super::{WeaponPromp, WeaponReloadingEvent, WeaponShootingEvent, WeaponState};
 use crate::ingame::{
     crosshair::{CrosshairLine, CrosshairLineSettings},
     player::Head,
-    GameSettings, KeyBindings, ShootingAnimations,
+    GameSettings, KeyBindings, ReloadingAnimations, ShootingAnimations,
 };
 
 #[derive(Resource)]
@@ -32,80 +32,7 @@ impl Default for LerpTimer {
     }
 }
 
-pub fn shooting_event(
-    key_bindings: Res<KeyBindings>,
-    mouse_input: Res<ButtonInput<MouseButton>>,
-    keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut event_writer: EventWriter<WeaponShootingEvent>,
-    mut weapon_query: Query<&mut WeaponPromp>,
-    mut windows: Query<&mut Window>,
-    mut next_state: ResMut<NextState<WeaponActionState>>,
-) {
-    for mut window in windows.iter_mut() {
-        if window.cursor.grab_mode == CursorGrabMode::Confined {
-            //Center mouse becasuse confined mod is not working on Windows right now
-            let center = Vec2::new(window.width() / 2.0, window.height() / 2.0);
-            window.set_cursor_position(Some(center));
-
-            for mut weapon_promp in weapon_query.iter_mut() {
-                if weapon_promp.okay_to_shoot {
-                    //semi auto shot
-                    if mouse_input.just_pressed(key_bindings.fire) && !weapon_promp.is_auto {
-                        weapon_promp.mag_capacity -= 1;
-                        event_writer.send(WeaponShootingEvent);
-                        weapon_promp.okay_to_shoot = false;
-                    }
-                    //full auto shot
-                    if mouse_input.pressed(key_bindings.fire) && weapon_promp.is_auto {
-                        weapon_promp.mag_capacity -= 1;
-                        event_writer.send(WeaponShootingEvent);
-                        weapon_promp.okay_to_shoot = false;
-                    }
-                }
-                //reload
-                if (weapon_promp.mag_capacity == 0
-                    || (keyboard_input.just_pressed(key_bindings.reload))
-                        && weapon_promp.mag_capacity < weapon_promp.self_mag_cap())
-                    && weapon_promp.ammo_capacity > 0
-                {
-                    next_state.set(WeaponActionState::Reloading)
-                }
-            }
-        }
-    }
-}
-
-pub fn firerate_timer(mut weapon_query: Query<&mut WeaponPromp>, time: Res<Time>) {
-    for mut weapon_promp in weapon_query.iter_mut() {
-        if !weapon_promp.okay_to_shoot {
-            weapon_promp.firerate.tick(time.delta());
-
-            if weapon_promp.firerate.finished() {
-                weapon_promp.firerate.reset();
-                weapon_promp.okay_to_shoot = true;
-            }
-        }
-    }
-}
-
-pub fn reload_timer(
-    mut weapon_query: Query<&mut WeaponPromp>,
-    mut next_state: ResMut<NextState<WeaponActionState>>,
-    time: Res<Time>,
-) {
-    for mut weapon_promp in weapon_query.iter_mut() {
-        weapon_promp.reload_timer.tick(time.delta());
-
-        if weapon_promp.reload_timer.finished() {
-            weapon_promp.reload_timer.reset();
-            weapon_promp.ammo_capacity -= weapon_promp.self_mag_cap() - weapon_promp.mag_capacity;
-            weapon_promp.mag_capacity = weapon_promp.self_mag_cap();
-            next_state.set(WeaponActionState::Shooting)
-        }
-    }
-}
-
-pub fn shooting_camera_shake(
+pub fn camera_recoil(
     mut event_reader: EventReader<WeaponShootingEvent>,
     mut camera_query: Query<&mut Projection, With<Camera3d>>,
     settings: ResMut<GameSettings>,
@@ -231,10 +158,11 @@ pub fn sway_weapon(
 pub fn shooting_sound(
     audio: Res<Audio>,
     asset_server: Res<AssetServer>,
-    mut event_reader: EventReader<WeaponShootingEvent>,
+    mut shot_event_reader: EventReader<WeaponShootingEvent>,
+    mut reload_event_reader: EventReader<WeaponReloadingEvent>,
     weapon_state: Res<State<WeaponState>>,
 ) {
-    for _event in event_reader.read() {
+    for _event in shot_event_reader.read() {
         match weapon_state.get() {
             WeaponState::P226 => audio.play(asset_server.load("sounds/p226_shot.ogg")),
             WeaponState::AK15 => audio.play(asset_server.load("sounds/ak15_shot.ogg")),
@@ -242,30 +170,47 @@ pub fn shooting_sound(
             WeaponState::MSR => audio.play(asset_server.load("sounds/msr_shot.ogg")), //FIXME: neeed msr sound
         };
     }
-}
-
-pub fn weapon_animation_setup(
-    shot_anim: Res<ShootingAnimations>,
-    weapon_state: Res<State<WeaponState>>,
-    mut animation_player_query: Query<&mut AnimationPlayer, Added<AnimationPlayer>>,
-) {
-    for mut animation_player in &mut animation_player_query {
+    for _event in reload_event_reader.read() {
         match weapon_state.get() {
-            WeaponState::P226 => animation_player.play(shot_anim.0[0].clone_weak()),
-            WeaponState::AK15 => animation_player.play(shot_anim.0[1].clone_weak()),
-            WeaponState::FNFAL => animation_player.play(shot_anim.0[2].clone_weak()),
-            WeaponState::MSR => animation_player.play(shot_anim.0[0].clone_weak()), //FIXME: neeed msr animation
+            WeaponState::P226 => audio.play(asset_server.load("sounds/p226_reload.ogg")),
+            WeaponState::AK15 => audio.play(asset_server.load("sounds/ak15_reload.ogg")),
+            WeaponState::FNFAL => audio.play(asset_server.load("sounds/fal_reload.ogg")),
+            WeaponState::MSR => audio.play(asset_server.load("sounds/msr_reload.ogg")), //FIXME: neeed msr sound
         };
-        animation_player.set_repeat(RepeatAnimation::Count(0));
     }
 }
 
 pub fn weapon_play_animation(
-    mut event_reader: EventReader<WeaponShootingEvent>,
+    shot_anim: Res<ShootingAnimations>,
+    reload_anim: Res<ReloadingAnimations>,
+    weapon_state: Res<State<WeaponState>>,
+    mut shot_event_reader: EventReader<WeaponShootingEvent>,
+    mut reload_event_reader: EventReader<WeaponReloadingEvent>,
     mut animation_player_query: Query<&mut AnimationPlayer>,
 ) {
-    for _event in event_reader.read() {
+    for _event in shot_event_reader.read() {
         for mut animation_player in &mut animation_player_query {
+            match weapon_state.get() {
+                WeaponState::P226 => animation_player.play(shot_anim.0[0].clone_weak()),
+                WeaponState::AK15 => animation_player.play(shot_anim.0[1].clone_weak()),
+                WeaponState::FNFAL => animation_player.play(shot_anim.0[2].clone_weak()),
+                WeaponState::MSR => animation_player.play(shot_anim.0[3].clone_weak()), //FIXME: neeed msr animation
+            };
+
+            animation_player.set_repeat(RepeatAnimation::Count(1));
+            animation_player.replay();
+        }
+    }
+
+    for _event in reload_event_reader.read() {
+        for mut animation_player in &mut animation_player_query {
+            match weapon_state.get() {
+                WeaponState::P226 => animation_player.play(reload_anim.0[0].clone_weak()),
+                WeaponState::AK15 => animation_player.play(reload_anim.0[1].clone_weak()), //FIXME: neeed ak15 animation
+                WeaponState::FNFAL => animation_player.play(reload_anim.0[2].clone_weak()), //FIXME: neeed fnfal animation
+                WeaponState::MSR => animation_player.play(reload_anim.0[3].clone_weak()), //FIXME: neeed msr animation
+            };
+
             animation_player.set_repeat(RepeatAnimation::Count(1));
             animation_player.replay();
         }
