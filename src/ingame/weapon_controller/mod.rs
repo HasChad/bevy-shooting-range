@@ -1,11 +1,13 @@
 use bevy::prelude::*;
 
 pub mod action_control;
+pub mod aim_control;
 pub mod bullet;
 pub mod weapon_control;
 pub mod weapons;
 
 use action_control::*;
+use aim_control::*;
 use bullet::*;
 use weapon_control::*;
 use weapons::*;
