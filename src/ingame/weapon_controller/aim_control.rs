@@ -3,7 +3,10 @@
 use bevy::prelude::*;
 use std::f32::consts::PI;
 
-use super::{weapons::WeaponActionState, WeaponPromp};
+use super::{
+    weapons::{WeaponActionState, WeaponAimState},
+    WeaponPromp,
+};
 use crate::ingame::{
     crosshair::{CrosshairLine, CrosshairLineSettings},
     GameSettings, KeyBindings,
@@ -22,30 +25,46 @@ impl Default for LerpTimer {
     }
 }
 
+pub fn aim_changer(
+    mut lerp_timer: ResMut<LerpTimer>,
+    key_bindings: Res<KeyBindings>,
+    mouse_input: Res<ButtonInput<MouseButton>>,
+    weapon_aim_state: Res<State<WeaponAimState>>,
+    mut next_weapon_aim_state: ResMut<NextState<WeaponAimState>>,
+    weapon_action_state: Res<State<WeaponActionState>>,
+) {
+    if weapon_action_state.is_changed() {
+        lerp_timer.scope_timer.reset();
+    }
+
+    if mouse_input.just_pressed(key_bindings.scope) || mouse_input.just_released(key_bindings.scope)
+    {
+        lerp_timer.scope_timer.reset();
+
+        match weapon_aim_state.get() {
+            WeaponAimState::HipFire => next_weapon_aim_state.set(WeaponAimState::Scope),
+            WeaponAimState::Scope => next_weapon_aim_state.set(WeaponAimState::HipFire),
+        }
+    }
+}
+
 pub fn scope(
     time: Res<Time>,
     settings: ResMut<GameSettings>,
-    key_bindings: Res<KeyBindings>,
-    mouse_input: Res<ButtonInput<MouseButton>>,
+    crosshair_settings: Res<CrosshairLineSettings>,
+    weapon_aim_state: Res<State<WeaponAimState>>,
     weapon_action_state: Res<State<WeaponActionState>>,
     mut lerp_timer: ResMut<LerpTimer>,
     mut camera_query: Query<&mut Projection, With<Camera3d>>,
     mut weapon_query: Query<&mut Transform, With<WeaponPromp>>,
     mut crosshair_query: Query<&mut Visibility, With<CrosshairLine>>,
-    crosshair_settings: Res<CrosshairLineSettings>,
 ) {
     let mut weapon_transform = weapon_query.single_mut();
     let Projection::Perspective(persp) = camera_query.single_mut().into_inner() else {
         return;
     };
 
-    if mouse_input.just_pressed(key_bindings.scope)
-        || mouse_input.just_released(key_bindings.scope)
-        || weapon_action_state.is_changed()
-    {
-        lerp_timer.scope_timer.reset()
-    }
-    if mouse_input.pressed(key_bindings.scope)
+    if *weapon_aim_state.get() == WeaponAimState::Scope
         && *weapon_action_state.get() == WeaponActionState::Shooting
     {
         lerp_timer.scope_timer.tick(time.delta());

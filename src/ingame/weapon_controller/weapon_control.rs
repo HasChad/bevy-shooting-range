@@ -12,10 +12,10 @@ use super::{WeaponPromp, WeaponReloadingEvent, WeaponShootingEvent, WeaponState}
 use crate::ingame::{player::Head, GameSettings, ReloadingAnimations, ShootingAnimations};
 
 pub fn camera_recoil(
+    time: Res<Time>,
+    settings: ResMut<GameSettings>,
     mut event_reader: EventReader<WeaponShootingEvent>,
     mut camera_query: Query<&mut Projection, With<Camera3d>>,
-    settings: ResMut<GameSettings>,
-    time: Res<Time>,
     mut head_query: Query<&mut Transform, With<Head>>,
 ) {
     let Projection::Perspective(persp) = camera_query.single_mut().into_inner() else {
@@ -52,11 +52,16 @@ pub fn sway_weapon(
             weapon_transform.rotation.to_euler(EulerRot::YXZ);
 
         if mouse_event.is_empty() {
-            if weapon_rot_x.abs() > 0.0 {
+            if weapon_rot_x.abs() > 0.05 {
                 weapon_rot_x /= 15000. * time.delta_seconds();
+            } else {
+                weapon_rot_x = 0.0;
             }
-            if weapon_rot_y.abs() > 0.0 {
+
+            if weapon_rot_y.abs() > 0.05 {
                 weapon_rot_y /= 15000. * time.delta_seconds();
+            } else {
+                weapon_rot_y = 0.0;
             }
         }
 
@@ -77,12 +82,54 @@ pub fn sway_weapon(
     }
 }
 
+pub fn scoped_sway_weapon(
+    time: Res<Time>,
+    primary_window: Query<&Window, With<PrimaryWindow>>,
+    mut weapon_query: Query<&mut Transform, With<WeaponPromp>>,
+    mut mouse_event: EventReader<MouseMotion>,
+) {
+    for window in primary_window.iter() {
+        let mut weapon_transform = weapon_query.single_mut();
+        let (mut weapon_rot_y, mut weapon_rot_x, _) =
+            weapon_transform.rotation.to_euler(EulerRot::YXZ);
+
+        if mouse_event.is_empty() {
+            if weapon_rot_x.abs() > 0.05 {
+                weapon_rot_x /= 5000. * time.delta_seconds();
+            } else {
+                weapon_rot_x = 0.0;
+            }
+
+            if weapon_rot_y.abs() > 0.05 {
+                weapon_rot_y /= 5000. * time.delta_seconds();
+            } else {
+                weapon_rot_y = 0.0;
+            }
+        }
+
+        for motion in mouse_event.read() {
+            match window.cursor.grab_mode {
+                CursorGrabMode::None => (),
+                _ => {
+                    weapon_rot_y +=
+                        (motion.delta.x - weapon_rot_y * 2000.) * time.delta_seconds() * 0.1;
+                    weapon_rot_x +=
+                        (motion.delta.y - weapon_rot_x * 2000.) * time.delta_seconds() * 0.1;
+                }
+            }
+        }
+
+        weapon_transform.rotation = Quat::from_axis_angle(Vec3::Y, weapon_rot_y)
+            * Quat::from_axis_angle(Vec3::X, weapon_rot_x);
+    }
+}
+
 pub fn shooting_sound(
     audio: Res<Audio>,
     asset_server: Res<AssetServer>,
+    weapon_state: Res<State<WeaponState>>,
     mut shot_event_reader: EventReader<WeaponShootingEvent>,
     mut reload_event_reader: EventReader<WeaponReloadingEvent>,
-    weapon_state: Res<State<WeaponState>>,
 ) {
     for _event in shot_event_reader.read() {
         match weapon_state.get() {
@@ -102,7 +149,7 @@ pub fn shooting_sound(
     }
 }
 
-pub fn weapon_play_animation(
+pub fn weapon_animation(
     shot_anim: Res<ShootingAnimations>,
     reload_anim: Res<ReloadingAnimations>,
     weapon_state: Res<State<WeaponState>>,
@@ -110,6 +157,7 @@ pub fn weapon_play_animation(
     mut reload_event_reader: EventReader<WeaponReloadingEvent>,
     mut animation_player_query: Query<&mut AnimationPlayer>,
 ) {
+    //shooting animation
     for _event in shot_event_reader.read() {
         for mut animation_player in &mut animation_player_query {
             match weapon_state.get() {
@@ -124,11 +172,12 @@ pub fn weapon_play_animation(
         }
     }
 
+    //reloading animation
     for _event in reload_event_reader.read() {
         for mut animation_player in &mut animation_player_query {
             match weapon_state.get() {
                 WeaponState::P226 => animation_player.play(reload_anim.0[0].clone_weak()),
-                WeaponState::AK15 => animation_player.play(reload_anim.0[1].clone_weak()), //FIXME: neeed ak15 animation
+                WeaponState::AK15 => animation_player.play(reload_anim.0[1].clone_weak()),
                 WeaponState::FNFAL => animation_player.play(reload_anim.0[2].clone_weak()), //FIXME: neeed fnfal animation
                 WeaponState::MSR => animation_player.play(reload_anim.0[3].clone_weak()), //FIXME: neeed msr animation
             };

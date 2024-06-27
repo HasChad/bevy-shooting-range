@@ -33,19 +33,22 @@ impl Plugin for WeaponControllerPlugin {
         app.add_systems(
             Update,
             (
-                sway_weapon,
-                shooting_sound,
+                //aim system
+                aim_changer,
                 scope,
-                weapon_play_animation,
+                //control system
+                camera_recoil,
+                sway_weapon.run_if(in_state(WeaponAimState::HipFire)),
+                scoped_sway_weapon.run_if(in_state(WeaponAimState::Scope)),
+                shooting_sound,
+                weapon_animation,
+                spawn_bullet,
+                //action system
                 firerate_timer.run_if(in_state(WeaponActionState::Shooting)),
                 reload_timer.run_if(in_state(WeaponActionState::Reloading)),
                 (
-                    shooting_event.run_if(in_state(WeaponActionState::Shooting)),
-                    //weapon control
-                    camera_recoil,
                     change_weapon,
-                    //bullet systems
-                    spawn_bullet,
+                    weapon_input_controller.run_if(in_state(WeaponActionState::Shooting)),
                 )
                     .run_if(in_state(PlayableState::Action)),
             ),

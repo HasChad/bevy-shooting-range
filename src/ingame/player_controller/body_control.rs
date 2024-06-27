@@ -48,12 +48,12 @@ pub fn movement_input_changer(
 pub fn player_move(
     primary_window: Query<&Window, With<PrimaryWindow>>,
     movement_input: Res<MovementInput>,
-    mut query_player: Query<(&mut LinearVelocity, &mut Transform), With<Player>>,
+    mut player_query: Query<(&mut LinearVelocity, &mut Transform), With<Player>>,
     key_input: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
 ) {
     if let Ok(window) = primary_window.get_single() {
-        for (mut _linear_velocity, mut player_transform) in query_player.iter_mut() {
+        for (mut _linear_velocity, mut player_transform) in player_query.iter_mut() {
             let (yaw_player, _, _) = player_transform.rotation.to_euler(EulerRot::YXZ);
 
             match window.cursor.grab_mode {

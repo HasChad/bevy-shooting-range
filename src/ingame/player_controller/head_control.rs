@@ -8,12 +8,12 @@ pub fn player_look(
     time: Res<Time>,
     settings: Res<GameSettings>,
     mut mouse_event: EventReader<MouseMotion>,
-    mut query_camera: Query<&mut Transform, With<Head>>,
-    mut query_player: Query<&mut Transform, (With<Player>, Without<Head>)>,
+    mut camera_query: Query<&mut Transform, With<Head>>,
+    mut player_query: Query<&mut Transform, (With<Player>, Without<Head>)>,
 ) {
     for motion in mouse_event.read() {
-        let mut camera_transform = query_camera.single_mut();
-        let mut player_transform = query_player.single_mut();
+        let mut camera_transform = camera_query.single_mut();
+        let mut player_transform = player_query.single_mut();
 
         let (mut yaw_camera, mut pitch_camera, _) =
             camera_transform.rotation.to_euler(EulerRot::YXZ);
@@ -33,11 +33,11 @@ pub fn player_look(
 }
 
 pub fn camera_follow_player(
-    mut query_camera: Query<&mut Transform, With<Head>>,
-    query_player: Query<&Transform, (With<Player>, Without<Head>)>,
+    mut camera_query: Query<&mut Transform, With<Head>>,
+    player_query: Query<&Transform, (With<Player>, Without<Head>)>,
 ) {
-    for player_transform in query_player.iter() {
-        for mut camera_transform in query_camera.iter_mut() {
+    for player_transform in player_query.iter() {
+        for mut camera_transform in camera_query.iter_mut() {
             camera_transform.translation = player_transform.translation;
             camera_transform.translation.y = player_transform.translation.y + 0.25;
             //for inspecting player collider

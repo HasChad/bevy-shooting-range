@@ -5,38 +5,33 @@ use bevy::prelude::*;
 use super::{WeaponActionState, WeaponPromp, WeaponReloadingEvent, WeaponShootingEvent};
 use crate::ingame::KeyBindings;
 
-pub fn shooting_event(
+pub fn weapon_input_controller(
     key_bindings: Res<KeyBindings>,
     mouse_input: Res<ButtonInput<MouseButton>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut shot_event_writer: EventWriter<WeaponShootingEvent>,
-    mut reload_event_writer: EventWriter<WeaponReloadingEvent>,
     mut weapon_query: Query<&mut WeaponPromp>,
     mut next_state: ResMut<NextState<WeaponActionState>>,
+    mut shot_event_writer: EventWriter<WeaponShootingEvent>,
+    mut reload_event_writer: EventWriter<WeaponReloadingEvent>,
 ) {
     for mut weapon_promp in weapon_query.iter_mut() {
-        if weapon_promp.okay_to_shoot {
-            //semi auto shot
-            if mouse_input.just_pressed(key_bindings.fire) && !weapon_promp.is_auto {
-                weapon_promp.mag_capacity -= 1;
-                shot_event_writer.send(WeaponShootingEvent);
-                weapon_promp.okay_to_shoot = false;
-            }
-            //full auto shot
-            if mouse_input.pressed(key_bindings.fire) && weapon_promp.is_auto {
-                weapon_promp.mag_capacity -= 1;
-                shot_event_writer.send(WeaponShootingEvent);
-                weapon_promp.okay_to_shoot = false;
-            }
+        //shoot
+        if weapon_promp.okay_to_shoot
+            && weapon_promp.mag_capacity > 0
+            && ((mouse_input.just_pressed(key_bindings.fire) && !weapon_promp.is_auto)
+                || (mouse_input.pressed(key_bindings.fire) && weapon_promp.is_auto))
+        {
+            weapon_promp.mag_capacity -= 1;
+            weapon_promp.okay_to_shoot = false;
+            shot_event_writer.send(WeaponShootingEvent);
         }
+
         //reload
-        if (weapon_promp.mag_capacity == 0
-            || (keyboard_input.just_pressed(key_bindings.reload))
-                && weapon_promp.mag_capacity < weapon_promp.self_mag_cap())
+        if (weapon_promp.mag_capacity == 0 || keyboard_input.just_pressed(key_bindings.reload))
             && weapon_promp.ammo_capacity > 0
         {
-            reload_event_writer.send(WeaponReloadingEvent);
             next_state.set(WeaponActionState::Reloading);
+            reload_event_writer.send(WeaponReloadingEvent);
         }
     }
 }
@@ -64,8 +59,17 @@ pub fn reload_timer(
 
         if weapon_promp.reload_timer.finished() {
             weapon_promp.reload_timer.reset();
-            weapon_promp.ammo_capacity -= weapon_promp.self_mag_cap() - weapon_promp.mag_capacity;
-            weapon_promp.mag_capacity = weapon_promp.self_mag_cap();
+
+            if weapon_promp.ammo_capacity + weapon_promp.mag_capacity >= weapon_promp.self_mag_cap()
+            {
+                weapon_promp.ammo_capacity -=
+                    weapon_promp.self_mag_cap() - weapon_promp.mag_capacity;
+                weapon_promp.mag_capacity = weapon_promp.self_mag_cap();
+            } else {
+                weapon_promp.mag_capacity += weapon_promp.ammo_capacity;
+                weapon_promp.ammo_capacity = 0;
+            }
+
             next_state.set(WeaponActionState::Shooting)
         }
     }

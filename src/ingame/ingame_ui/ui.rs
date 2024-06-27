@@ -229,11 +229,11 @@ pub fn weapon_name_text_updater(
 }
 
 pub fn velocity_text_updater(
-    query_player: Query<&LinearVelocity, With<Player>>,
+    player_query: Query<&LinearVelocity, With<Player>>,
     mut query: Query<&mut Text, With<VelocityText>>,
 ) {
     for mut text in &mut query {
-        for linear_velocity in query_player.iter() {
+        for linear_velocity in player_query.iter() {
             let sum_velocity = ((linear_velocity.x * linear_velocity.x)
                 + (linear_velocity.z * linear_velocity.z))
                 .sqrt();
