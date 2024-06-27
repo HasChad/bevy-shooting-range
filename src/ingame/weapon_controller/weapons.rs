@@ -1,10 +1,14 @@
+#![allow(clippy::too_many_arguments)]
+
 use bevy::prelude::*;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Default, States)]
 pub enum WeaponActionState {
     #[default]
-    Shooting,
-    Reloading,
+    Shoot,
+    Reload,
+    Raise,
+    Lower,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Default, States)]
@@ -125,16 +129,20 @@ impl WeaponPromp {
 }
 
 pub fn change_weapon(
-    mut weapon_query: Query<(&mut WeaponPromp, &mut Handle<Scene>)>,
     input: Res<ButtonInput<KeyCode>>,
     asset_server: Res<AssetServer>,
-    mut next_weapon_state: ResMut<NextState<WeaponState>>,
-    weapon_state: Res<State<WeaponState>>,
-    weapon_action_state: Res<State<WeaponActionState>>,
     mut weapon_res: ResMut<WeaponRes>,
+    weapon_state: Res<State<WeaponState>>,
+    weapon_aim_state: Res<State<WeaponAimState>>,
+    weapon_action_state: Res<State<WeaponActionState>>,
+    //mut next_weapon_action_state: ResMut<NextState<WeaponActionState>>,
+    mut next_weapon_state: ResMut<NextState<WeaponState>>,
+    mut weapon_query: Query<(&mut WeaponPromp, &mut Handle<Scene>)>,
 ) {
     for key in input.get_just_pressed() {
-        if *weapon_action_state.get() == WeaponActionState::Shooting {
+        if *weapon_action_state.get() == WeaponActionState::Shoot
+            && *weapon_aim_state.get() == WeaponAimState::HipFire
+        {
             for (mut weapon_promp, mut weapon_scene) in weapon_query.iter_mut() {
                 match weapon_state.get() {
                     WeaponState::P226 => weapon_res.p226 = weapon_promp.clone(),
@@ -148,21 +156,25 @@ pub fn change_weapon(
                         *weapon_promp = weapon_res.p226.clone();
                         *weapon_scene = asset_server.load("models/weapons/P226.glb#Scene0");
                         next_weapon_state.set(WeaponState::P226);
+                        //next_weapon_action_state.set(WeaponActionState::Raise);
                     }
                     KeyCode::Digit2 => {
                         *weapon_promp = weapon_res.ak15.clone();
                         *weapon_scene = asset_server.load("models/weapons/AK15.glb#Scene0");
                         next_weapon_state.set(WeaponState::AK15);
+                        //next_weapon_action_state.set(WeaponActionState::Raise);
                     }
                     KeyCode::Digit3 => {
                         *weapon_promp = weapon_res.fnfal.clone();
                         *weapon_scene = asset_server.load("models/weapons/FNFAL.glb#Scene0");
                         next_weapon_state.set(WeaponState::FNFAL);
+                        //next_weapon_action_state.set(WeaponActionState::Raise);
                     }
                     KeyCode::Digit4 => {
                         *weapon_promp = weapon_res.msr.clone();
                         *weapon_scene = asset_server.load("models/weapons/MSR.glb#Scene0");
                         next_weapon_state.set(WeaponState::MSR);
+                        //next_weapon_action_state.set(WeaponActionState::Raise);
                     }
                     _ => (),
                 }

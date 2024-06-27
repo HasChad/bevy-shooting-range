@@ -65,7 +65,7 @@ pub fn scope(
     };
 
     if *weapon_aim_state.get() == WeaponAimState::Scope
-        && *weapon_action_state.get() == WeaponActionState::Shooting
+        && *weapon_action_state.get() == WeaponActionState::Shoot
     {
         lerp_timer.scope_timer.tick(time.delta());
 
@@ -76,9 +76,7 @@ pub fn scope(
         let percentage_complete =
             lerp_timer.scope_timer.elapsed_secs() / lerp_timer.scope_timer.duration().as_secs_f32();
 
-        persp.fov = persp
-            .fov
-            .lerp((settings.fov) * 0.6 / 180.0 * PI, percentage_complete);
+        persp.fov = persp.fov.lerp(50.0 / 180.0 * PI, percentage_complete);
 
         weapon_transform.translation = weapon_transform
             .translation

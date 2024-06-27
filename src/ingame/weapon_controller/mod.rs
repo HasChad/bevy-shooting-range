@@ -44,11 +44,11 @@ impl Plugin for WeaponControllerPlugin {
                 weapon_animation,
                 spawn_bullet,
                 //action system
-                firerate_timer.run_if(in_state(WeaponActionState::Shooting)),
-                reload_timer.run_if(in_state(WeaponActionState::Reloading)),
+                firerate_timer.run_if(in_state(WeaponActionState::Shoot)),
+                reload_timer.run_if(in_state(WeaponActionState::Reload)),
                 (
                     change_weapon,
-                    weapon_input_controller.run_if(in_state(WeaponActionState::Shooting)),
+                    weapon_input_controller.run_if(in_state(WeaponActionState::Shoot)),
                 )
                     .run_if(in_state(PlayableState::Action)),
             ),

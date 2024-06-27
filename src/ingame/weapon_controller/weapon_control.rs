@@ -21,6 +21,7 @@ pub fn camera_recoil(
     let Projection::Perspective(persp) = camera_query.single_mut().into_inner() else {
         return;
     };
+
     for _event in event_reader.read() {
         let mut head_transform = head_query.single_mut();
         let (mut yaw_camera, mut pitch_camera, _) = head_transform.rotation.to_euler(EulerRot::YXZ);

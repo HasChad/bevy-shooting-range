@@ -65,11 +65,11 @@ pub fn target_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 pub fn circle_target_controller(
+    audio: Res<Audio>,
+    query: Query<&Name>,
+    asset_server: Res<AssetServer>,
     mut event_reader: EventReader<HitConfirmEvent>,
     mut circletarget_query: Query<(&mut Transform, &mut CircleTarget)>,
-    query: Query<&Name>,
-    audio: Res<Audio>,
-    asset_server: Res<AssetServer>,
 ) {
     for event in event_reader.read() {
         if "Cylinder" == query.get(event.hit_entity).unwrap().as_str() {
@@ -77,7 +77,9 @@ pub fn circle_target_controller(
             for (mut circletarget_transform, mut circletarget_prop) in circletarget_query.iter_mut()
             {
                 let old_position = circletarget_transform.translation.x;
-                circletarget_prop.hit_counter += 1;
+                if circletarget_prop.hit_counter < 30 {
+                    circletarget_prop.hit_counter += 1;
+                }
                 while (circletarget_transform.translation.x - old_position).abs() < 0.5 {
                     circletarget_transform.translation.x = thread_rng().gen_range(-3.0..3.0);
                 }

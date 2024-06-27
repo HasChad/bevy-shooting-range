@@ -10,7 +10,7 @@ pub fn weapon_input_controller(
     mouse_input: Res<ButtonInput<MouseButton>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut weapon_query: Query<&mut WeaponPromp>,
-    mut next_state: ResMut<NextState<WeaponActionState>>,
+    mut next_weapon_action_state: ResMut<NextState<WeaponActionState>>,
     mut shot_event_writer: EventWriter<WeaponShootingEvent>,
     mut reload_event_writer: EventWriter<WeaponReloadingEvent>,
 ) {
@@ -29,8 +29,9 @@ pub fn weapon_input_controller(
         //reload
         if (weapon_promp.mag_capacity == 0 || keyboard_input.just_pressed(key_bindings.reload))
             && weapon_promp.ammo_capacity > 0
+            && weapon_promp.mag_capacity < weapon_promp.self_mag_cap()
         {
-            next_state.set(WeaponActionState::Reloading);
+            next_weapon_action_state.set(WeaponActionState::Reload);
             reload_event_writer.send(WeaponReloadingEvent);
         }
     }
@@ -70,7 +71,7 @@ pub fn reload_timer(
                 weapon_promp.ammo_capacity = 0;
             }
 
-            next_state.set(WeaponActionState::Shooting)
+            next_state.set(WeaponActionState::Shoot)
         }
     }
 }

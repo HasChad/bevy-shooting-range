@@ -68,6 +68,7 @@ pub fn player_setup(
                 BulletSpawnPosition,
                 Name::new("Bullet Spawn Position"),
             ));
+
             //gun model
             parent.spawn((
                 SceneBundle {

@@ -39,6 +39,8 @@ pub fn spawn_bullet(
                     if name.contains("tracer_point") {
                         if let Ok(transform) = position.get(child) {
                             tracer_position = transform.translation + gun_trans.translation;
+                            tracer_position.z -= 0.5;
+                            info!("{:?}", transform.translation);
                         }
                     }
                 }
@@ -51,7 +53,7 @@ pub fn spawn_bullet(
                     bullet_lifetime: Timer::from_seconds(3., TimerMode::Once),
                     velocity: bullet_velocity,
                 },
-                TransformBundle::from(spawn_position),
+                TransformBundle::from(*head_transform),
                 InheritedVisibility::VISIBLE,
                 Name::new("Bullet"),
             ))
@@ -72,13 +74,13 @@ pub fn spawn_bullet(
 }
 
 pub fn bullet_controller(
-    player_query: Query<Entity, With<Player>>,
     time: Res<Time>,
     mut commands: Commands,
-    mut bullet_query: Query<(&mut Transform, &mut Bullet, Entity)>,
     spatial_query: SpatialQuery,
     mut event_writer: EventWriter<HitConfirmEvent>,
     children_query: Query<&Children>,
+    player_query: Query<Entity, With<Player>>,
+    mut bullet_query: Query<(&mut Transform, &mut Bullet, Entity)>,
     mut transforms: Query<&mut Transform, Without<Bullet>>,
 ) {
     for (mut bullet_transform, mut bullet_promp, bullet_entity) in bullet_query.iter_mut() {
@@ -116,7 +118,6 @@ pub fn bullet_controller(
             }
         }
 
-        //bullet despawner
         bullet_promp.bullet_lifetime.tick(time.delta());
         if bullet_promp.bullet_lifetime.finished() {
             commands.entity(bullet_entity).despawn_recursive();
