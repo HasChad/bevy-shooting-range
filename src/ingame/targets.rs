@@ -3,7 +3,10 @@ use bevy_kira_audio::prelude::*;
 use bevy_xpbd_3d::prelude::*;
 use rand::prelude::*;
 
-use crate::ingame::{weapons::WeaponPromp, HitConfirmEvent};
+use crate::{
+    ingame::{weapons::WeaponPromp, HitConfirmEvent},
+    ingame_ui::HitmarkerEvent,
+};
 
 #[derive(Component)]
 pub struct CircleTarget {
@@ -19,6 +22,38 @@ pub struct EnemyTarget {
 #[derive(Component)]
 pub struct EnemyTargetHostage {
     health: i8,
+}
+
+#[derive(Event)]
+pub struct CircleTargetEvent {
+    entity: Entity,
+}
+
+pub fn hit_detector(
+    audio: Res<Audio>,
+    query: Query<&Name>,
+    asset_server: Res<AssetServer>,
+    mut event_reader: EventReader<HitConfirmEvent>,
+    mut circletarget_event_writer: EventWriter<CircleTargetEvent>,
+    mut hitmarker_event_writer: EventWriter<HitmarkerEvent>,
+    parent_query: Query<&Parent>,
+) {
+    for event in event_reader.read() {
+        let hit_entity_name = query.get(event.hit_entity).unwrap().as_str();
+
+        for ancestor in parent_query.iter_ancestors(event.hit_entity) {}
+
+        match hit_entity_name {
+            "Cylinder" => {
+                circletarget_event_writer.send(CircleTargetEvent {
+                    entity: event.hit_entity,
+                });
+                hitmarker_event_writer.send(HitmarkerEvent);
+                audio.play(asset_server.load("sounds/hitmarker.ogg"));
+            }
+            _ => (),
+        }
+    }
 }
 
 pub fn target_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
@@ -65,17 +100,17 @@ pub fn target_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 pub fn circle_target_controller(
-    audio: Res<Audio>,
-    query: Query<&Name>,
-    asset_server: Res<AssetServer>,
-    mut event_reader: EventReader<HitConfirmEvent>,
-    mut circletarget_query: Query<(&mut Transform, &mut CircleTarget)>,
+    mut event_reader: EventReader<CircleTargetEvent>,
+    mut circletarget_query: Query<(&mut Transform, &mut CircleTarget, Entity)>,
 ) {
     for event in event_reader.read() {
-        if "Cylinder" == query.get(event.hit_entity).unwrap().as_str() {
-            audio.play(asset_server.load("sounds/hitmarker.ogg"));
-            for (mut circletarget_transform, mut circletarget_prop) in circletarget_query.iter_mut()
-            {
+        for (mut circletarget_transform, mut circletarget_prop, circletarget_entity) in
+            circletarget_query.iter_mut()
+        {
+            info!("{:?}", event.entity);
+            info!("{:?}", circletarget_entity);
+
+            if event.entity == circletarget_entity {
                 let old_position = circletarget_transform.translation.x;
                 if circletarget_prop.hit_counter < 30 {
                     circletarget_prop.hit_counter += 1;

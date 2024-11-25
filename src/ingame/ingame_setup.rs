@@ -1,27 +1,7 @@
 use bevy::{prelude::*, window::CursorGrabMode};
 use bevy_xpbd_3d::prelude::*;
 
-#[derive(Resource)]
-pub struct ShootingAnimations(pub Vec<Handle<AnimationClip>>);
-
-#[derive(Resource)]
-pub struct ReloadingAnimations(pub Vec<Handle<AnimationClip>>);
-
 pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.insert_resource(ShootingAnimations(vec![
-        asset_server.load("models/weapons/P226.glb#Animation0"),
-        asset_server.load("models/weapons/AK15.glb#Animation0"),
-        asset_server.load("models/weapons/FNFAL.glb#Animation0"),
-        asset_server.load("models/weapons/P226.glb#Animation0"),
-    ]));
-
-    commands.insert_resource(ReloadingAnimations(vec![
-        asset_server.load("models/weapons/P226.glb#Animation1"),
-        asset_server.load("models/weapons/AK15.glb#Animation1"),
-        asset_server.load("models/weapons/FNFAL.glb#Animation1"),
-        asset_server.load("models/weapons/P226.glb#Animation1"),
-    ]));
-
     //shooting range
     commands.spawn((
         SceneBundle {

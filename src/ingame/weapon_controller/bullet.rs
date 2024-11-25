@@ -40,7 +40,6 @@ pub fn spawn_bullet(
                         if let Ok(transform) = position.get(child) {
                             tracer_position = transform.translation + gun_trans.translation;
                             tracer_position.z -= 0.5;
-                            info!("{:?}", transform.translation);
                         }
                     }
                 }

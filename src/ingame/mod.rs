@@ -42,8 +42,11 @@ impl Plugin for InGamePlugin {
                     circle_target_controller,
                     enemy_target_controller,
                     enemy_target_hostage_controller,
+                    hit_detector,
                 ),
             )
+            //events
+            .add_event::<CircleTargetEvent>()
             //resources
             .init_resource::<GameSettings>()
             //states

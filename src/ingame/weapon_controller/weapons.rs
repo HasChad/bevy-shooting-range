@@ -2,6 +2,12 @@
 
 use bevy::prelude::*;
 
+#[derive(Resource)]
+pub struct ShootingAnimations(pub Vec<Handle<AnimationClip>>);
+
+#[derive(Resource)]
+pub struct ReloadingAnimations(pub Vec<Handle<AnimationClip>>);
+
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Default, States)]
 pub enum WeaponActionState {
     #[default]
@@ -170,15 +176,33 @@ pub fn change_weapon(
                         next_weapon_state.set(WeaponState::FNFAL);
                         //next_weapon_action_state.set(WeaponActionState::Raise);
                     }
+                    /*
                     KeyCode::Digit4 => {
                         *weapon_promp = weapon_res.msr.clone();
                         *weapon_scene = asset_server.load("models/weapons/MSR.glb#Scene0");
                         next_weapon_state.set(WeaponState::MSR);
                         //next_weapon_action_state.set(WeaponActionState::Raise);
                     }
+                    */
                     _ => (),
                 }
             }
         }
     }
+}
+
+pub fn weapon_animation_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.insert_resource(ShootingAnimations(vec![
+        asset_server.load("models/weapons/P226.glb#Animation0"),
+        asset_server.load("models/weapons/AK15.glb#Animation0"),
+        asset_server.load("models/weapons/FNFAL.glb#Animation0"),
+        asset_server.load("models/weapons/P226.glb#Animation0"),
+    ]));
+
+    commands.insert_resource(ReloadingAnimations(vec![
+        asset_server.load("models/weapons/P226.glb#Animation1"),
+        asset_server.load("models/weapons/AK15.glb#Animation1"),
+        asset_server.load("models/weapons/FNFAL.glb#Animation1"),
+        asset_server.load("models/weapons/P226.glb#Animation1"),
+    ]));
 }

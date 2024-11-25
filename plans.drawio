@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="gjKjIMiTYmDiEs1VnJWH" name="Page-1">
-        <mxGraphModel dx="1911" dy="1052" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="1923" dy="1004" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -12,6 +12,9 @@
                 </mxCell>
                 <mxCell id="12" value="&lt;p style=&quot;line-height: 0%;&quot;&gt;&lt;b style=&quot;&quot;&gt;&lt;font style=&quot;font-size: 40px;&quot;&gt;PLANS&lt;/font&gt;&lt;/b&gt;&lt;/p&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=20;fontFamily=Architects Daughter;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;" parent="1" vertex="1">
                     <mxGeometry x="-440" y="-360" width="150" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="13" value="&lt;b&gt;HELPING VIDEOS&lt;br&gt;&lt;/b&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&lt;b&gt;- Quake movement:&lt;/b&gt; https://www.youtube.com/watch?v=v3zT3Z5apaM&lt;/span&gt;&lt;b&gt;&lt;br&gt;- First person movement:&amp;nbsp;&lt;/b&gt;https://www.youtube.com/watch?v=f473C43s8nE&lt;br&gt;&lt;b&gt;- Weapon animations:&lt;/b&gt; https://www.youtube.com/watch?v=ZJvfaorDX3Y" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=20;fontFamily=Architects Daughter;sketch=1;hachureGap=4;jiggle=2;curveFitting=1;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DArchitects%2BDaughter;" vertex="1" parent="1">
+                    <mxGeometry x="-600" y="-80" width="730" height="110" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>

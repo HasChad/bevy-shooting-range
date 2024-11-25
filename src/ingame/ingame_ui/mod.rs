@@ -8,6 +8,9 @@ use crosshair::*;
 use settings::*;
 use ui::*;
 
+#[derive(Event)]
+pub struct HitmarkerEvent;
+
 pub struct IngameUIPlugin;
 
 impl Plugin for IngameUIPlugin {
@@ -28,6 +31,8 @@ impl Plugin for IngameUIPlugin {
                     hitmarker_controller,
                 ),
             )
+            //events
+            .add_event::<HitmarkerEvent>()
             //resources
             .init_resource::<CrosshairLineSettings>();
     }

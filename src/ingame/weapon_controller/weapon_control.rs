@@ -8,8 +8,11 @@ use bevy_kira_audio::prelude::*;
 use rand::{thread_rng, Rng};
 use std::f32::consts::PI;
 
-use super::{WeaponPromp, WeaponReloadingEvent, WeaponShootingEvent, WeaponState};
-use crate::ingame::{player::Head, GameSettings, ReloadingAnimations, ShootingAnimations};
+use super::{
+    weapons::{ReloadingAnimations, ShootingAnimations},
+    WeaponPromp, WeaponReloadingEvent, WeaponShootingEvent, WeaponState,
+};
+use crate::ingame::{player::Head, GameSettings};
 
 pub fn camera_recoil(
     time: Res<Time>,
@@ -113,9 +116,9 @@ pub fn scoped_sway_weapon(
                 CursorGrabMode::None => (),
                 _ => {
                     weapon_rot_y +=
-                        (motion.delta.x - weapon_rot_y * 2000.) * time.delta_seconds() * 0.1;
+                        (motion.delta.x - weapon_rot_y * 900.) * time.delta_seconds() * 0.1;
                     weapon_rot_x +=
-                        (motion.delta.y - weapon_rot_x * 2000.) * time.delta_seconds() * 0.1;
+                        (motion.delta.y - weapon_rot_x * 900.) * time.delta_seconds() * 0.1;
                 }
             }
         }
@@ -132,14 +135,17 @@ pub fn shooting_sound(
     mut shot_event_reader: EventReader<WeaponShootingEvent>,
     mut reload_event_reader: EventReader<WeaponReloadingEvent>,
 ) {
+    //shooting sound
     for _event in shot_event_reader.read() {
         match weapon_state.get() {
             WeaponState::P226 => audio.play(asset_server.load("sounds/p226_shot.ogg")),
-            WeaponState::AK15 => audio.play(asset_server.load("sounds/ak15_shot.ogg")),
+            WeaponState::AK15 => audio.play(asset_server.load("sounds/ak15_shot1.ogg")),
             WeaponState::FNFAL => audio.play(asset_server.load("sounds/fal_shot.ogg")),
             WeaponState::MSR => audio.play(asset_server.load("sounds/msr_shot.ogg")), //FIXME: neeed msr sound
         };
     }
+
+    //reloading sound
     for _event in reload_event_reader.read() {
         match weapon_state.get() {
             WeaponState::P226 => audio.play(asset_server.load("sounds/p226_reload.ogg")),

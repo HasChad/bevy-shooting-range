@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use rand::{thread_rng, Rng};
 use std::f32::consts::PI;
 
-use crate::ingame::HitConfirmEvent;
+use super::HitmarkerEvent;
 
 #[derive(Component)]
 pub struct HitMarker {
@@ -171,7 +171,7 @@ pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<Crosshair
 }
 
 //MARK: Hitmarker
-pub fn hitmarker_spawner(mut commands: Commands, mut event_reader: EventReader<HitConfirmEvent>) {
+pub fn hitmarker_spawner(mut commands: Commands, mut event_reader: EventReader<HitmarkerEvent>) {
     for _event in event_reader.read() {
         commands
             .spawn(NodeBundle {
