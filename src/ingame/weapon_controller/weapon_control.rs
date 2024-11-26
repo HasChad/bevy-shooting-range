@@ -135,25 +135,28 @@ pub fn shooting_sound(
     mut shot_event_reader: EventReader<WeaponShootingEvent>,
     mut reload_event_reader: EventReader<WeaponReloadingEvent>,
 ) {
-    //shooting sound
+    // shooting sound
     for _event in shot_event_reader.read() {
         match weapon_state.get() {
             WeaponState::P226 => audio.play(asset_server.load("sounds/p226_shot.ogg")),
             WeaponState::AK15 => audio.play(asset_server.load("sounds/ak15_shot1.ogg")),
             WeaponState::FNFAL => audio.play(asset_server.load("sounds/fal_shot.ogg")),
-            WeaponState::MSR => audio.play(asset_server.load("sounds/msr_shot.ogg")), //FIXME: neeed msr sound
+            WeaponState::MSR => audio.play(asset_server.load("sounds/msr_shot.ogg")), //FIXME: need msr sound
         };
     }
 
-    //reloading sound
+    // reloading sound
     for _event in reload_event_reader.read() {
         match weapon_state.get() {
             WeaponState::P226 => audio.play(asset_server.load("sounds/p226_reload.ogg")),
             WeaponState::AK15 => audio.play(asset_server.load("sounds/ak15_reload.ogg")),
             WeaponState::FNFAL => audio.play(asset_server.load("sounds/fal_reload.ogg")),
-            WeaponState::MSR => audio.play(asset_server.load("sounds/msr_reload.ogg")), //FIXME: neeed msr sound
+            WeaponState::MSR => audio.play(asset_server.load("sounds/msr_reload.ogg")), //FIXME: need msr sound
         };
     }
+
+    // raising sound
+    // lowering sound
 }
 
 pub fn weapon_animation(
@@ -164,14 +167,14 @@ pub fn weapon_animation(
     mut reload_event_reader: EventReader<WeaponReloadingEvent>,
     mut animation_player_query: Query<&mut AnimationPlayer>,
 ) {
-    //shooting animation
+    // shooting animation
     for _event in shot_event_reader.read() {
         for mut animation_player in &mut animation_player_query {
             match weapon_state.get() {
                 WeaponState::P226 => animation_player.play(shot_anim.0[0].clone_weak()),
                 WeaponState::AK15 => animation_player.play(shot_anim.0[1].clone_weak()),
                 WeaponState::FNFAL => animation_player.play(shot_anim.0[2].clone_weak()),
-                WeaponState::MSR => animation_player.play(shot_anim.0[3].clone_weak()), //FIXME: neeed msr animation
+                WeaponState::MSR => animation_player.play(shot_anim.0[3].clone_weak()), //FIXME: need msr animation
             };
 
             animation_player.set_repeat(RepeatAnimation::Count(1));
@@ -179,18 +182,21 @@ pub fn weapon_animation(
         }
     }
 
-    //reloading animation
+    // reloading animation
     for _event in reload_event_reader.read() {
         for mut animation_player in &mut animation_player_query {
             match weapon_state.get() {
                 WeaponState::P226 => animation_player.play(reload_anim.0[0].clone_weak()),
                 WeaponState::AK15 => animation_player.play(reload_anim.0[1].clone_weak()),
-                WeaponState::FNFAL => animation_player.play(reload_anim.0[2].clone_weak()), //FIXME: neeed fnfal animation
-                WeaponState::MSR => animation_player.play(reload_anim.0[3].clone_weak()), //FIXME: neeed msr animation
+                WeaponState::FNFAL => animation_player.play(reload_anim.0[2].clone_weak()), //FIXME: need fnfal animation
+                WeaponState::MSR => animation_player.play(reload_anim.0[3].clone_weak()), //FIXME: need msr animation
             };
 
             animation_player.set_repeat(RepeatAnimation::Count(1));
             animation_player.replay();
         }
     }
+
+    // raising animation
+    // lowering animation
 }

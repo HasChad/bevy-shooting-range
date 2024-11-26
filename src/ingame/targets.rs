@@ -41,17 +41,16 @@ pub fn hit_detector(
     for event in event_reader.read() {
         let hit_entity_name = query.get(event.hit_entity).unwrap().as_str();
 
-        for ancestor in parent_query.iter_ancestors(event.hit_entity) {}
+        if hit_entity_name == "Cylinder" {
+            let ancestor = parent_query
+                .iter_ancestors(event.hit_entity)
+                .last()
+                .unwrap();
 
-        match hit_entity_name {
-            "Cylinder" => {
-                circletarget_event_writer.send(CircleTargetEvent {
-                    entity: event.hit_entity,
-                });
-                hitmarker_event_writer.send(HitmarkerEvent);
-                audio.play(asset_server.load("sounds/hitmarker.ogg"));
-            }
-            _ => (),
+            circletarget_event_writer.send(CircleTargetEvent { entity: ancestor });
+
+            hitmarker_event_writer.send(HitmarkerEvent);
+            audio.play(asset_server.load("sounds/hitmarker.ogg"));
         }
     }
 }
