@@ -79,7 +79,12 @@ impl Plugin for PlayerControllerPlugin {
                 Update,
                 (
                     //player systems
-                    (player_move, movement_input_changer, player_look)
+                    (
+                        player_move,
+                        movement_input_changer,
+                        player_look,
+                        player_position_reset,
+                    )
                         .run_if(in_state(PlayableState::Action)),
                 ),
             )

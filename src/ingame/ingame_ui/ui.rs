@@ -24,6 +24,29 @@ pub struct FpsText;
 pub struct TargetCounterText;
 
 pub fn ui_setup(mut commands: Commands) {
+    //MARK: Information UI
+    commands.spawn((
+        TextBundle::from_sections([TextSection::new(
+            "ESC - Enter/Exit play mode \nX - Reset player position \nZ - Reset ammo",
+            TextStyle {
+                font_size: 20.0,
+                ..default()
+            },
+        )])
+        .with_style(Style {
+            position_type: PositionType::Absolute,
+            align_self: AlignSelf::Start,
+            justify_self: JustifySelf::Start,
+            margin: UiRect {
+                left: Val::Px(5.0),
+                top: Val::Px(5.0),
+                ..default()
+            },
+            ..default()
+        }),
+        Name::new("UI - Information Text "),
+    ));
+
     //MARK: Ammo UI
     commands.spawn((
         TextBundle::from_sections([
@@ -133,6 +156,7 @@ pub fn ui_setup(mut commands: Commands) {
     ));
 
     //MARK: Veclocity UI
+    /*
     commands.spawn((
         TextBundle::from_sections([
             TextSection::new(
@@ -158,6 +182,7 @@ pub fn ui_setup(mut commands: Commands) {
         VelocityText,
         Name::new("UI - Velocity Counter"),
     ));
+    */
 
     //MARK: FPS UI
     commands.spawn((

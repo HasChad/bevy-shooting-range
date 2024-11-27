@@ -45,6 +45,16 @@ pub fn movement_input_changer(
     }
 }
 
+pub fn player_position_reset(
+    key_input: Res<ButtonInput<KeyCode>>,
+    mut player_query: Query<&mut Transform, With<Player>>,
+) {
+    if key_input.just_pressed(KeyCode::KeyX) {
+        let mut player_pos = player_query.single_mut();
+        player_pos.translation = Vec3::new(0.0, 0.5, 0.0);
+    }
+}
+
 pub fn player_move(
     primary_window: Query<&Window, With<PrimaryWindow>>,
     movement_input: Res<MovementInput>,

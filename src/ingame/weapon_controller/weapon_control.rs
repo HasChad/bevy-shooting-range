@@ -44,6 +44,8 @@ pub fn camera_recoil(
     }
 }
 
+// TODO: make ammo reset
+
 pub fn sway_weapon(
     time: Res<Time>,
     primary_window: Query<&Window, With<PrimaryWindow>>,
