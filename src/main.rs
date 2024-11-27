@@ -1,5 +1,8 @@
+#![windows_subsystem = "windows"]
+
 use bevy::{
     diagnostic::FrameTimeDiagnosticsPlugin,
+    input::common_conditions::input_just_pressed,
     prelude::*,
     render::{
         settings::{Backends, WgpuSettings},
@@ -46,7 +49,7 @@ fn main() -> Result<()> {
         .add_plugins(FrameTimeDiagnosticsPlugin)
         .add_plugins(PhysicsPlugins::default())
         //.add_plugins(PhysicsDebugPlugin::default())
-        .add_plugins(WorldInspectorPlugin::default())
+        .add_plugins(WorldInspectorPlugin::default().run_if(input_just_pressed(KeyCode::F20)))
         //mod plugins
         .add_plugins(InGamePlugin)
         .run();

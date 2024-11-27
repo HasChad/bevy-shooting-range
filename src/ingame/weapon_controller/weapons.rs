@@ -49,10 +49,10 @@ pub struct WeaponPromp {
 
 #[derive(Resource, Clone)]
 pub struct WeaponRes {
-    p226: WeaponPromp,
-    ak15: WeaponPromp,
-    fnfal: WeaponPromp,
-    msr: WeaponPromp,
+    pub p226: WeaponPromp,
+    pub ak15: WeaponPromp,
+    pub fnfal: WeaponPromp,
+    pub msr: WeaponPromp,
 }
 
 impl Default for WeaponRes {

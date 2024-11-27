@@ -10,7 +10,7 @@ use std::f32::consts::PI;
 
 use super::{
     weapons::{ReloadingAnimations, ShootingAnimations},
-    WeaponPromp, WeaponReloadingEvent, WeaponShootingEvent, WeaponState,
+    WeaponPromp, WeaponReloadingEvent, WeaponRes, WeaponShootingEvent, WeaponState,
 };
 use crate::ingame::{player::Head, GameSettings};
 
@@ -43,8 +43,6 @@ pub fn camera_recoil(
         persp.fov -= (50.0 / 180.0 * PI) * time.delta_seconds();
     }
 }
-
-// TODO: make ammo reset
 
 pub fn sway_weapon(
     time: Res<Time>,

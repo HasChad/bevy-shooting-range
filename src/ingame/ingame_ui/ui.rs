@@ -27,7 +27,7 @@ pub fn ui_setup(mut commands: Commands) {
     //MARK: Information UI
     commands.spawn((
         TextBundle::from_sections([TextSection::new(
-            "ESC - Enter/Exit play mode \nX - Reset player position \nZ - Reset ammo",
+            "ESC - Enter/Exit play mode \nW/A/S/D - Move \nRight Mouse Button - Aim \nR - Reload \nX - Reset player position",
             TextStyle {
                 font_size: 20.0,
                 ..default()
