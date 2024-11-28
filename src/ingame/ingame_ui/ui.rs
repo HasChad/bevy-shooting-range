@@ -1,10 +1,11 @@
-use std::time::Duration;
-
+use avian3d::prelude::LinearVelocity;
 use bevy::{
+    color::palettes::css::GOLD,
+    color::*,
     diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin},
     prelude::*,
 };
-use bevy_xpbd_3d::components::LinearVelocity;
+use std::time::Duration;
 
 use crate::ingame::{player::Player, weapons::WeaponPromp, CircleTarget};
 
@@ -27,7 +28,7 @@ pub fn ui_setup(mut commands: Commands) {
     //MARK: Information UI
     commands.spawn((
         TextBundle::from_sections([TextSection::new(
-            "ESC - Enter/Exit play mode \nW/A/S/D - Move \nRight Mouse Button - Aim \nR - Reload \nX - Reset player position",
+            "ESC - Enter/Exit play mode \nW/A/S/D - Move \nRight Mouse Button - Aim \nR - Reload \nX - Reset player position \n1 - P226 \n2 - AK-15 \n3 - FN-FAL",
             TextStyle {
                 font_size: 20.0,
                 ..default()
@@ -76,7 +77,7 @@ pub fn ui_setup(mut commands: Commands) {
             },
             ..default()
         })
-        .with_background_color(Color::rgba(0.0, 0.0, 0.0, 0.5)),
+        .with_background_color(Color::srgba(0.0, 0.0, 0.0, 0.5)),
         AmmoText,
         Name::new("UI - Ammo Counter"),
     ));
@@ -93,14 +94,14 @@ pub fn ui_setup(mut commands: Commands) {
             ),
             TextSection::from_style(TextStyle {
                 font_size: 25.0,
-                color: Color::GOLD,
+                color: GOLD.into(),
                 ..default()
             }),
             TextSection::new(
                 " / 30",
                 TextStyle {
                     font_size: 25.0,
-                    color: Color::GOLD,
+                    color: GOLD.into(),
                     ..default()
                 },
             ),
@@ -113,7 +114,7 @@ pub fn ui_setup(mut commands: Commands) {
             ),
             TextSection::from_style(TextStyle {
                 font_size: 25.0,
-                color: Color::GOLD,
+                color: GOLD.into(),
                 ..default()
             }),
         ])
@@ -127,7 +128,7 @@ pub fn ui_setup(mut commands: Commands) {
             },
             ..default()
         })
-        .with_background_color(Color::rgba(0.0, 0.0, 0.0, 0.5)),
+        .with_background_color(Color::srgba(0.0, 0.0, 0.0, 0.5)),
         TargetCounterText,
         Name::new("UI - Target Counter"),
     ));
@@ -136,7 +137,7 @@ pub fn ui_setup(mut commands: Commands) {
     commands.spawn((
         TextBundle::from_sections([TextSection::from_style(TextStyle {
             font_size: 30.0,
-            color: Color::GOLD,
+            color: bevy::prelude::Color::Srgba(GOLD),
             ..default()
         })])
         .with_style(Style {
@@ -150,7 +151,7 @@ pub fn ui_setup(mut commands: Commands) {
             },
             ..default()
         })
-        .with_background_color(Color::rgba(0.0, 0.0, 0.0, 0.5)),
+        .with_background_color(Color::srgba(0.0, 0.0, 0.0, 0.5)),
         WeaponNameText,
         Name::new("UI - Weapon Name"),
     ));
@@ -196,7 +197,7 @@ pub fn ui_setup(mut commands: Commands) {
             ),
             TextSection::from_style(TextStyle {
                 font_size: 20.0,
-                color: Color::GOLD,
+                color: GOLD.into(),
                 ..default()
             }),
         ])

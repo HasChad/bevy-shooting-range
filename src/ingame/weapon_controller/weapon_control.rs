@@ -10,7 +10,7 @@ use std::f32::consts::PI;
 
 use super::{
     weapons::{ReloadingAnimations, ShootingAnimations},
-    WeaponPromp, WeaponReloadingEvent, WeaponRes, WeaponShootingEvent, WeaponState,
+    WeaponPromp, WeaponReloadingEvent, WeaponShootingEvent, WeaponState,
 };
 use crate::ingame::{player::Head, GameSettings};
 
@@ -159,6 +159,7 @@ pub fn shooting_sound(
     // lowering sound
 }
 
+/*
 pub fn weapon_animation(
     shot_anim: Res<ShootingAnimations>,
     reload_anim: Res<ReloadingAnimations>,
@@ -200,3 +201,4 @@ pub fn weapon_animation(
     // raising animation
     // lowering animation
 }
+*/

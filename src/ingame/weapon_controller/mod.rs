@@ -42,7 +42,7 @@ impl Plugin for WeaponControllerPlugin {
                     sway_weapon.run_if(in_state(WeaponAimState::HipFire)),
                     scoped_sway_weapon.run_if(in_state(WeaponAimState::Scope)),
                     shooting_sound,
-                    weapon_animation,
+                    // weapon_animation,
                     spawn_bullet,
                     //action system
                     firerate_timer.run_if(in_state(WeaponActionState::Shoot)),

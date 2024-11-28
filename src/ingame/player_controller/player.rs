@@ -1,6 +1,6 @@
+use avian3d::prelude::*;
 use bevy::core_pipeline::bloom::BloomSettings;
 use bevy::prelude::*;
-use bevy_xpbd_3d::prelude::*;
 use std::f32::consts::PI;
 
 use crate::ingame::{weapons::WeaponPromp, GameSettings};

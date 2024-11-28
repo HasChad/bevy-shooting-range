@@ -5,9 +5,10 @@ edition = "2021"
 authors = ["HasChad"]
 
 [dependencies]
-bevy = { version = "0.13.2", default-features = false, features = [
+bevy = { version = "0.14.2", default-features = false, features = [
   # Bevy functionality:
-  "multi-threaded",     # Run with multithreading
+  "bevy_state",         # Enable built in global state machines
+  "multi_threaded",     # Run with multithreading
   "bevy_asset",         # Assets management
   "bevy_scene",         # Scenes management
   "bevy_winit",         # Window management (cross-platform Winit backend)
@@ -34,13 +35,13 @@ bevy = { version = "0.13.2", default-features = false, features = [
   "serialize",            # Support for `serde` Serialize/Deserialize
 
   # Development/Debug features:
-  # "dynamic_linking",   # Dynamic linking for faster compile-times
+  "dynamic_linking",   # Dynamic linking for faster compile-times
   "trace",             # Enable tracing for performance measurement
   "trace_tracy",       # Tracing using `tracy`
 ] }
-bevy-inspector-egui = "0.24.0"
-bevy_xpbd_3d = "0.4.2"
-bevy_kira_audio = "0.19.0"
+bevy-inspector-egui = "0.27.0"
+avian3d = "0.1.2"
+bevy_kira_audio = "0.20.0"
 rand = "0.8.5"
 color-eyre = "0.6.3"
 # https://crates.io/crates/bevy_pkv for saving game settings

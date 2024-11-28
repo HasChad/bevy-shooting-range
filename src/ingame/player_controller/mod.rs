@@ -1,5 +1,5 @@
+use avian3d::{parry::na::ComplexField, prelude::*};
 use bevy::{prelude::*, transform::TransformSystem};
-use bevy_xpbd_3d::{parry::na::ComplexField, PhysicsSet};
 
 pub mod body_control;
 pub mod head_control;

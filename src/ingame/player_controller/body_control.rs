@@ -1,6 +1,6 @@
+use avian3d::prelude::*;
 use bevy::window::CursorGrabMode;
 use bevy::{prelude::*, window::PrimaryWindow};
-use bevy_xpbd_3d::prelude::*;
 
 use super::{player::Player, KeyBindings, MovementInput};
 

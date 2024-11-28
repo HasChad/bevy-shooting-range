@@ -1,8 +1,8 @@
-#![windows_subsystem = "windows"]
+// #![windows_subsystem = "windows"]
 
+use avian3d::prelude::*;
 use bevy::{
     diagnostic::FrameTimeDiagnosticsPlugin,
-    input::common_conditions::input_just_pressed,
     prelude::*,
     render::{
         settings::{Backends, WgpuSettings},
@@ -12,7 +12,6 @@ use bevy::{
 };
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_kira_audio::prelude::*;
-use bevy_xpbd_3d::prelude::*;
 use color_eyre::eyre::Result;
 
 pub mod ingame;
@@ -49,7 +48,7 @@ fn main() -> Result<()> {
         .add_plugins(FrameTimeDiagnosticsPlugin)
         .add_plugins(PhysicsPlugins::default())
         //.add_plugins(PhysicsDebugPlugin::default())
-        .add_plugins(WorldInspectorPlugin::default().run_if(input_just_pressed(KeyCode::F20)))
+        .add_plugins(WorldInspectorPlugin::default())
         //mod plugins
         .add_plugins(InGamePlugin)
         .run();

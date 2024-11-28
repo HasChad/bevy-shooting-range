@@ -1,6 +1,6 @@
+use avian3d::prelude::*;
 use bevy::{prelude::*, time::Stopwatch};
 use bevy_kira_audio::prelude::*;
-use bevy_xpbd_3d::prelude::*;
 use rand::prelude::*;
 
 use crate::{
@@ -63,7 +63,7 @@ pub fn target_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             transform: Transform::from_xyz(0.0, 0.75, -4.0),
             ..default()
         },
-        AsyncSceneCollider::new(Some(ComputedCollider::TriMesh)),
+        ColliderConstructorHierarchy::new(ColliderConstructor::TrimeshFromMesh),
         Name::new("CircleTarget"),
         CircleTarget {
             hit_counter: 0,

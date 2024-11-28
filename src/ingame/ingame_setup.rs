@@ -1,5 +1,5 @@
+use avian3d::prelude::*;
 use bevy::{prelude::*, window::CursorGrabMode};
-use bevy_xpbd_3d::prelude::*;
 
 pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     //shooting range
@@ -8,7 +8,7 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             scene: asset_server.load("models/shooting-range.glb#Scene0"),
             ..default()
         },
-        AsyncSceneCollider::new(Some(ComputedCollider::TriMesh)),
+        ColliderConstructorHierarchy::new(ColliderConstructor::TrimeshFromMesh),
         RigidBody::Static,
         Name::new("Shooting Range"),
     ));

@@ -1,7 +1,7 @@
 #![allow(clippy::too_many_arguments)]
 
+use avian3d::prelude::*;
 use bevy::prelude::*;
-use bevy_xpbd_3d::plugins::spatial_query::{SpatialQuery, SpatialQueryFilter};
 use std::f32::consts::PI;
 
 use super::{HitConfirmEvent, WeaponPromp, WeaponShootingEvent};
@@ -60,8 +60,13 @@ pub fn spawn_bullet(
                 parent.spawn(PbrBundle {
                     mesh: meshes.add(Capsule3d::new(0.005, 0.6)),
                     material: materials.add(StandardMaterial {
-                        base_color: Color::rgb(1.0, 0.8, 0.0),
-                        emissive: Color::rgb_linear(23000.0, 10000.0, 0.0),
+                        base_color: Color::srgb(1., 0.8, 0.),
+                        emissive: LinearRgba {
+                            red: 1000.,
+                            green: 800.,
+                            blue: 0.,
+                            alpha: 255.,
+                        },
                         ..default()
                     }),
                     transform: Transform::from_translation(tracer_position)
@@ -98,7 +103,7 @@ pub fn bullet_controller(
 
         if let Some(hit) = spatial_query.cast_ray(
             prev_pos,
-            Direction3d::new_unchecked(bullet_promp.velocity.normalize()),
+            Dir3::new_unchecked(bullet_promp.velocity.normalize()),
             distance,
             true,
             SpatialQueryFilter::from_mask(0b1011).with_excluded_entities([player_id]),
