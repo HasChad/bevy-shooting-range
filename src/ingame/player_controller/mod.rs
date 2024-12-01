@@ -1,4 +1,4 @@
-use avian3d::{parry::na::ComplexField, prelude::*};
+use avian3d::prelude::*;
 use bevy::{prelude::*, transform::TransformSystem};
 
 pub mod body_control;
@@ -41,35 +41,6 @@ impl Default for KeyBindings {
     }
 }
 
-#[derive(Resource)]
-pub struct MovementControl {
-    pub max_velocity_air: f32,
-    pub max_velocity_ground: f32,
-    pub max_acceleration: f32,
-    pub gravity: f32,
-    pub stop_speed: f32,
-    pub jump_impulse: f32,
-}
-
-impl Default for MovementControl {
-    fn default() -> Self {
-        MovementControl {
-            max_velocity_air: 0.6,
-            max_velocity_ground: 6.0,
-            max_acceleration: 10.0 * 6.0, /* max_velocity_ground */
-            gravity: 15.34,
-            stop_speed: 1.5,
-            jump_impulse: (2.0 * 15.34 /* gravity */ * 0.85).sqrt(),
-        }
-    }
-}
-
-#[derive(Resource, Default)]
-pub struct MovementInput {
-    pub fmove: f32,
-    pub smove: f32,
-}
-
 pub struct PlayerControllerPlugin;
 
 impl Plugin for PlayerControllerPlugin {
@@ -79,12 +50,7 @@ impl Plugin for PlayerControllerPlugin {
                 Update,
                 (
                     //player systems
-                    (
-                        player_move,
-                        movement_input_changer,
-                        player_look,
-                        player_position_reset,
-                    )
+                    (player_move, player_look, player_position_reset)
                         .run_if(in_state(PlayableState::Action)),
                 ),
             )
@@ -96,8 +62,6 @@ impl Plugin for PlayerControllerPlugin {
                     .before(TransformSystem::TransformPropagate),
             )
             //resources
-            .init_resource::<KeyBindings>()
-            .init_resource::<MovementControl>()
-            .init_resource::<MovementInput>();
+            .init_resource::<KeyBindings>();
     }
 }

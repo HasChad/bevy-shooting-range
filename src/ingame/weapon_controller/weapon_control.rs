@@ -140,8 +140,6 @@ pub fn shooting_sound(
         match weapon_state.get() {
             WeaponState::P226 => audio.play(asset_server.load("sounds/p226_shot.ogg")),
             WeaponState::AK15 => audio.play(asset_server.load("sounds/ak15_shot1.ogg")),
-            WeaponState::FNFAL => audio.play(asset_server.load("sounds/fal_shot.ogg")),
-            WeaponState::MSR => audio.play(asset_server.load("sounds/msr_shot.ogg")), //FIXME: need msr sound
         };
     }
 
@@ -150,8 +148,6 @@ pub fn shooting_sound(
         match weapon_state.get() {
             WeaponState::P226 => audio.play(asset_server.load("sounds/p226_reload.ogg")),
             WeaponState::AK15 => audio.play(asset_server.load("sounds/ak15_reload.ogg")),
-            WeaponState::FNFAL => audio.play(asset_server.load("sounds/fal_reload.ogg")),
-            WeaponState::MSR => audio.play(asset_server.load("sounds/msr_reload.ogg")), //FIXME: need msr sound
         };
     }
 
