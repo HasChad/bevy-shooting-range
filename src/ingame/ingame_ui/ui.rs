@@ -1,11 +1,13 @@
 use avian3d::prelude::LinearVelocity;
 use bevy::{
-    color::palettes::css::GOLD,
     color::*,
     diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin},
+    ecs::entity,
     prelude::*,
 };
-use std::time::Duration;
+use color_eyre::owo_colors::colors::css::Gold;
+use palettes::css::GOLD;
+use std::{fmt::format, time::Duration};
 
 use crate::ingame::{player::Player, weapons::WeaponPromp, CircleTarget};
 
@@ -25,16 +27,14 @@ pub struct FpsText;
 pub struct TargetCounterText;
 
 pub fn ui_setup(mut commands: Commands) {
-    //MARK: Information UI
+    // MARK: Information UI
     commands.spawn((
-        TextBundle::from_sections([TextSection::new(
-            "ESC - Enter/Exit play mode \nW/A/S/D - Move \nRight Mouse Button - Aim \nR - Reload \nX - Reset player position \n1 - P226 \n2 - AK-15 \n3 - FN-FAL",
-            TextStyle {
-                font_size: 20.0,
-                ..default()
-            },
-        )])
-        .with_style(Style {
+        Text::new("ESC - Enter/Exit play mode\nW/A/S/D - Move\nRight Mouse Button - Aim\nR - Reload\nX - Reset player position\n1 - P226\n2 - AK-15"),
+        TextFont {
+            font_size: 15.0,
+            ..default()
+        },
+        Node {
             position_type: PositionType::Absolute,
             align_self: AlignSelf::Start,
             justify_self: JustifySelf::Start,
@@ -44,44 +44,99 @@ pub fn ui_setup(mut commands: Commands) {
                 ..default()
             },
             ..default()
-        }),
+        },
         Name::new("UI - Information Text "),
     ));
 
-    //MARK: Ammo UI
-    commands.spawn((
-        TextBundle::from_sections([
-            TextSection::from_style(TextStyle {
+    // MARK: Ammo UI
+    commands
+        .spawn((
+            Text::default(),
+            TextFont {
                 font_size: 50.0,
                 ..default()
-            }),
-            TextSection::new(
-                "/",
-                TextStyle {
-                    font_size: 50.0,
+            },
+            Node {
+                position_type: PositionType::Absolute,
+                align_self: AlignSelf::End,
+                justify_self: JustifySelf::Center,
+                margin: UiRect {
+                    left: Val::Px(300.0),
                     ..default()
                 },
-            ),
-            TextSection::from_style(TextStyle {
+                ..default()
+            },
+            BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.5)),
+            Name::new("UI - Ammo Counter"),
+            AmmoText,
+        ))
+        .with_child((
+            TextSpan::new("/"),
+            TextFont {
+                font_size: 50.0,
+                ..default()
+            },
+        ))
+        .with_child((
+            TextSpan::default(),
+            TextFont {
                 font_size: 30.0,
                 ..default()
-            }),
-        ])
-        .with_style(Style {
+            },
+            TextColor(GOLD.into()),
+        ));
+
+    //MARK: Weapon Name UI
+    commands.spawn((
+        Text::default(),
+        TextFont {
+            font_size: 25.0,
+            ..default()
+        },
+        TextColor(GOLD.into()),
+        Node {
             position_type: PositionType::Absolute,
             align_self: AlignSelf::End,
             justify_self: JustifySelf::Center,
             margin: UiRect {
                 left: Val::Px(300.0),
+                bottom: Val::Px(55.0),
                 ..default()
             },
             ..default()
-        })
-        .with_background_color(Color::srgba(0.0, 0.0, 0.0, 0.5)),
-        AmmoText,
-        Name::new("UI - Ammo Counter"),
+        },
+        BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.5)),
+        WeaponNameText,
+        Name::new("UI - Weapon Name"),
     ));
 
+    //MARK: FPS UI
+    commands
+        .spawn((
+            Text::new("FPS: "),
+            TextFont {
+                font_size: 20.0,
+                ..default()
+            },
+            Node {
+                position_type: PositionType::Absolute,
+                justify_self: JustifySelf::End,
+                ..default()
+            },
+            BackgroundColor(Color::BLACK),
+            Name::new("UI - FPSCounter"),
+            FpsText,
+        ))
+        .with_child((
+            TextSpan::default(),
+            TextFont {
+                font_size: 20.0,
+                ..default()
+            },
+            TextColor(GOLD.into()),
+        ));
+
+    /*
     //MARK: Target Counter UI
     commands.spawn((
         TextBundle::from_sections([
@@ -133,28 +188,7 @@ pub fn ui_setup(mut commands: Commands) {
         Name::new("UI - Target Counter"),
     ));
 
-    //MARK: Weapon Name UI
-    commands.spawn((
-        TextBundle::from_sections([TextSection::from_style(TextStyle {
-            font_size: 30.0,
-            color: bevy::prelude::Color::Srgba(GOLD),
-            ..default()
-        })])
-        .with_style(Style {
-            position_type: PositionType::Absolute,
-            align_self: AlignSelf::End,
-            justify_self: JustifySelf::Center,
-            margin: UiRect {
-                left: Val::Px(300.0),
-                bottom: Val::Px(55.0),
-                ..default()
-            },
-            ..default()
-        })
-        .with_background_color(Color::srgba(0.0, 0.0, 0.0, 0.5)),
-        WeaponNameText,
-        Name::new("UI - Weapon Name"),
-    ));
+
 
     //MARK: Veclocity UI
     /*
@@ -185,46 +219,41 @@ pub fn ui_setup(mut commands: Commands) {
     ));
     */
 
-    //MARK: FPS UI
-    commands.spawn((
-        TextBundle::from_sections([
-            TextSection::new(
-                "FPS: ",
-                TextStyle {
-                    font_size: 20.0,
-                    ..default()
-                },
-            ),
-            TextSection::from_style(TextStyle {
-                font_size: 20.0,
-                color: GOLD.into(),
-                ..default()
-            }),
-        ])
-        .with_style(Style {
-            position_type: PositionType::Absolute,
-            justify_self: JustifySelf::End,
-            ..default()
-        })
-        .with_background_color(Color::BLACK),
-        FpsText,
-        Name::new("UI - FPSCounter"),
-    ));
+
+    */
 }
 
 //MARK: Updaters
 pub fn ammo_text_updater(
-    mut query: Query<&mut Text, With<AmmoText>>,
-    weapon_query: Query<&mut WeaponPromp>,
+    mut writer: TextUiWriter,
+    weapon_promp: Single<&WeaponPromp>,
+    entity: Single<Entity, With<AmmoText>>,
 ) {
-    for mut text in &mut query {
-        for weapon_promp in weapon_query.iter() {
-            text.sections[0].value = format!("{}", weapon_promp.mag_capacity);
-            text.sections[2].value = format!("{}", weapon_promp.ammo_capacity);
+    *writer.text(*entity, 0) = format!("{}", weapon_promp.mag_capacity);
+    *writer.text(*entity, 2) = format!("{}", weapon_promp.ammo_capacity);
+}
+
+pub fn weapon_name_text_updater(
+    mut writer: TextUiWriter,
+    weapon_promp: Single<&WeaponPromp>,
+    entity: Single<Entity, With<WeaponNameText>>,
+) {
+    *writer.text(*entity, 0) = weapon_promp.name.to_string();
+}
+
+pub fn fps_text_updater(
+    mut writer: TextUiWriter,
+    diagnostics: Res<DiagnosticsStore>,
+    entity: Single<Entity, With<FpsText>>,
+) {
+    if let Some(fps) = diagnostics.get(&FrameTimeDiagnosticsPlugin::FPS) {
+        if let Some(value) = fps.smoothed() {
+            *writer.text(*entity, 1) = format!("{value:.0}");
         }
     }
 }
 
+/*
 pub fn target_text_updater(
     time: Res<Time>,
     mut query: Query<&mut Text, With<TargetCounterText>>,
@@ -243,16 +272,6 @@ pub fn target_text_updater(
     }
 }
 
-pub fn weapon_name_text_updater(
-    mut query: Query<&mut Text, With<WeaponNameText>>,
-    weapon_query: Query<&mut WeaponPromp>,
-) {
-    for mut text in &mut query {
-        for weapon_promp in weapon_query.iter() {
-            text.sections[0].value = weapon_promp.name.to_string();
-        }
-    }
-}
 
 pub fn velocity_text_updater(
     player_query: Query<&LinearVelocity, With<Player>>,
@@ -267,16 +286,4 @@ pub fn velocity_text_updater(
         }
     }
 }
-
-pub fn fps_text_updater(
-    diagnostics: Res<DiagnosticsStore>,
-    mut query: Query<&mut Text, With<FpsText>>,
-) {
-    for mut text in &mut query {
-        if let Some(fps) = diagnostics.get(&FrameTimeDiagnosticsPlugin::FPS) {
-            if let Some(value) = fps.smoothed() {
-                text.sections[1].value = format!("{value:.0}");
-            }
-        }
-    }
-}
+*/

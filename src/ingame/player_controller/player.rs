@@ -1,6 +1,5 @@
 use avian3d::prelude::*;
-use bevy::core_pipeline::bloom::BloomSettings;
-use bevy::prelude::*;
+use bevy::{core_pipeline::bloom::Bloom, prelude::*};
 use std::f32::consts::PI;
 
 use crate::ingame::{weapons::WeaponPromp, GameSettings};
@@ -26,7 +25,7 @@ pub fn player_setup(
             InheritedVisibility::VISIBLE,
             RigidBody::Dynamic,
             Collider::capsule(0.5, 0.25),
-            TransformBundle::from(Transform::from_xyz(0.0, 0.5, 0.0)),
+            Transform::from_xyz(0.0, 0.5, 0.0),
             GravityScale(2.0),
             Restitution::new(0.0).with_combine_rule(CoefficientCombine::Min),
             LockedAxes::ROTATION_LOCKED,
@@ -37,26 +36,20 @@ pub fn player_setup(
     //player head
     commands
         .spawn((
-            Camera3dBundle {
-                transform: Transform::from_xyz(0.0, 1.0, 0.0),
-                projection: Projection::Perspective(PerspectiveProjection {
-                    fov: settings.fov / 180.0 * PI, // ! One PI = 180, first value is the real fov
-                    near: 0.01,
-                    ..default()
-                }),
-                camera: Camera {
-                    hdr: true, // HDR is required for bloom
-                    ..default()
-                },
+            Camera3d::default(),
+            Projection::Perspective(PerspectiveProjection {
+                fov: settings.fov / 180.0 * PI, // ! One PI = 180, first value is the real fov
+                near: 0.01,
                 ..default()
-            },
-            FogSettings {
+            }),
+            Transform::from_xyz(0.0, 1.0, 0.0),
+            DistanceFog {
                 color: Color::BLACK,
                 falloff: FogFalloff::Exponential { density: 0.01 },
                 ..default()
             },
             // Enable bloom for the camera
-            BloomSettings::NATURAL,
+            Bloom::NATURAL,
         ))
         .insert(InheritedVisibility::VISIBLE)
         .insert(Name::new("Head"))
@@ -64,18 +57,15 @@ pub fn player_setup(
         .with_children(|parent| {
             //bullet spawn position
             parent.spawn((
-                TransformBundle::from(Transform::from_xyz(0.0, 0.0, -0.5)),
+                Transform::from_xyz(0.0, 0.0, -0.5),
                 BulletSpawnPosition,
                 Name::new("Bullet Spawn Position"),
             ));
 
             //gun model
             parent.spawn((
-                SceneBundle {
-                    scene: asset_server.load("models/weapons/P226.glb#Scene0"),
-                    transform: Transform::from_xyz(0.1, -0.05, -0.15),
-                    ..default()
-                },
+                SceneRoot(asset_server.load("models/weapons/P226.glb#Scene0")),
+                Transform::from_xyz(0.1, -0.05, -0.15),
                 WeaponPromp::p226(),
                 Name::new("Weapon"),
             ));

@@ -14,7 +14,7 @@ pub fn egui_settings(
     mut contexts: EguiContexts,
     mut crosshair_line_settings: ResMut<CrosshairLineSettings>,
     mut crosshair_line_query: Query<
-        (&mut Style, &mut Visibility, &mut BackgroundColor),
+        (&mut Node, &mut Visibility, &mut BackgroundColor),
         With<CrosshairLine>,
     >,
 ) {

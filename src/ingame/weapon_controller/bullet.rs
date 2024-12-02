@@ -52,14 +52,14 @@ pub fn spawn_bullet(
                     bullet_lifetime: Timer::from_seconds(3., TimerMode::Once),
                     velocity: bullet_velocity,
                 },
-                TransformBundle::from(*head_transform),
+                *head_transform,
                 InheritedVisibility::VISIBLE,
                 Name::new("Bullet"),
             ))
             .with_children(|parent| {
-                parent.spawn(PbrBundle {
-                    mesh: meshes.add(Capsule3d::new(0.005, 0.6)),
-                    material: materials.add(StandardMaterial {
+                parent.spawn((
+                    Mesh3d(meshes.add(Capsule3d::new(0.005, 0.6))),
+                    MeshMaterial3d(materials.add(StandardMaterial {
                         base_color: Color::srgb(1., 0.8, 0.),
                         emissive: LinearRgba {
                             red: 1000.,
@@ -68,11 +68,10 @@ pub fn spawn_bullet(
                             alpha: 255.,
                         },
                         ..default()
-                    }),
-                    transform: Transform::from_translation(tracer_position)
+                    })),
+                    Transform::from_translation(tracer_position)
                         .with_rotation(Quat::from_rotation_x(PI / 2.)),
-                    ..default()
-                });
+                ));
             });
     }
 }
@@ -89,7 +88,7 @@ pub fn bullet_controller(
 ) {
     for (mut bullet_transform, mut bullet_promp, bullet_entity) in bullet_query.iter_mut() {
         let player_id = player_query.single();
-        let bullet_travel = bullet_promp.velocity * 100.0 * time.delta_seconds();
+        let bullet_travel = bullet_promp.velocity * 100.0 * time.delta_secs();
         let distance = (bullet_travel).length();
 
         let prev_pos = bullet_transform.translation;
@@ -106,7 +105,7 @@ pub fn bullet_controller(
             Dir3::new_unchecked(bullet_promp.velocity.normalize()),
             distance,
             true,
-            SpatialQueryFilter::from_mask(0b1011).with_excluded_entities([player_id]),
+            &SpatialQueryFilter::from_mask(0b1011).with_excluded_entities([player_id]),
         ) {
             commands.entity(bullet_entity).despawn_recursive();
 

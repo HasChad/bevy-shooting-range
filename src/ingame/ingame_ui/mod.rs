@@ -20,20 +20,20 @@ impl Plugin for IngameUIPlugin {
             .add_systems(
                 FixedUpdate,
                 (
-                    //ui systems
-                    ammo_text_updater,
-                    target_text_updater,
-                    weapon_name_text_updater,
-                    velocity_text_updater,
+                    // ui systems
                     fps_text_updater,
-                    //hitmarker systems
+                    ammo_text_updater,
+                    weapon_name_text_updater,
+                    //target_text_updater,
+                    //velocity_text_updater,
+                    // hitmarker systems
                     hitmarker_spawner,
                     hitmarker_controller,
                 ),
             )
-            //events
+            // events
             .add_event::<HitmarkerEvent>()
-            //resources
+            // resources
             .init_resource::<CrosshairLineSettings>();
     }
 }

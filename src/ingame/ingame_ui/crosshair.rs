@@ -36,12 +36,9 @@ impl Default for CrosshairLineSettings {
 pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<CrosshairLineSettings>) {
     commands
         .spawn((
-            NodeBundle {
-                style: Style {
-                    align_self: AlignSelf::Center,
-                    justify_self: JustifySelf::Center,
-                    ..default()
-                },
+            Node {
+                align_self: AlignSelf::Center,
+                justify_self: JustifySelf::Center,
                 ..default()
             },
             Name::new("UI - Crosshair"),
@@ -49,59 +46,49 @@ pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<Crosshair
         //MARK: Horizontal Lines
         .with_children(|parent| {
             parent
-                .spawn(NodeBundle {
-                    style: Style {
-                        align_self: AlignSelf::Center,
-                        justify_self: JustifySelf::Center,
-                        ..default()
-                    },
+                .spawn(Node {
+                    align_self: AlignSelf::Center,
+                    justify_self: JustifySelf::Center,
                     ..default()
                 })
                 .with_children(|parent| {
                     //Left Line
                     parent.spawn((
-                        NodeBundle {
-                            style: Style {
-                                position_type: PositionType::Absolute,
-                                height: Val::Px(crosshair_settings.thickness),
-                                width: Val::Px(crosshair_settings.length),
-                                right: Val::Percent(50.0),
-                                align_self: AlignSelf::Center,
-                                justify_self: JustifySelf::End,
-                                margin: UiRect {
-                                    right: Val::Px(crosshair_settings.gap),
-                                    ..default()
-                                },
+                        Node {
+                            position_type: PositionType::Absolute,
+                            height: Val::Px(crosshair_settings.thickness),
+                            width: Val::Px(crosshair_settings.length),
+                            right: Val::Percent(50.0),
+                            align_self: AlignSelf::Center,
+                            justify_self: JustifySelf::End,
+                            margin: UiRect {
+                                right: Val::Px(crosshair_settings.gap),
                                 ..default()
                             },
-                            background_color: crosshair_settings.color.into(),
-                            visibility: crosshair_settings.enable,
                             ..default()
                         },
+                        BackgroundColor(crosshair_settings.color),
+                        crosshair_settings.enable,
                         Name::new("Left Line"),
                         CrosshairLine,
                     ));
 
                     //Right Line
                     parent.spawn((
-                        NodeBundle {
-                            style: Style {
-                                position_type: PositionType::Absolute,
-                                height: Val::Px(crosshair_settings.thickness),
-                                width: Val::Px(crosshair_settings.length),
-                                left: Val::Percent(50.0),
-                                align_self: AlignSelf::Center,
-                                margin: UiRect {
-                                    left: Val::Px(crosshair_settings.gap),
-                                    ..default()
-                                },
+                        Node {
+                            position_type: PositionType::Absolute,
+                            height: Val::Px(crosshair_settings.thickness),
+                            width: Val::Px(crosshair_settings.length),
+                            left: Val::Percent(50.0),
+                            align_self: AlignSelf::Center,
+                            margin: UiRect {
+                                left: Val::Px(crosshair_settings.gap),
                                 ..default()
                             },
-                            background_color: crosshair_settings.color.into(),
-                            visibility: crosshair_settings.enable,
-
                             ..default()
                         },
+                        BackgroundColor(crosshair_settings.color),
+                        crosshair_settings.enable,
                         Name::new("Right Line"),
                         CrosshairLine,
                     ));
@@ -109,60 +96,52 @@ pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<Crosshair
 
             //MARK: Vertical Lines
             parent
-                .spawn(NodeBundle {
-                    transform: Transform::from_rotation(Quat::from_rotation_z(PI / 2.)),
-                    style: Style {
+                .spawn((
+                    Node {
                         align_self: AlignSelf::Center,
                         justify_self: JustifySelf::Center,
                         ..default()
                     },
-                    ..default()
-                })
+                    Transform::from_rotation(Quat::from_rotation_z(PI / 2.)),
+                ))
                 .with_children(|parent| {
                     //Top Line
                     parent.spawn((
-                        NodeBundle {
-                            style: Style {
-                                position_type: PositionType::Absolute,
-                                height: Val::Px(crosshair_settings.thickness),
-                                width: Val::Px(crosshair_settings.length),
-                                right: Val::Percent(50.0),
-                                align_self: AlignSelf::Center,
-                                justify_self: JustifySelf::End,
-                                margin: UiRect {
-                                    right: Val::Px(crosshair_settings.gap),
-                                    ..default()
-                                },
+                        Node {
+                            position_type: PositionType::Absolute,
+                            height: Val::Px(crosshair_settings.thickness),
+                            width: Val::Px(crosshair_settings.length),
+                            right: Val::Percent(50.0),
+                            align_self: AlignSelf::Center,
+                            justify_self: JustifySelf::End,
+                            margin: UiRect {
+                                right: Val::Px(crosshair_settings.gap),
                                 ..default()
                             },
-                            background_color: crosshair_settings.color.into(),
-                            visibility: crosshair_settings.enable,
                             ..default()
                         },
+                        BackgroundColor(crosshair_settings.color),
+                        crosshair_settings.enable,
                         Name::new("Left Line"),
                         CrosshairLine,
                     ));
 
                     //Bottom Line
                     parent.spawn((
-                        NodeBundle {
-                            style: Style {
-                                position_type: PositionType::Absolute,
-                                height: Val::Px(crosshair_settings.thickness),
-                                width: Val::Px(crosshair_settings.length),
-                                left: Val::Percent(50.0),
-                                align_self: AlignSelf::Center,
-                                margin: UiRect {
-                                    left: Val::Px(crosshair_settings.gap),
-                                    ..default()
-                                },
+                        Node {
+                            position_type: PositionType::Absolute,
+                            height: Val::Px(crosshair_settings.thickness),
+                            width: Val::Px(crosshair_settings.length),
+                            left: Val::Percent(50.0),
+                            align_self: AlignSelf::Center,
+                            margin: UiRect {
+                                left: Val::Px(crosshair_settings.gap),
                                 ..default()
                             },
-                            background_color: crosshair_settings.color.into(),
-                            visibility: crosshair_settings.enable,
-
                             ..default()
                         },
+                        BackgroundColor(crosshair_settings.color),
+                        crosshair_settings.enable,
                         Name::new("Right Line"),
                         CrosshairLine,
                     ));
@@ -174,23 +153,23 @@ pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<Crosshair
 pub fn hitmarker_spawner(mut commands: Commands, mut event_reader: EventReader<HitmarkerEvent>) {
     for _event in event_reader.read() {
         commands
-            .spawn(NodeBundle {
-                transform: Transform::from_rotation(Quat::from_rotation_z(
-                    PI / thread_rng().gen_range(3.5..4.5),
-                )),
-                style: Style {
+            .spawn((
+                Node {
                     align_self: AlignSelf::Center,
                     justify_self: JustifySelf::Center,
+
                     ..default()
                 },
-                ..default()
-            })
-            .insert(HitMarker {
-                hitmarker_lifetime: Timer::from_seconds(0.1, TimerMode::Once),
-            })
+                Transform::from_rotation(Quat::from_rotation_z(
+                    PI / thread_rng().gen_range(3.5..4.5),
+                )),
+                HitMarker {
+                    hitmarker_lifetime: Timer::from_seconds(0.1, TimerMode::Once),
+                },
+            ))
             .with_children(|parent| {
-                parent.spawn(NodeBundle {
-                    style: Style {
+                parent.spawn((
+                    Node {
                         position_type: PositionType::Absolute,
                         height: Val::Px(10.0),
                         width: Val::Px(2.0),
@@ -201,13 +180,13 @@ pub fn hitmarker_spawner(mut commands: Commands, mut event_reader: EventReader<H
                             top: Val::Px(-20.0),
                             ..default()
                         },
+
                         ..default()
                     },
-                    background_color: Color::WHITE.into(),
-                    ..default()
-                });
-                parent.spawn(NodeBundle {
-                    style: Style {
+                    BackgroundColor(Color::WHITE),
+                ));
+                parent.spawn((
+                    Node {
                         position_type: PositionType::Absolute,
                         height: Val::Px(10.0),
                         width: Val::Px(2.0),
@@ -220,11 +199,10 @@ pub fn hitmarker_spawner(mut commands: Commands, mut event_reader: EventReader<H
                         },
                         ..default()
                     },
-                    background_color: Color::WHITE.into(),
-                    ..default()
-                });
-                parent.spawn(NodeBundle {
-                    style: Style {
+                    BackgroundColor(Color::WHITE),
+                ));
+                parent.spawn((
+                    Node {
                         position_type: PositionType::Absolute,
                         height: Val::Px(2.0),
                         width: Val::Px(10.0),
@@ -236,11 +214,10 @@ pub fn hitmarker_spawner(mut commands: Commands, mut event_reader: EventReader<H
                         },
                         ..default()
                     },
-                    background_color: Color::WHITE.into(),
-                    ..default()
-                });
-                parent.spawn(NodeBundle {
-                    style: Style {
+                    BackgroundColor(Color::WHITE),
+                ));
+                parent.spawn((
+                    Node {
                         position_type: PositionType::Absolute,
                         height: Val::Px(2.0),
                         width: Val::Px(10.0),
@@ -252,9 +229,8 @@ pub fn hitmarker_spawner(mut commands: Commands, mut event_reader: EventReader<H
                         },
                         ..default()
                     },
-                    background_color: Color::WHITE.into(),
-                    ..default()
-                });
+                    BackgroundColor(Color::WHITE),
+                ));
             });
     }
 }

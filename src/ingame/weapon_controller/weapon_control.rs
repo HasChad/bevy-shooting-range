@@ -40,7 +40,7 @@ pub fn camera_recoil(
     }
 
     if settings.fov < (persp.fov / PI * 180.0) {
-        persp.fov -= (50.0 / 180.0 * PI) * time.delta_seconds();
+        persp.fov -= (50.0 / 180.0 * PI) * time.delta_secs();
     }
 }
 
@@ -57,26 +57,26 @@ pub fn sway_weapon(
 
         if mouse_event.is_empty() {
             if weapon_rot_x.abs() > 0.05 {
-                weapon_rot_x /= 15000. * time.delta_seconds();
+                weapon_rot_x /= 15000. * time.delta_secs();
             } else {
                 weapon_rot_x = 0.0;
             }
 
             if weapon_rot_y.abs() > 0.05 {
-                weapon_rot_y /= 15000. * time.delta_seconds();
+                weapon_rot_y /= 15000. * time.delta_secs();
             } else {
                 weapon_rot_y = 0.0;
             }
         }
 
         for motion in mouse_event.read() {
-            match window.cursor.grab_mode {
+            match window.cursor_options.grab_mode {
                 CursorGrabMode::None => (),
                 _ => {
                     weapon_rot_y +=
-                        (motion.delta.x - weapon_rot_y * 300.) * time.delta_seconds() * 0.1;
+                        (motion.delta.x - weapon_rot_y * 300.) * time.delta_secs() * 0.1;
                     weapon_rot_x +=
-                        (motion.delta.y - weapon_rot_x * 300.) * time.delta_seconds() * 0.1;
+                        (motion.delta.y - weapon_rot_x * 300.) * time.delta_secs() * 0.1;
                 }
             }
         }
@@ -99,26 +99,26 @@ pub fn scoped_sway_weapon(
 
         if mouse_event.is_empty() {
             if weapon_rot_x.abs() > 0.05 {
-                weapon_rot_x /= 5000. * time.delta_seconds();
+                weapon_rot_x /= 5000. * time.delta_secs();
             } else {
                 weapon_rot_x = 0.0;
             }
 
             if weapon_rot_y.abs() > 0.05 {
-                weapon_rot_y /= 5000. * time.delta_seconds();
+                weapon_rot_y /= 5000. * time.delta_secs();
             } else {
                 weapon_rot_y = 0.0;
             }
         }
 
         for motion in mouse_event.read() {
-            match window.cursor.grab_mode {
+            match window.cursor_options.grab_mode {
                 CursorGrabMode::None => (),
                 _ => {
                     weapon_rot_y +=
-                        (motion.delta.x - weapon_rot_y * 900.) * time.delta_seconds() * 0.1;
+                        (motion.delta.x - weapon_rot_y * 900.) * time.delta_secs() * 0.1;
                     weapon_rot_x +=
-                        (motion.delta.y - weapon_rot_x * 900.) * time.delta_seconds() * 0.1;
+                        (motion.delta.y - weapon_rot_x * 900.) * time.delta_secs() * 0.1;
                 }
             }
         }
