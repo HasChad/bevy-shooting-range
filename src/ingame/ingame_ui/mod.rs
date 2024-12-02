@@ -24,8 +24,8 @@ impl Plugin for IngameUIPlugin {
                     fps_text_updater,
                     ammo_text_updater,
                     weapon_name_text_updater,
+                    velocity_text_updater,
                     //target_text_updater,
-                    //velocity_text_updater,
                     // hitmarker systems
                     hitmarker_spawner,
                     hitmarker_controller,

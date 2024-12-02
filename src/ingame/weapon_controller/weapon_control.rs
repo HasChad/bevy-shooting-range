@@ -6,13 +6,16 @@ use bevy::{
 };
 use bevy_kira_audio::prelude::*;
 use rand::{thread_rng, Rng};
-use std::f32::consts::PI;
+use std::{f32::consts::PI, time::Duration};
 
 use super::{
     weapons::{ReloadingAnimations, ShootingAnimations},
     WeaponPromp, WeaponReloadingEvent, WeaponShootingEvent, WeaponState,
 };
-use crate::ingame::{player::Head, GameSettings};
+use crate::ingame::{
+    player::{self, Head},
+    GameSettings,
+};
 
 pub fn camera_recoil(
     time: Res<Time>,
@@ -155,16 +158,52 @@ pub fn shooting_sound(
     // lowering sound
 }
 
-/*
 pub fn weapon_animation(
-    shot_anim: Res<ShootingAnimations>,
-    reload_anim: Res<ReloadingAnimations>,
     weapon_state: Res<State<WeaponState>>,
     mut shot_event_reader: EventReader<WeaponShootingEvent>,
     mut reload_event_reader: EventReader<WeaponReloadingEvent>,
-    mut animation_player_query: Query<&mut AnimationPlayer>,
+    shot_anim: Res<ShootingAnimations>,
+    reload_anim: Res<ReloadingAnimations>,
+    mut animation_players: Query<(&mut AnimationPlayer, &mut AnimationTransitions)>,
 ) {
-    // shooting animation
+    for (mut player, mut transitions) in &mut animation_players {
+        for _event in shot_event_reader.read() {
+            let anim = match weapon_state.get() {
+                WeaponState::P226 => shot_anim.animations[0],
+                WeaponState::AK15 => shot_anim.animations[1],
+            };
+
+            transitions.play(&mut player, anim, Duration::ZERO);
+        }
+
+        for _event in reload_event_reader.read() {
+            let anim = match weapon_state.get() {
+                WeaponState::P226 => reload_anim.animations[0],
+                WeaponState::AK15 => reload_anim.animations[1],
+            };
+
+            transitions.play(&mut player, anim, Duration::ZERO);
+        }
+    }
+}
+
+pub fn setup_scene_once_loaded(
+    mut commands: Commands,
+    shot_anim: Res<ShootingAnimations>,
+    mut players: Query<(Entity, &mut AnimationPlayer), Added<AnimationPlayer>>,
+) {
+    for (entity, _player) in &mut players {
+        let transitions = AnimationTransitions::new();
+
+        commands
+            .entity(entity)
+            .insert(AnimationGraphHandle(shot_anim.graph.clone()))
+            .insert(transitions);
+    }
+}
+
+/*
+// shooting animation
     for _event in shot_event_reader.read() {
         for mut animation_player in &mut animation_player_query {
             match weapon_state.get() {
@@ -178,23 +217,4 @@ pub fn weapon_animation(
             animation_player.replay();
         }
     }
-
-    // reloading animation
-    for _event in reload_event_reader.read() {
-        for mut animation_player in &mut animation_player_query {
-            match weapon_state.get() {
-                WeaponState::P226 => animation_player.play(reload_anim.0[0].clone_weak()),
-                WeaponState::AK15 => animation_player.play(reload_anim.0[1].clone_weak()),
-                WeaponState::FNFAL => animation_player.play(reload_anim.0[2].clone_weak()), //FIXME: need fnfal animation
-                WeaponState::MSR => animation_player.play(reload_anim.0[3].clone_weak()), //FIXME: need msr animation
-            };
-
-            animation_player.set_repeat(RepeatAnimation::Count(1));
-            animation_player.replay();
-        }
-    }
-
-    // raising animation
-    // lowering animation
-}
-*/
+ */

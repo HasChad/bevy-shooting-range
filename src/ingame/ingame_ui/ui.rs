@@ -2,12 +2,9 @@ use avian3d::prelude::LinearVelocity;
 use bevy::{
     color::*,
     diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin},
-    ecs::entity,
     prelude::*,
 };
-use color_eyre::owo_colors::colors::css::Gold;
 use palettes::css::GOLD;
-use std::{fmt::format, time::Duration};
 
 use crate::ingame::{player::Player, weapons::WeaponPromp, CircleTarget};
 
@@ -136,6 +133,33 @@ pub fn ui_setup(mut commands: Commands) {
             TextColor(GOLD.into()),
         ));
 
+    //MARK: Veclocity UI
+    commands
+        .spawn((
+            Text::new("Velocity: "),
+            TextFont {
+                font_size: 20.0,
+                ..default()
+            },
+            Node {
+                position_type: PositionType::Absolute,
+                justify_self: JustifySelf::Center,
+                align_self: AlignSelf::End,
+                ..default()
+            },
+            BackgroundColor(Color::BLACK),
+            Name::new("UI - FPSCounter"),
+            VelocityText,
+        ))
+        .with_child((
+            TextSpan::default(),
+            TextFont {
+                font_size: 20.0,
+                ..default()
+            },
+            TextColor(GOLD.into()),
+        ));
+
     /*
     //MARK: Target Counter UI
     commands.spawn((
@@ -187,39 +211,6 @@ pub fn ui_setup(mut commands: Commands) {
         TargetCounterText,
         Name::new("UI - Target Counter"),
     ));
-
-
-
-    //MARK: Veclocity UI
-    /*
-    commands.spawn((
-        TextBundle::from_sections([
-            TextSection::new(
-                "Velocity: ",
-                TextStyle {
-                    font_size: 20.0,
-                    ..default()
-                },
-            ),
-            TextSection::from_style(TextStyle {
-                font_size: 20.0,
-                color: Color::GOLD,
-                ..default()
-            }),
-        ])
-        .with_style(Style {
-            position_type: PositionType::Absolute,
-            justify_self: JustifySelf::Center,
-            align_self: AlignSelf::End,
-            ..default()
-        })
-        .with_background_color(Color::BLACK),
-        VelocityText,
-        Name::new("UI - Velocity Counter"),
-    ));
-    */
-
-
     */
 }
 
@@ -253,6 +244,20 @@ pub fn fps_text_updater(
     }
 }
 
+pub fn velocity_text_updater(
+    mut writer: TextUiWriter,
+    player_query: Query<&LinearVelocity, With<Player>>,
+    entity: Single<Entity, With<VelocityText>>,
+) {
+    for linear_velocity in player_query.iter() {
+        let sum_velocity = ((linear_velocity.x * linear_velocity.x)
+            + (linear_velocity.z * linear_velocity.z))
+            .sqrt();
+
+        *writer.text(*entity, 1) = format!("{sum_velocity:.1}");
+    }
+}
+
 /*
 pub fn target_text_updater(
     time: Res<Time>,
@@ -268,21 +273,6 @@ pub fn target_text_updater(
                     .timer
                     .tick(Duration::from_secs_f32(time.delta_seconds()));
             }
-        }
-    }
-}
-
-
-pub fn velocity_text_updater(
-    player_query: Query<&LinearVelocity, With<Player>>,
-    mut query: Query<&mut Text, With<VelocityText>>,
-) {
-    for mut text in &mut query {
-        for linear_velocity in player_query.iter() {
-            let sum_velocity = ((linear_velocity.x * linear_velocity.x)
-                + (linear_velocity.z * linear_velocity.z))
-                .sqrt();
-            text.sections[1].value = format!("{sum_velocity:.1}");
         }
     }
 }

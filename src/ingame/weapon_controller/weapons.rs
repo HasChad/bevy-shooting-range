@@ -3,10 +3,16 @@
 use bevy::prelude::*;
 
 #[derive(Resource)]
-pub struct ShootingAnimations(pub Vec<Handle<AnimationClip>>);
+pub struct ShootingAnimations {
+    pub animations: Vec<AnimationNodeIndex>,
+    pub graph: Handle<AnimationGraph>,
+}
 
 #[derive(Resource)]
-pub struct ReloadingAnimations(pub Vec<Handle<AnimationClip>>);
+pub struct ReloadingAnimations {
+    pub animations: Vec<AnimationNodeIndex>,
+    pub graph: Handle<AnimationGraph>,
+}
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Default, States)]
 pub enum WeaponActionState {
@@ -99,16 +105,36 @@ impl WeaponPromp {
     }
 }
 
-pub fn weapon_animation_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.insert_resource(ShootingAnimations(vec![
+pub fn weapon_animation_setup(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut graphs: ResMut<Assets<AnimationGraph>>,
+) {
+    // Build the shooting animation graph
+    let (graph, node_indices) = AnimationGraph::from_clips([
         asset_server.load("models/weapons/P226.glb#Animation0"),
         asset_server.load("models/weapons/AK15.glb#Animation0"),
-    ]));
+    ]);
 
-    commands.insert_resource(ReloadingAnimations(vec![
+    // Insert a resource with the current scene information
+    let graph_handle = graphs.add(graph);
+    commands.insert_resource(ShootingAnimations {
+        animations: node_indices,
+        graph: graph_handle,
+    });
+
+    // Build the animation graph
+    let (reload_graph, node_indices) = AnimationGraph::from_clips([
         asset_server.load("models/weapons/P226.glb#Animation1"),
         asset_server.load("models/weapons/AK15.glb#Animation1"),
-    ]));
+    ]);
+
+    // Insert a resource with the current scene information
+    let graph_handle = graphs.add(reload_graph);
+    commands.insert_resource(ReloadingAnimations {
+        animations: node_indices,
+        graph: graph_handle,
+    });
 }
 
 pub fn change_weapon(
