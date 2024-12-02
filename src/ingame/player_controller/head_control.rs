@@ -31,15 +31,14 @@ pub fn player_look(
 }
 
 pub fn camera_follow_player(
-    mut camera_query: Query<&mut Transform, With<Head>>,
-    player_query: Query<&Transform, (With<Player>, Without<Head>)>,
+    mut camera: Single<&mut Transform, With<Head>>,
+    player: Single<&Transform, (With<Player>, Without<Head>)>,
+    time: Res<Time>,
 ) {
-    for player_transform in player_query.iter() {
-        for mut camera_transform in camera_query.iter_mut() {
-            camera_transform.translation = player_transform.translation;
-            camera_transform.translation.y = player_transform.translation.y + 0.25;
-            //for inspecting player collider
-            //camera_transform.translation.z = player_transform.translation.z + 1.;
-        }
-    }
+    let Vec3 { x, y, z } = player.translation;
+    let direction = Vec3::new(x, y + 0.25, z); // + 1.0 when inspecting player collider
+
+    camera
+        .translation
+        .smooth_nudge(&direction, 50.0, time.delta_secs());
 }

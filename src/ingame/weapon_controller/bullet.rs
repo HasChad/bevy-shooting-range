@@ -58,7 +58,7 @@ pub fn spawn_bullet(
             ))
             .with_children(|parent| {
                 parent.spawn((
-                    Mesh3d(meshes.add(Capsule3d::new(0.005, 0.6))),
+                    Mesh3d(meshes.add(Capsule3d::new(0.002, 1.0))),
                     MeshMaterial3d(materials.add(StandardMaterial {
                         base_color: Color::srgb(1., 0.8, 0.),
                         emissive: LinearRgba {

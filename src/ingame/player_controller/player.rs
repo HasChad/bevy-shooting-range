@@ -22,10 +22,9 @@ pub fn player_setup(
     commands
         .spawn((
             Player,
-            InheritedVisibility::VISIBLE,
             RigidBody::Dynamic,
-            Collider::capsule(0.5, 0.25),
-            Transform::from_xyz(0.0, 0.5, 0.0),
+            Collider::capsule(0.25, 0.5),
+            Transform::from_xyz(0.0, 1.0, 0.0),
             GravityScale(2.0),
             Restitution::new(0.0).with_combine_rule(CoefficientCombine::Min),
             LockedAxes::ROTATION_LOCKED,
@@ -37,23 +36,19 @@ pub fn player_setup(
     commands
         .spawn((
             Camera3d::default(),
+            Camera {
+                hdr: true, // HDR is required for the bloom effect
+                ..default()
+            },
             Projection::Perspective(PerspectiveProjection {
-                fov: settings.fov / 180.0 * PI, // ! One PI = 180, first value is the real fov
+                fov: settings.fov / 180.0 * PI,
                 near: 0.01,
                 ..default()
             }),
-            Transform::from_xyz(0.0, 1.0, 0.0),
-            DistanceFog {
-                color: Color::BLACK,
-                falloff: FogFalloff::Exponential { density: 0.01 },
-                ..default()
-            },
-            // Enable bloom for the camera
             Bloom::NATURAL,
+            Name::new("Head"),
+            Head,
         ))
-        .insert(InheritedVisibility::VISIBLE)
-        .insert(Name::new("Head"))
-        .insert(Head)
         .with_children(|parent| {
             //bullet spawn position
             parent.spawn((
