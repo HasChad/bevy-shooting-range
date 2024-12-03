@@ -58,16 +58,9 @@ pub fn hit_detector(
 pub fn target_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     //circle target
     commands.spawn((
-        /*
-        SceneBundle {
-            scene: asset_server.load("models/circle_target.glb#Scene0"),
-            transform: Transform::from_xyz(0.0, 0.75, -4.0),
-            ..default()
-        },
-        */
         SceneRoot(asset_server.load("models/circle_target.glb#Scene0")),
-        Transform::from_xyz(0.0, 0.75, -4.0),
         ColliderConstructorHierarchy::new(ColliderConstructor::TrimeshFromMesh),
+        Transform::from_xyz(0.0, 0.75, -4.0),
         Name::new("CircleTarget"),
         CircleTarget {
             hit_counter: 0,
@@ -78,24 +71,18 @@ pub fn target_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     /*
     //enemy target
     commands.spawn((
-        SceneBundle {
-            scene: asset_server.load("models/enemy-target.glb#Scene0"),
-            transform: Transform::from_xyz(0.0, 0.5, -3.0),
-            ..default()
-        },
-        AsyncSceneCollider::new(Some(ComputedCollider::TriMesh)),
+        SceneRoot(asset_server.load("models/enemy-target.glb#Scene0")),
+        ColliderConstructorHierarchy::new(ColliderConstructor::TrimeshFromMesh),
+        Transform::from_xyz(0.0, 0.5, -3.0),
         Name::new("EnemyTarget"),
         EnemyTarget { health: 5 },
     ));
 
     //enemy target hostage
     commands.spawn((
-        SceneBundle {
-            scene: asset_server.load("models/enemy-target-hostage.glb#Scene0"),
-            transform: Transform::from_xyz(1.0, 0.8, -3.0),
-            ..default()
-        },
-        AsyncSceneCollider::new(Some(ComputedCollider::TriMesh)),
+        SceneRoot(asset_server.load("models/enemy-target-hostage.glb#Scene0")),
+        ColliderConstructorHierarchy::new(ColliderConstructor::TrimeshFromMesh),
+        Transform::from_xyz(1.0, 0.8, -3.0),
         Name::new("EnemyTargetHostage"),
         EnemyTargetHostage { health: 5 },
     ));

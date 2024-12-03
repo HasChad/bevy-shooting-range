@@ -39,10 +39,10 @@ impl Plugin for InGamePlugin {
                 (
                     edit_mode_toggler,
                     //target systems
+                    hit_detector,
                     circle_target_controller,
                     enemy_target_controller,
                     enemy_target_hostage_controller,
-                    hit_detector,
                 ),
             )
             //events

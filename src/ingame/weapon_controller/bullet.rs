@@ -53,26 +53,24 @@ pub fn spawn_bullet(
                     velocity: bullet_velocity,
                 },
                 *head_transform,
-                InheritedVisibility::VISIBLE,
+                Visibility::Visible,
                 Name::new("Bullet"),
             ))
-            .with_children(|parent| {
-                parent.spawn((
-                    Mesh3d(meshes.add(Capsule3d::new(0.002, 1.0))),
-                    MeshMaterial3d(materials.add(StandardMaterial {
-                        base_color: Color::srgb(1., 0.8, 0.),
-                        emissive: LinearRgba {
-                            red: 1000.,
-                            green: 800.,
-                            blue: 0.,
-                            alpha: 255.,
-                        },
-                        ..default()
-                    })),
-                    Transform::from_translation(tracer_position)
-                        .with_rotation(Quat::from_rotation_x(PI / 2.)),
-                ));
-            });
+            .with_child((
+                Mesh3d(meshes.add(Capsule3d::new(0.002, 1.0))),
+                MeshMaterial3d(materials.add(StandardMaterial {
+                    base_color: Color::srgb(1., 0.8, 0.),
+                    emissive: LinearRgba {
+                        red: 1000.,
+                        green: 800.,
+                        blue: 0.,
+                        alpha: 255.,
+                    },
+                    ..default()
+                })),
+                Transform::from_translation(tracer_position)
+                    .with_rotation(Quat::from_rotation_x(PI / 2.)),
+            ));
     }
 }
 
@@ -82,12 +80,11 @@ pub fn bullet_controller(
     spatial_query: SpatialQuery,
     mut event_writer: EventWriter<HitConfirmEvent>,
     children_query: Query<&Children>,
-    player_query: Query<Entity, With<Player>>,
+    player_id: Single<Entity, With<Player>>,
     mut bullet_query: Query<(&mut Transform, &mut Bullet, Entity)>,
     mut transforms: Query<&mut Transform, Without<Bullet>>,
 ) {
     for (mut bullet_transform, mut bullet_promp, bullet_entity) in bullet_query.iter_mut() {
-        let player_id = player_query.single();
         let bullet_travel = bullet_promp.velocity * 100.0 * time.delta_secs();
         let distance = (bullet_travel).length();
 
@@ -105,7 +102,7 @@ pub fn bullet_controller(
             Dir3::new_unchecked(bullet_promp.velocity.normalize()),
             distance,
             true,
-            &SpatialQueryFilter::from_mask(0b1011).with_excluded_entities([player_id]),
+            &SpatialQueryFilter::from_mask(0b1011).with_excluded_entities([*player_id]),
         ) {
             commands.entity(bullet_entity).despawn_recursive();
 
@@ -117,7 +114,9 @@ pub fn bullet_controller(
 
         for child in children_query.iter_descendants(bullet_entity) {
             if let Ok(mut transform) = transforms.get_mut(child) {
-                transform.translation *= 0.9;
+                transform
+                    .translation
+                    .smooth_nudge(&Vec3::ZERO, 2.0, time.delta_secs());
             }
         }
 

@@ -1,5 +1,3 @@
-#![allow(clippy::too_many_arguments)]
-
 use bevy::prelude::*;
 use std::f32::consts::PI;
 
@@ -16,11 +14,8 @@ pub fn aim_changer(
     key_bindings: Res<KeyBindings>,
     mouse_input: Res<ButtonInput<MouseButton>>,
     weapon_action_state: Res<State<WeaponActionState>>,
-    weapon_aim_state: Res<State<WeaponAimState>>,
     mut next_weapon_aim_state: ResMut<NextState<WeaponAimState>>,
 ) {
-    info!("weapon aim state = {:?}", weapon_aim_state.get());
-
     if mouse_input.pressed(key_bindings.scope)
         && *weapon_action_state.get() == WeaponActionState::Shoot
     {
@@ -35,7 +30,6 @@ pub fn scope(
     settings: ResMut<GameSettings>,
     crosshair_settings: Res<CrosshairLineSettings>,
     weapon_aim_state: Res<State<WeaponAimState>>,
-    weapon_action_state: Res<State<WeaponActionState>>,
     mut camera_query: Query<&mut Projection, With<Camera3d>>,
     mut weapon_query: Query<&mut Transform, With<WeaponPromp>>,
     mut crosshair_query: Query<&mut Visibility, With<CrosshairLine>>,
@@ -45,9 +39,7 @@ pub fn scope(
         return;
     };
 
-    if *weapon_aim_state.get() == WeaponAimState::Scope
-        && *weapon_action_state.get() == WeaponActionState::Shoot
-    {
+    if *weapon_aim_state.get() == WeaponAimState::Scope {
         for mut croshair_visib in crosshair_query.iter_mut() {
             *croshair_visib = Visibility::Hidden;
         }
