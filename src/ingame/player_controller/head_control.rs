@@ -16,8 +16,8 @@ pub fn player_look(
     let delta = accumulated_mouse_motion.delta;
 
     if delta != Vec2::ZERO {
-        let delta_yaw = -delta.x * settings.sensitivity / 300.0;
-        let delta_pitch = -delta.y * settings.sensitivity / 300.0;
+        let delta_yaw = -delta.x * settings.sensitivity / 500.0;
+        let delta_pitch = -delta.y * settings.sensitivity / 500.0;
 
         let (yaw, pitch, roll) = camera_transform.rotation.to_euler(EulerRot::YXZ);
 
