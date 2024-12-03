@@ -18,27 +18,31 @@ pub fn player_move(
     input: Res<ButtonInput<KeyCode>>,
     mut player_query: Query<(&mut LinearVelocity, &mut Transform), With<Player>>,
 ) {
-    let mut fmove = 0.0;
-    let mut smove = 0.0;
-
-    for key in input.get_pressed() {
-        let key = *key;
-
-        if key == key_bindings.move_forward {
-            fmove = 5.0;
-        } else if key == key_bindings.move_backward {
-            fmove = -5.0
-        }
-
-        if key == key_bindings.move_left {
-            smove = 5.0
-        } else if key == key_bindings.move_right {
-            smove = -5.0
-        }
-    }
-
     for (mut linear_velocity, player_transform) in player_query.iter_mut() {
         let (yaw_player, _, _) = player_transform.rotation.to_euler(EulerRot::YXZ);
+
+        let mut fmove = 0.0;
+        let mut smove = 0.0;
+
+        for key in input.get_pressed() {
+            let key = *key;
+
+            if key == key_bindings.move_forward {
+                fmove = 5.0;
+            } else if key == key_bindings.move_backward {
+                fmove = -5.0
+            }
+
+            if key == key_bindings.move_left {
+                smove = 5.0
+            } else if key == key_bindings.move_right {
+                smove = -5.0
+            }
+
+            if key == key_bindings.jump {
+                linear_velocity.y = 3.0
+            }
+        }
 
         // ! player looking direction
         let forward = Vec3::new(-yaw_player.sin(), 0.0, -yaw_player.cos()).normalize();
