@@ -32,17 +32,9 @@ pub enum PlayableState {
 
 pub fn edit_mode_toggler(
     input: ResMut<ButtonInput<KeyCode>>,
-    mut windows: Query<&mut Window>,
+    mut window: Single<&mut Window>,
     mut next_state: ResMut<NextState<PlayableState>>,
 ) {
-    let mut window = windows.single_mut();
-
-    if window.cursor_options.grab_mode == CursorGrabMode::Confined {
-        //Center mouse becasuse confined mod is not working on Windows right now
-        let center = Vec2::new(window.width() / 2.0, window.height() / 2.0);
-        window.set_cursor_position(Some(center));
-    }
-
     if input.just_pressed(KeyCode::Escape) {
         match window.cursor_options.grab_mode {
             CursorGrabMode::Confined => {

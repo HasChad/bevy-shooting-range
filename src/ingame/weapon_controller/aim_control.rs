@@ -12,39 +12,21 @@ use crate::ingame::{
     GameSettings, KeyBindings,
 };
 
-#[derive(Resource)]
-pub struct LerpTimer {
-    scope_timer: Timer,
-}
-
-impl Default for LerpTimer {
-    fn default() -> Self {
-        LerpTimer {
-            scope_timer: Timer::from_seconds(0.1, TimerMode::Once),
-        }
-    }
-}
-
 pub fn aim_changer(
-    mut lerp_timer: ResMut<LerpTimer>,
     key_bindings: Res<KeyBindings>,
     mouse_input: Res<ButtonInput<MouseButton>>,
+    weapon_action_state: Res<State<WeaponActionState>>,
     weapon_aim_state: Res<State<WeaponAimState>>,
     mut next_weapon_aim_state: ResMut<NextState<WeaponAimState>>,
-    weapon_action_state: Res<State<WeaponActionState>>,
 ) {
-    if weapon_action_state.is_changed() {
-        lerp_timer.scope_timer.reset();
-    }
+    info!("weapon aim state = {:?}", weapon_aim_state.get());
 
-    if mouse_input.just_pressed(key_bindings.scope) || mouse_input.just_released(key_bindings.scope)
+    if mouse_input.pressed(key_bindings.scope)
+        && *weapon_action_state.get() == WeaponActionState::Shoot
     {
-        lerp_timer.scope_timer.reset();
-
-        match weapon_aim_state.get() {
-            WeaponAimState::HipFire => next_weapon_aim_state.set(WeaponAimState::Scope),
-            WeaponAimState::Scope => next_weapon_aim_state.set(WeaponAimState::HipFire),
-        }
+        next_weapon_aim_state.set(WeaponAimState::Scope);
+    } else {
+        next_weapon_aim_state.set(WeaponAimState::HipFire);
     }
 }
 
@@ -54,7 +36,6 @@ pub fn scope(
     crosshair_settings: Res<CrosshairLineSettings>,
     weapon_aim_state: Res<State<WeaponAimState>>,
     weapon_action_state: Res<State<WeaponActionState>>,
-    mut lerp_timer: ResMut<LerpTimer>,
     mut camera_query: Query<&mut Projection, With<Camera3d>>,
     mut weapon_query: Query<&mut Transform, With<WeaponPromp>>,
     mut crosshair_query: Query<&mut Visibility, With<CrosshairLine>>,
@@ -67,36 +48,32 @@ pub fn scope(
     if *weapon_aim_state.get() == WeaponAimState::Scope
         && *weapon_action_state.get() == WeaponActionState::Shoot
     {
-        lerp_timer.scope_timer.tick(time.delta());
-
         for mut croshair_visib in crosshair_query.iter_mut() {
             *croshair_visib = Visibility::Hidden;
         }
 
-        let percentage_complete =
-            lerp_timer.scope_timer.elapsed_secs() / lerp_timer.scope_timer.duration().as_secs_f32();
+        weapon_transform.translation.smooth_nudge(
+            &Vec3::new(0.0, 0.0, -0.15),
+            20.0,
+            time.delta_secs(),
+        );
 
-        persp.fov = persp.fov.lerp(50.0 / 180.0 * PI, percentage_complete);
-
-        weapon_transform.translation = weapon_transform
-            .translation
-            .lerp(Vec3::new(0.0, 0.0, -0.15), percentage_complete);
-    } else if !lerp_timer.scope_timer.finished() {
-        lerp_timer.scope_timer.tick(time.delta());
-
+        persp
+            .fov
+            .smooth_nudge(&(50.0 / 180.0 * PI), 20.0, time.delta_secs());
+    } else {
         for mut croshair_visib in crosshair_query.iter_mut() {
             *croshair_visib = crosshair_settings.enable;
         }
 
-        let percentage_complete =
-            lerp_timer.scope_timer.elapsed_secs() / lerp_timer.scope_timer.duration().as_secs_f32();
+        weapon_transform.translation.smooth_nudge(
+            &Vec3::new(0.075, -0.04, -0.1),
+            20.0,
+            time.delta_secs(),
+        );
 
-        persp.fov = persp
+        persp
             .fov
-            .lerp(settings.fov / 180.0 * PI, percentage_complete);
-
-        weapon_transform.translation = weapon_transform
-            .translation
-            .lerp(Vec3::new(0.075, -0.04, -0.1), percentage_complete);
+            .smooth_nudge(&(settings.fov / 180.0 * PI), 20.0, time.delta_secs());
     }
 }

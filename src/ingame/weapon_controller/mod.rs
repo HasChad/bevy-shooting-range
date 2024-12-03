@@ -48,6 +48,7 @@ impl Plugin for WeaponControllerPlugin {
                 weapon_animation_player,
                 //aim system
                 aim_changer,
+                //scope,
                 scope,
                 //control system
                 camera_recoil,
@@ -67,7 +68,6 @@ impl Plugin for WeaponControllerPlugin {
         )
         .add_systems(FixedUpdate, bullet_controller)
         //resources
-        .init_resource::<LerpTimer>()
         .init_resource::<WeaponRes>()
         //states
         .init_state::<WeaponActionState>()

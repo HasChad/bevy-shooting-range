@@ -32,11 +32,15 @@ pub fn camera_recoil(
         head_transform.rotation = Quat::from_axis_angle(Vec3::Y, yaw_camera)
             * Quat::from_axis_angle(Vec3::X, pitch_camera);
 
-        persp.fov += 3.0 / 180.0 * PI;
+        persp
+            .fov
+            .smooth_nudge(&(persp.fov + (10.0 / 180.0 * PI)), 50.0, time.delta_secs());
     }
 
     if settings.fov < (persp.fov / PI * 180.0) {
-        persp.fov -= (50.0 / 180.0 * PI) * time.delta_secs();
+        persp
+            .fov
+            .smooth_nudge(&(settings.fov / 180.0 * PI), 20.0, time.delta_secs());
     }
 }
 
