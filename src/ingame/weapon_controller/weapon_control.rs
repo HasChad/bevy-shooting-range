@@ -1,5 +1,7 @@
+use avian3d::parry::math::Rotation;
 use bevy::{
-    input::mouse::MouseMotion,
+    input::mouse::{AccumulatedMouseMotion, MouseMotion},
+    math::VectorSpace,
     prelude::*,
     window::{CursorGrabMode, PrimaryWindow},
 };
@@ -44,46 +46,32 @@ pub fn camera_recoil(
     }
 }
 
+// FIXME: fix this shit
 pub fn sway_weapon(
     time: Res<Time>,
-    primary_window: Query<&Window, With<PrimaryWindow>>,
-    mut weapon_query: Query<&mut Transform, With<WeaponPromp>>,
-    mut mouse_event: EventReader<MouseMotion>,
+    accumulated_mouse_motion: Res<AccumulatedMouseMotion>,
+    mut weapon_transform: Single<&mut Transform, With<WeaponPromp>>,
 ) {
-    for window in primary_window.iter() {
-        let mut weapon_transform = weapon_query.single_mut();
-        let (mut weapon_rot_y, mut weapon_rot_x, _) =
-            weapon_transform.rotation.to_euler(EulerRot::YXZ);
+    let (mut weapon_rot_y, mut weapon_rot_x, _) = weapon_transform.rotation.to_euler(EulerRot::YXZ);
 
-        if mouse_event.is_empty() {
-            if weapon_rot_x.abs() > 0.05 {
-                weapon_rot_x /= 15000. * time.delta_secs();
-            } else {
-                weapon_rot_x = 0.0;
-            }
+    let delta = accumulated_mouse_motion.delta;
 
-            if weapon_rot_y.abs() > 0.05 {
-                weapon_rot_y /= 15000. * time.delta_secs();
-            } else {
-                weapon_rot_y = 0.0;
-            }
-        }
+    if delta == Vec2::ZERO {
+        weapon_rot_x = 0.;
+        weapon_rot_y = 0.;
+    } else {
+        weapon_rot_y += delta.x / 2000.;
+        weapon_rot_x += delta.y / 2000.;
 
-        for motion in mouse_event.read() {
-            match window.cursor_options.grab_mode {
-                CursorGrabMode::None => (),
-                _ => {
-                    weapon_rot_y +=
-                        (motion.delta.x - weapon_rot_y * 300.) * time.delta_secs() * 0.1;
-                    weapon_rot_x +=
-                        (motion.delta.y - weapon_rot_x * 300.) * time.delta_secs() * 0.1;
-                }
-            }
-        }
-
-        weapon_transform.rotation = Quat::from_axis_angle(Vec3::Y, weapon_rot_y)
-            * Quat::from_axis_angle(Vec3::X, weapon_rot_x);
+        info!("rot = {}", weapon_rot_y);
     }
+
+    weapon_transform.rotation.smooth_nudge(
+        &(Quat::from_axis_angle(Vec3::Y, weapon_rot_y.clamp(-0.03, 0.03))
+            * Quat::from_axis_angle(Vec3::X, weapon_rot_x.clamp(-0.03, 0.03))),
+        20.0,
+        time.delta_secs(),
+    );
 }
 
 pub fn scoped_sway_weapon(

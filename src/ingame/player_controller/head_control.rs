@@ -36,7 +36,7 @@ pub fn camera_follow_player(
     time: Res<Time>,
 ) {
     let Vec3 { x, y, z } = player.translation;
-    let direction = Vec3::new(x, y + 0.25, z); // + 1.0 when inspecting player collider
+    let direction = Vec3::new(x, y + 0.25, z); // z + 1.0 when inspecting player collider
 
     camera
         .translation

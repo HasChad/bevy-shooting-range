@@ -82,7 +82,7 @@ pub fn egui_settings(
 
                     //MARK: Color
                     ui.label("Color: ");
-                    let cross_color: Vec3 = crosshair_line_settings.color.to_linear().to_vec3(); // FIXME: şüpheli
+                    let cross_color: Vec3 = crosshair_line_settings.color.to_linear().to_vec3(); // FIXME: artık şüpheli değil, çalışmıyo
                     let mut new_one: [f32; 3] = [cross_color[0], cross_color[1], cross_color[2]];
                     if ui.color_edit_button_rgb(&mut new_one).changed() {
                         crosshair_line_settings.color =
