@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_kira_audio::{Audio, AudioControl};
 use std::time::Duration;
 
 use super::{WeaponReloadingEvent, WeaponShootingEvent, WeaponState};
@@ -81,4 +82,31 @@ pub fn weapon_animation_player(
             transitions.play(&mut player, AnimationNodeIndex::new(2), Duration::ZERO);
         }
     }
+}
+
+pub fn shooting_sound(
+    audio: Res<Audio>,
+    asset_server: Res<AssetServer>,
+    weapon_state: Res<State<WeaponState>>,
+    mut shot_event_reader: EventReader<WeaponShootingEvent>,
+    mut reload_event_reader: EventReader<WeaponReloadingEvent>,
+) {
+    // shooting sound
+    for _event in shot_event_reader.read() {
+        match weapon_state.get() {
+            WeaponState::P226 => audio.play(asset_server.load("sounds/p226_shot.ogg")),
+            WeaponState::AK15 => audio.play(asset_server.load("sounds/ak15_shot.ogg")),
+        };
+    }
+
+    // reloading sound
+    for _event in reload_event_reader.read() {
+        match weapon_state.get() {
+            WeaponState::P226 => audio.play(asset_server.load("sounds/p226_reload.ogg")),
+            WeaponState::AK15 => audio.play(asset_server.load("sounds/ak15_reload.ogg")),
+        };
+    }
+
+    // raising sound
+    // lowering sound
 }

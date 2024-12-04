@@ -58,7 +58,7 @@ pub fn hit_detector(
 pub fn target_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     //circle target
     commands.spawn((
-        SceneRoot(asset_server.load("models/circle_target.glb#Scene0")),
+        SceneRoot(asset_server.load("models/targets/circle_target.glb#Scene0")),
         ColliderConstructorHierarchy::new(ColliderConstructor::TrimeshFromMesh),
         Transform::from_xyz(0.0, 0.75, -4.0),
         Name::new("CircleTarget"),
@@ -71,7 +71,7 @@ pub fn target_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     /*
     //enemy target
     commands.spawn((
-        SceneRoot(asset_server.load("models/enemy-target.glb#Scene0")),
+        SceneRoot(asset_server.load("models/targets/enemy-target.glb#Scene0")),
         ColliderConstructorHierarchy::new(ColliderConstructor::TrimeshFromMesh),
         Transform::from_xyz(0.0, 0.5, -3.0),
         Name::new("EnemyTarget"),
@@ -80,7 +80,7 @@ pub fn target_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     //enemy target hostage
     commands.spawn((
-        SceneRoot(asset_server.load("models/enemy-target-hostage.glb#Scene0")),
+        SceneRoot(asset_server.load("models/targets/enemy-target-hostage.glb#Scene0")),
         ColliderConstructorHierarchy::new(ColliderConstructor::TrimeshFromMesh),
         Transform::from_xyz(1.0, 0.8, -3.0),
         Name::new("EnemyTargetHostage"),

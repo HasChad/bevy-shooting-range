@@ -1,15 +1,8 @@
-use avian3d::parry::math::Rotation;
-use bevy::{
-    input::mouse::{AccumulatedMouseMotion, MouseMotion},
-    math::VectorSpace,
-    prelude::*,
-    window::{CursorGrabMode, PrimaryWindow},
-};
-use bevy_kira_audio::prelude::*;
+use bevy::{input::mouse::AccumulatedMouseMotion, prelude::*};
 use rand::{thread_rng, Rng};
 use std::f32::consts::PI;
 
-use super::{WeaponPromp, WeaponReloadingEvent, WeaponShootingEvent, WeaponState};
+use super::{WeaponPromp, WeaponShootingEvent};
 use crate::ingame::{player::Head, GameSettings};
 
 pub fn camera_recoil(
@@ -46,7 +39,6 @@ pub fn camera_recoil(
     }
 }
 
-// FIXME: fix this shit
 pub fn sway_weapon(
     time: Res<Time>,
     accumulated_mouse_motion: Res<AccumulatedMouseMotion>,
@@ -75,31 +67,4 @@ pub fn scoped_sway_weapon(
         10.0,
         time.delta_secs(),
     );
-}
-
-pub fn shooting_sound(
-    audio: Res<Audio>,
-    asset_server: Res<AssetServer>,
-    weapon_state: Res<State<WeaponState>>,
-    mut shot_event_reader: EventReader<WeaponShootingEvent>,
-    mut reload_event_reader: EventReader<WeaponReloadingEvent>,
-) {
-    // shooting sound
-    for _event in shot_event_reader.read() {
-        match weapon_state.get() {
-            WeaponState::P226 => audio.play(asset_server.load("sounds/p226_shot.ogg")),
-            WeaponState::AK15 => audio.play(asset_server.load("sounds/ak15_shot1.ogg")),
-        };
-    }
-
-    // reloading sound
-    for _event in reload_event_reader.read() {
-        match weapon_state.get() {
-            WeaponState::P226 => audio.play(asset_server.load("sounds/p226_reload.ogg")),
-            WeaponState::AK15 => audio.play(asset_server.load("sounds/ak15_reload.ogg")),
-        };
-    }
-
-    // raising sound
-    // lowering sound
 }
