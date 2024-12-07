@@ -4,8 +4,8 @@ use bevy::prelude::*;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Default, States)]
 pub enum WeaponActionState {
-    Ready,
     #[default]
+    Ready,
     Shoot,
     Reload,
     Raise,
@@ -34,7 +34,6 @@ pub struct WeaponPromp {
     pub head_damage: u8,
     pub body_damage: u8,
     pub is_auto: bool,
-    pub okay_to_shoot: bool,
     pub firerate: Timer,
     pub reload_timer: Timer,
     //pub time_to_aim: Timer,
@@ -64,7 +63,6 @@ impl WeaponPromp {
             head_damage: 3,
             body_damage: 1,
             is_auto: false,
-            okay_to_shoot: true,
             firerate: Timer::from_seconds(0.1, TimerMode::Once),
             reload_timer: Timer::from_seconds(1.0, TimerMode::Once),
         }
@@ -78,7 +76,6 @@ impl WeaponPromp {
             head_damage: 10,
             body_damage: 4,
             is_auto: true,
-            okay_to_shoot: true,
             firerate: Timer::from_seconds(0.09, TimerMode::Once),
             reload_timer: Timer::from_seconds(1.75, TimerMode::Once),
         }
@@ -105,7 +102,7 @@ pub fn change_weapon(
     mut weapon_query: Query<(&mut WeaponPromp, &mut SceneRoot)>,
 ) {
     for key in input.get_just_pressed() {
-        if *weapon_action_state.get() == WeaponActionState::Shoot
+        if *weapon_action_state.get() == WeaponActionState::Ready
             && *weapon_aim_state.get() == WeaponAimState::HipFire
         {
             for (mut weapon_promp, mut weapon_scene) in weapon_query.iter_mut() {

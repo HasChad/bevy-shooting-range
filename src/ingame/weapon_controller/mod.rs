@@ -59,11 +59,7 @@ impl Plugin for WeaponControllerPlugin {
                 //action system
                 firerate_timer.run_if(in_state(WeaponActionState::Shoot)),
                 reload_timer.run_if(in_state(WeaponActionState::Reload)),
-                (
-                    change_weapon,
-                    weapon_input_controller.run_if(in_state(WeaponActionState::Shoot)),
-                )
-                    .run_if(in_state(PlayableState::Action)),
+                (change_weapon, weapon_input_controller).run_if(in_state(PlayableState::Action)),
             ),
         )
         .add_systems(FixedUpdate, bullet_controller)

@@ -17,7 +17,8 @@ pub fn aim_changer(
     mut next_weapon_aim_state: ResMut<NextState<WeaponAimState>>,
 ) {
     if mouse_input.pressed(key_bindings.scope)
-        && *weapon_action_state.get() == WeaponActionState::Shoot
+        && (*weapon_action_state.get() == WeaponActionState::Shoot
+            || *weapon_action_state.get() == WeaponActionState::Ready)
     {
         next_weapon_aim_state.set(WeaponAimState::Scope);
     } else {

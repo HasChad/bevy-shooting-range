@@ -10,41 +10,47 @@ pub fn weapon_input_controller(
     mouse_input: Res<ButtonInput<MouseButton>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut weapon_query: Query<&mut WeaponPromp>,
+    weapon_action_state: Res<State<WeaponActionState>>,
     mut next_weapon_action_state: ResMut<NextState<WeaponActionState>>,
     mut shot_event_writer: EventWriter<WeaponShootingEvent>,
     mut reload_event_writer: EventWriter<WeaponReloadingEvent>,
 ) {
     for mut weapon_promp in weapon_query.iter_mut() {
         //shoot
-        if weapon_promp.okay_to_shoot
-            && weapon_promp.mag_capacity > 0
+        if *weapon_action_state.get() == WeaponActionState::Ready
             && ((mouse_input.just_pressed(key_bindings.fire) && !weapon_promp.is_auto)
                 || (mouse_input.pressed(key_bindings.fire) && weapon_promp.is_auto))
         {
             weapon_promp.mag_capacity -= 1;
-            weapon_promp.okay_to_shoot = false;
             shot_event_writer.send(WeaponShootingEvent);
+            next_weapon_action_state.set(WeaponActionState::Shoot);
         }
 
         //reload
-        if (weapon_promp.mag_capacity == 0 || keyboard_input.just_pressed(key_bindings.reload))
+        if *weapon_action_state.get() == WeaponActionState::Ready
+            && (weapon_promp.mag_capacity == 0 || keyboard_input.just_pressed(key_bindings.reload))
             && weapon_promp.ammo_capacity > 0
             && weapon_promp.mag_capacity < weapon_promp.self_mag_cap()
         {
-            next_weapon_action_state.set(WeaponActionState::Reload);
             reload_event_writer.send(WeaponReloadingEvent);
+            next_weapon_action_state.set(WeaponActionState::Reload);
         }
     }
 }
 
-pub fn firerate_timer(mut weapon_query: Query<&mut WeaponPromp>, time: Res<Time>) {
+pub fn firerate_timer(
+    time: Res<Time>,
+    mut weapon_query: Query<&mut WeaponPromp>,
+    weapon_action_state: Res<State<WeaponActionState>>,
+    mut next_weapon_action_state: ResMut<NextState<WeaponActionState>>,
+) {
     for mut weapon_promp in weapon_query.iter_mut() {
-        if !weapon_promp.okay_to_shoot {
+        if *weapon_action_state.get() == WeaponActionState::Shoot {
             weapon_promp.firerate.tick(time.delta());
 
             if weapon_promp.firerate.finished() {
                 weapon_promp.firerate.reset();
-                weapon_promp.okay_to_shoot = true;
+                next_weapon_action_state.set(WeaponActionState::Ready);
             }
         }
     }
@@ -71,7 +77,7 @@ pub fn reload_timer(
                 weapon_promp.ammo_capacity = 0;
             }
 
-            next_state.set(WeaponActionState::Shoot)
+            next_state.set(WeaponActionState::Ready)
         }
     }
 }
