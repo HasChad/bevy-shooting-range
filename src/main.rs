@@ -47,7 +47,8 @@ fn main() -> Result<()> {
         .add_plugins(AudioPlugin)
         .add_plugins(FrameTimeDiagnosticsPlugin)
         .add_plugins(PhysicsPlugins::default())
-        //.add_plugins(PhysicsDebugPlugin::default())
+        //4
+        .add_plugins(PhysicsDebugPlugin::default())
         .add_plugins(WorldInspectorPlugin::default())
         //mod plugins
         .add_plugins(InGamePlugin)

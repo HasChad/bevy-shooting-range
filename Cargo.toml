@@ -29,12 +29,12 @@ bevy = { version = "0.15.0", default-features = false, features = [
   "tonemapping_luts",   # nclude tonemapping Look Up Tables KTX2 files. If everything is pink, you need to enable this feature or change the Tonemapping method for your Camera2d or Camera3d.
 
   # Optional features:
-  "asset_processor",      # Asset processing
-  "serialize",            # Support for `serde` Serialize/Deserialize
-  "dynamic_linking",   # Dynamic linking for faster compile-times
+  "asset_processor", # Asset processing
+  "serialize",       # Support for `serde` Serialize/Deserialize
+  "dynamic_linking", # Dynamic linking for faster compile-times
 ] }
 bevy-inspector-egui = "0.28.0"
-avian3d =  { git = "https://github.com/Jondolf/avian", branch = "main"}
+avian3d = "0.2.0"
 bevy_kira_audio = "0.21.0"
 rand = "0.8.5"
 color-eyre = "0.6.3"

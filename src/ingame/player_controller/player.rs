@@ -26,7 +26,7 @@ pub fn player_setup(
             Transform::from_xyz(0.0, 1.0, 0.0),
             GravityScale(2.0),
             Restitution::new(0.0).with_combine_rule(CoefficientCombine::Min),
-            LockedAxes::ROTATION_LOCKED,
+            LockedAxes::new().lock_rotation_x().lock_rotation_z(),
             Friction::new(0.0).with_combine_rule(CoefficientCombine::Min),
         ))
         .insert(Name::new("Player"));
