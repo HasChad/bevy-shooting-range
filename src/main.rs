@@ -1,15 +1,7 @@
 // #![windows_subsystem = "windows"]
 
 use avian3d::prelude::*;
-use bevy::{
-    diagnostic::FrameTimeDiagnosticsPlugin,
-    prelude::*,
-    render::{
-        settings::{Backends, WgpuSettings},
-        RenderPlugin,
-    },
-    window::WindowMode,
-};
+use bevy::{diagnostic::FrameTimeDiagnosticsPlugin, prelude::*, window::WindowMode};
 use bevy_inspector_egui::{bevy_egui::EguiPlugin, quick::WorldInspectorPlugin};
 use bevy_kira_audio::prelude::*;
 
@@ -27,15 +19,6 @@ fn main() {
                         mode: WindowMode::Windowed,
                         ..default()
                     }),
-                    ..default()
-                })
-                .set(RenderPlugin {
-                    render_creation: {
-                        bevy::render::settings::RenderCreation::Automatic(WgpuSettings {
-                            backends: Some(Backends::VULKAN),
-                            ..default()
-                        })
-                    },
                     ..default()
                 })
                 .build(),

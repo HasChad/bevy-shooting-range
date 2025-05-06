@@ -13,6 +13,9 @@ pub struct Player;
 #[derive(Component)]
 pub struct Head;
 
+#[derive(Component)]
+pub struct GroundChecker;
+
 pub fn player_setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -28,8 +31,15 @@ pub fn player_setup(
             Restitution::new(0.0).with_combine_rule(CoefficientCombine::Min),
             LockedAxes::new().lock_rotation_x().lock_rotation_z(),
             Friction::new(0.0).with_combine_rule(CoefficientCombine::Min),
+            Name::new("Player"),
         ))
-        .insert(Name::new("Player"));
+        .with_child((
+            GroundChecker,
+            Sensor,
+            Collider::cylinder(0.25, 0.1),
+            Transform::from_xyz(0.0, -0.5, 0.0),
+            Name::new("Ground Checker"),
+        ));
 
     commands
         .spawn((

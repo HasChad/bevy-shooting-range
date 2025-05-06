@@ -50,7 +50,12 @@ impl Plugin for PlayerControllerPlugin {
                 Update,
                 (
                     //player systems
-                    (player_move, player_look, player_position_reset)
+                    (
+                        player_move,
+                        player_look,
+                        player_position_reset,
+                        ground_check,
+                    )
                         .run_if(in_state(PlayableState::Action)),
                 ),
             )
