@@ -5,11 +5,10 @@ use super::{player::Player, KeyBindings};
 
 pub fn player_position_reset(
     key_input: Res<ButtonInput<KeyCode>>,
-    mut player_query: Query<&mut Transform, With<Player>>,
+    mut player_transform: Single<&mut Transform, With<Player>>,
 ) {
     if key_input.just_pressed(KeyCode::KeyX) {
-        let mut player_pos = player_query.single_mut();
-        player_pos.translation = Vec3::new(0.0, 0.5, 0.0);
+        player_transform.translation = Vec3::new(0.0, 0.5, 0.0);
     }
 }
 

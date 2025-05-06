@@ -18,8 +18,8 @@ pub fn spawn_bullet(
     mut event_reader: EventReader<WeaponShootingEvent>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    position_query: Query<&GlobalTransform, (With<BulletSpawnPosition>, Without<Head>)>,
-    head_query: Query<&Transform, With<Head>>,
+    spawn_position: Single<&GlobalTransform, (With<BulletSpawnPosition>, Without<Head>)>,
+    head_transform: Single<&Transform, With<Head>>,
     //
     query: Query<(&Transform, Entity), With<WeaponPromp>>,
     children: Query<&Children>,
@@ -27,9 +27,8 @@ pub fn spawn_bullet(
     position: Query<&Transform>,
 ) {
     for _event in event_reader.read() {
-        let spawn_position = position_query.single().compute_transform();
-        let head_transform = head_query.single();
-        let bullet_velocity = (spawn_position.translation - head_transform.translation).normalize();
+        let bullet_velocity =
+            (spawn_position.translation() - head_transform.translation).normalize();
 
         let mut tracer_position: Vec3 = Vec3::ZERO;
 
@@ -52,8 +51,7 @@ pub fn spawn_bullet(
                     bullet_lifetime: Timer::from_seconds(3., TimerMode::Once),
                     velocity: bullet_velocity,
                 },
-                *head_transform,
-                Visibility::Visible,
+                head_transform.clone(),
                 Name::new("Bullet"),
             ))
             .with_child((
@@ -104,9 +102,9 @@ pub fn bullet_controller(
             true,
             &SpatialQueryFilter::from_mask(0b1011).with_excluded_entities([*player_id]),
         ) {
-            commands.entity(bullet_entity).despawn_recursive();
+            commands.entity(bullet_entity).despawn();
 
-            event_writer.send(HitConfirmEvent {
+            event_writer.write(HitConfirmEvent {
                 hit_entity: hit.entity,
                 hit_normal: hit.normal,
             });
@@ -122,7 +120,7 @@ pub fn bullet_controller(
 
         bullet_promp.bullet_lifetime.tick(time.delta());
         if bullet_promp.bullet_lifetime.finished() {
-            commands.entity(bullet_entity).despawn_recursive();
+            commands.entity(bullet_entity).despawn();
         }
     }
 }

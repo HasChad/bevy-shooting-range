@@ -1,7 +1,7 @@
 use avian3d::prelude::*;
 use bevy::{prelude::*, time::Stopwatch};
 use bevy_kira_audio::prelude::*;
-use rand::prelude::*;
+use rand::random_range;
 
 use crate::{
     ingame::{weapons::WeaponPromp, HitConfirmEvent},
@@ -36,7 +36,7 @@ pub fn hit_detector(
     mut event_reader: EventReader<HitConfirmEvent>,
     mut circletarget_event_writer: EventWriter<CircleTargetEvent>,
     mut hitmarker_event_writer: EventWriter<HitmarkerEvent>,
-    parent_query: Query<&Parent>,
+    parent_query: Query<&ChildOf>,
 ) {
     for event in event_reader.read() {
         let hit_entity_name = query.get(event.hit_entity).unwrap().as_str();
@@ -47,9 +47,9 @@ pub fn hit_detector(
                 .last()
                 .unwrap();
 
-            circletarget_event_writer.send(CircleTargetEvent { entity: ancestor });
+            circletarget_event_writer.write(CircleTargetEvent { entity: ancestor });
 
-            hitmarker_event_writer.send(HitmarkerEvent);
+            hitmarker_event_writer.write(HitmarkerEvent);
             audio.play(asset_server.load("sounds/hitmarker.ogg"));
         }
     }
@@ -106,7 +106,7 @@ pub fn circle_target_controller(
                     circletarget_prop.hit_counter += 1;
                 }
                 while (circletarget_transform.translation.x - old_position).abs() < 0.5 {
-                    circletarget_transform.translation.x = thread_rng().gen_range(-3.0..3.0);
+                    circletarget_transform.translation.x = random_range(-3.0..3.0);
                 }
             }
         }
@@ -117,11 +117,10 @@ pub fn enemy_target_controller(
     mut commands: Commands,
     mut event_reader: EventReader<HitConfirmEvent>,
     mut enemytarget_query: Query<(&mut EnemyTarget, Entity)>,
-    weapon_query: Query<&WeaponPromp>,
+    weapon_promp: Single<&WeaponPromp>,
     query: Query<&Name>,
 ) {
     for event in event_reader.read() {
-        let weapon_promp = weapon_query.single();
         match query.get(event.hit_entity).unwrap().as_str() {
             "silhouette-target-head" => {
                 for (mut enemytarget_prop, _) in &mut enemytarget_query {
@@ -140,7 +139,7 @@ pub fn enemy_target_controller(
         };
         for (enemytarget_prop, enemytarget_entity) in &mut enemytarget_query {
             if enemytarget_prop.health <= 0 {
-                commands.entity(enemytarget_entity).despawn_recursive();
+                commands.entity(enemytarget_entity).despawn();
             }
         }
     }
@@ -150,12 +149,10 @@ pub fn enemy_target_hostage_controller(
     mut commands: Commands,
     mut event_reader: EventReader<HitConfirmEvent>,
     mut enemytargethostage_query: Query<(&mut EnemyTargetHostage, Entity)>,
-    weapon_query: Query<&WeaponPromp>,
+    weapon_promp: Single<&WeaponPromp>,
     query: Query<&Name>,
 ) {
     for event in event_reader.read() {
-        let weapon_promp = weapon_query.single();
-
         match query.get(event.hit_entity).unwrap().as_str() {
             "silhouette-target-gun-head" => {
                 for (mut enemytargethostage_prop, _) in &mut enemytargethostage_query {
@@ -174,9 +171,7 @@ pub fn enemy_target_hostage_controller(
         };
         for (enemytargethostage_prop, enemytargethostage_entity) in &mut enemytargethostage_query {
             if enemytargethostage_prop.health <= 0 {
-                commands
-                    .entity(enemytargethostage_entity)
-                    .despawn_recursive();
+                commands.entity(enemytargethostage_entity).despawn();
             }
         }
     }

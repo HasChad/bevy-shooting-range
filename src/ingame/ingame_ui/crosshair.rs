@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use rand::{thread_rng, Rng};
+use rand::random_range;
 use std::f32::consts::PI;
 
 use super::HitmarkerEvent;
@@ -160,9 +160,7 @@ pub fn hitmarker_spawner(mut commands: Commands, mut event_reader: EventReader<H
 
                     ..default()
                 },
-                Transform::from_rotation(Quat::from_rotation_z(
-                    PI / thread_rng().gen_range(3.5..4.5),
-                )),
+                Transform::from_rotation(Quat::from_rotation_z(PI / random_range(3.5..4.5))),
                 HitMarker {
                     hitmarker_lifetime: Timer::from_seconds(0.1, TimerMode::Once),
                 },
@@ -244,7 +242,7 @@ pub fn hitmarker_controller(
         hitmarker_promp.hitmarker_lifetime.tick(time.delta());
 
         if hitmarker_promp.hitmarker_lifetime.finished() {
-            commands.entity(hitmarker_entity).despawn_recursive();
+            commands.entity(hitmarker_entity).despawn();
         }
     }
 }

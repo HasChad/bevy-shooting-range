@@ -6,7 +6,7 @@ use bevy::{
 };
 use palettes::css::GOLD;
 
-use crate::ingame::{player::Player, weapons::WeaponPromp, CircleTarget};
+use crate::ingame::{player::Player, weapons::WeaponPromp};
 
 #[derive(Component)]
 pub struct VelocityText;
@@ -26,7 +26,16 @@ pub struct TargetCounterText;
 pub fn ui_setup(mut commands: Commands) {
     // MARK: Information UI
     commands.spawn((
-        Text::new("ESC - Enter/Exit play mode\nW/A/S/D - Move\nRight Mouse Button - Aim\nR - Reload\nX - Reset player position\n1 - P226\n2 - AK-15"),
+        Text::new(concat!(
+            "ESC - Enter/Exit play mode\n",
+            "W/A/S/D - Move\n",
+            "Left Mouse Button - Shoot\n",
+            "Right Mouse Button - Aim\n",
+            "R - Reload\n",
+            "X - Reset player position\n",
+            "1 - P226\n",
+            "2 - AK-15"
+        )),
         TextFont {
             font_size: 15.0,
             ..default()
@@ -97,7 +106,7 @@ pub fn ui_setup(mut commands: Commands) {
             justify_self: JustifySelf::Center,
             margin: UiRect {
                 left: Val::Px(300.0),
-                bottom: Val::Px(55.0),
+                bottom: Val::Px(60.0),
                 ..default()
             },
             ..default()
@@ -112,7 +121,7 @@ pub fn ui_setup(mut commands: Commands) {
         .spawn((
             Text::new("FPS: "),
             TextFont {
-                font_size: 20.0,
+                font_size: 15.0,
                 ..default()
             },
             Node {
@@ -127,7 +136,7 @@ pub fn ui_setup(mut commands: Commands) {
         .with_child((
             TextSpan::default(),
             TextFont {
-                font_size: 20.0,
+                font_size: 15.0,
                 ..default()
             },
             TextColor(GOLD.into()),

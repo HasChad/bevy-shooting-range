@@ -31,12 +31,11 @@ pub fn scope(
     settings: ResMut<GameSettings>,
     crosshair_settings: Res<CrosshairLineSettings>,
     weapon_aim_state: Res<State<WeaponAimState>>,
-    mut camera_query: Query<&mut Projection, With<Camera3d>>,
-    mut weapon_query: Query<&mut Transform, With<WeaponPromp>>,
+    mut camera_projection: Single<&mut Projection, With<Camera3d>>,
+    mut weapon_transform: Single<&mut Transform, With<WeaponPromp>>,
     mut crosshair_query: Query<&mut Visibility, With<CrosshairLine>>,
 ) {
-    let mut weapon_transform = weapon_query.single_mut();
-    let Projection::Perspective(persp) = camera_query.single_mut().into_inner() else {
+    let Projection::Perspective(persp) = camera_projection.as_mut() else {
         return;
     };
 

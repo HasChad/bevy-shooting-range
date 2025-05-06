@@ -7,12 +7,9 @@ use crate::ingame::GameSettings;
 pub fn player_look(
     settings: Res<GameSettings>,
     accumulated_mouse_motion: Res<AccumulatedMouseMotion>,
-    mut camera_query: Query<&mut Transform, With<Head>>,
-    mut player_query: Query<&mut Transform, (With<Player>, Without<Head>)>,
+    mut camera_transform: Single<&mut Transform, With<Head>>,
+    mut player_transform: Single<&mut Transform, (With<Player>, Without<Head>)>,
 ) {
-    let mut camera_transform = camera_query.single_mut();
-    let mut player_transform = player_query.single_mut();
-
     let delta = accumulated_mouse_motion.delta;
 
     if delta != Vec2::ZERO {

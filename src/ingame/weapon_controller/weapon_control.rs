@@ -1,5 +1,5 @@
 use bevy::{input::mouse::AccumulatedMouseMotion, prelude::*};
-use rand::{thread_rng, Rng};
+use rand::random_range;
 use std::f32::consts::PI;
 
 use super::{WeaponPromp, WeaponShootingEvent};
@@ -9,19 +9,18 @@ pub fn camera_recoil(
     time: Res<Time>,
     settings: ResMut<GameSettings>,
     mut event_reader: EventReader<WeaponShootingEvent>,
-    mut camera_query: Query<&mut Projection, With<Camera3d>>,
-    mut head_query: Query<&mut Transform, With<Head>>,
+    mut camera_projection: Single<&mut Projection, With<Camera3d>>,
+    mut head_transform: Single<&mut Transform, With<Head>>,
 ) {
-    let Projection::Perspective(persp) = camera_query.single_mut().into_inner() else {
+    let Projection::Perspective(persp) = camera_projection.as_mut() else {
         return;
     };
 
     for _event in event_reader.read() {
-        let mut head_transform = head_query.single_mut();
         let (mut yaw_camera, mut pitch_camera, _) = head_transform.rotation.to_euler(EulerRot::YXZ);
 
         pitch_camera += 0.015;
-        yaw_camera += thread_rng().gen_range(-0.005..0.005);
+        yaw_camera += random_range(-0.005..0.005);
 
         pitch_camera = pitch_camera.clamp(-PI / 2.0, PI / 2.0);
         head_transform.rotation = Quat::from_axis_angle(Vec3::Y, yaw_camera)

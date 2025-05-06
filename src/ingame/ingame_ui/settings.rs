@@ -1,6 +1,6 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_inspector_egui::{
-    bevy_egui::{egui, EguiContexts},
+    bevy_egui::{egui, EguiContext},
     egui::Align2,
 };
 use std::f32::consts::PI;
@@ -9,9 +9,9 @@ use super::{CrosshairLine, CrosshairLineSettings};
 use crate::ingame::GameSettings;
 
 pub fn egui_settings(
+    mut egui_context: Single<&mut EguiContext, With<PrimaryWindow>>,
     mut settings: ResMut<GameSettings>,
-    mut camera_query: Query<&mut Projection, With<Camera3d>>,
-    mut contexts: EguiContexts,
+    mut camera_query: Single<&mut Projection, With<Camera3d>>,
     mut crosshair_line_settings: ResMut<CrosshairLineSettings>,
     mut crosshair_line_query: Query<
         (&mut Node, &mut Visibility, &mut BackgroundColor),
@@ -21,7 +21,7 @@ pub fn egui_settings(
     egui::Window::new("SETTINGS")
         .resizable(false)
         .anchor(Align2::RIGHT_BOTTOM, (-5.0, -5.0))
-        .show(contexts.ctx_mut(), |ui| {
+        .show(egui_context.get_mut(), |ui| {
             egui::Grid::new("my_grid")
                 .num_columns(2)
                 .spacing([10.0, 5.0])
@@ -41,8 +41,7 @@ pub fn egui_settings(
                     ui.end_row();
 
                     //MARK: Fov
-                    let Projection::Perspective(persp) = camera_query.single_mut().into_inner()
-                    else {
+                    let Projection::Perspective(persp) = camera_query.as_mut() else {
                         return;
                     };
 

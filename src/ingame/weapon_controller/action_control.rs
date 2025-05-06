@@ -22,7 +22,7 @@ pub fn weapon_input_controller(
                 || (mouse_input.pressed(key_bindings.fire) && weapon_promp.is_auto))
         {
             weapon_promp.mag_capacity -= 1;
-            shot_event_writer.send(WeaponShootingEvent);
+            shot_event_writer.write(WeaponShootingEvent);
             next_weapon_action_state.set(WeaponActionState::Shoot);
         }
 
@@ -32,7 +32,7 @@ pub fn weapon_input_controller(
             && weapon_promp.ammo_capacity > 0
             && weapon_promp.mag_capacity < weapon_promp.self_mag_cap()
         {
-            reload_event_writer.send(WeaponReloadingEvent);
+            reload_event_writer.write(WeaponReloadingEvent);
             next_weapon_action_state.set(WeaponActionState::Reload);
         }
     }
