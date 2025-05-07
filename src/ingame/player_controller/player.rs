@@ -8,10 +8,14 @@ use crate::ingame::{weapons::WeaponPromp, GameSettings};
 pub struct BulletSpawnPosition;
 
 #[derive(Component)]
-pub struct Player;
+pub struct Player {
+    pub on_ground: bool,
+}
 
 #[derive(Component)]
-pub struct Head;
+pub struct Head {
+    pub current_weapon: WeaponPromp,
+}
 
 #[derive(Component)]
 pub struct GroundChecker;
@@ -23,7 +27,7 @@ pub fn player_setup(
 ) {
     commands
         .spawn((
-            Player,
+            Player { on_ground: true },
             RigidBody::Dynamic,
             Collider::capsule(0.25, 0.5),
             Transform::from_xyz(0.0, 1.0, 0.0),
@@ -36,7 +40,7 @@ pub fn player_setup(
         .with_child((
             GroundChecker,
             Sensor,
-            Collider::cylinder(0.25, 0.1),
+            Collider::cylinder(0.25, 0.001),
             Transform::from_xyz(0.0, -0.5, 0.0),
             Name::new("Ground Checker"),
         ));
@@ -55,7 +59,9 @@ pub fn player_setup(
             }),
             Bloom::NATURAL,
             Name::new("Head"),
-            Head,
+            Head {
+                current_weapon: WeaponPromp::p226(),
+            },
         ))
         .with_child((
             // bullet spawn position

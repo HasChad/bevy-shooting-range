@@ -22,9 +22,9 @@ pub fn player_move(
     settings: Res<GameSettings>,
     key_bindings: Res<KeyBindings>,
     input: Res<ButtonInput<KeyCode>>,
-    mut player_query: Query<(&mut LinearVelocity, &mut Transform), With<Player>>,
+    mut player_query: Query<(&mut LinearVelocity, &mut Transform, &Player)>,
 ) {
-    for (mut linear_velocity, player_transform) in player_query.iter_mut() {
+    for (mut linear_velocity, player_transform, player_promp) in player_query.iter_mut() {
         let (yaw_player, _, _) = player_transform.rotation.to_euler(EulerRot::YXZ);
 
         // ! player movement input
@@ -46,8 +46,8 @@ pub fn player_move(
                 smove = -1.0
             }
 
-            if key == key_bindings.jump {
-                linear_velocity.y = 3.0
+            if key == key_bindings.jump && player_promp.on_ground {
+                linear_velocity.y = 5.0
             }
         }
 
@@ -71,7 +71,13 @@ pub fn player_move(
 
         let current_speed = linear_velocity.dot(wish_vel);
 
-        let add_speed = wish_speed - current_speed;
+        let mut add_speed = wish_speed - current_speed;
+
+        println!("is grounded {:?}", player_promp.on_ground);
+
+        if player_promp.on_ground {
+            add_speed -= 5.0
+        }
 
         if add_speed <= 0.0 {
             return;
@@ -86,29 +92,12 @@ pub fn player_move(
 pub fn ground_check(
     collisions: Collisions,
     gc_entity: Single<Entity, With<GroundChecker>>,
-    mut player_query: Query<&mut LinearVelocity, With<Player>>,
+    mut player_promp: Single<&mut Player>,
 ) {
-    for contacts in collisions.iter() {
-        for mut player_lin_vel in player_query.iter_mut() {
-            if contacts.collider1 == *gc_entity || contacts.collider2 == *gc_entity {
-                if player_lin_vel.length() < 1.0 {
-                    player_lin_vel.x = 0.0;
-                    player_lin_vel.y = 0.0;
-                    player_lin_vel.z = 0.0;
-                }
-
-                if player_lin_vel.x > 0.0 {
-                    player_lin_vel.x -= 0.2;
-                } else if player_lin_vel.x < 0.0 {
-                    player_lin_vel.x += 0.2;
-                }
-
-                if player_lin_vel.z > 0.0 {
-                    player_lin_vel.z -= 0.2;
-                } else if player_lin_vel.z < 0.0 {
-                    player_lin_vel.z += 0.2;
-                }
-            }
-        }
+    for _ in collisions.entities_colliding_with(*gc_entity) {
+        player_promp.on_ground = true;
+        return;
     }
+
+    player_promp.on_ground = false;
 }
