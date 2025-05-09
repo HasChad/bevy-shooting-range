@@ -1,5 +1,5 @@
 use avian3d::prelude::*;
-use bevy::{math::VectorSpace, prelude::*};
+use bevy::prelude::*;
 
 use crate::ingame::GameSettings;
 
@@ -75,46 +75,54 @@ pub fn player_move(
         )
         .normalize_or_zero();
 
-        let mut wish_speed = wish_vel.length() * settings.player_speed;
+        let real_lin_vel = Vec3::new(lin_vel.x, 0.0, lin_vel.z);
 
-        if wish_speed > 0.5 {
-            wish_speed = 0.5
+        info!("wish vel" = wish_vel.length());
+
+        if wish_vel.length() > 0.0 {
+            lin_vel.x += wish_vel.x * 0.2;
+            lin_vel.z += wish_vel.z * 0.2;
         }
 
-        let current_speed = lin_vel.dot(wish_vel);
+        if real_lin_vel.length() > settings.player_speed {
+            let norm_lin_vel = real_lin_vel.normalize_or_zero();
 
-        let add_speed = wish_speed - current_speed;
-
-        // info!("wish speed" = wish_speed);
-        // info!("current speed" = current_speed);
-        // info!("add speed" = add_speed);
+            lin_vel.z = norm_lin_vel.z * settings.player_speed;
+            lin_vel.x = norm_lin_vel.x * settings.player_speed;
+        }
 
         if player_promp.on_ground {
-            let mut friction_direction = Vec3::new(-lin_vel.x, 0.0, -lin_vel.z).normalize_or_zero();
-
-            if lin_vel.length() <= 0.2 {
-                lin_vel.x = 0.0;
-                lin_vel.z = 0.0;
-            }
-
-            if lin_vel.length() == 0.0 {
-                friction_direction = Vec3::ZERO
-            }
-
-            info!("len" = lin_vel.length());
-            info!("fri len" = friction_direction.length());
-
-            if friction_direction.length() > 0.0 {
-                **lin_vel += friction_direction * 0.2
-            }
+            friction(real_lin_vel, &mut **lin_vel);
         }
+    }
+}
 
-        if add_speed <= 0.0 {
-            return;
-        } else {
-            let accel_speed = settings.player_speed;
+fn friction(real_lin_vel: Vec3, lin_vel: &mut Vec3) {
+    let mut friction_direction = -real_lin_vel.normalize_or_zero();
 
-            **lin_vel += add_speed * wish_vel;
+    if real_lin_vel.length() == 0.0 {
+        friction_direction = Vec3::ZERO
+    }
+
+    if real_lin_vel.length() >= 0.0 {
+        lin_vel.x += friction_direction.x * 0.2;
+        lin_vel.z += friction_direction.z * 0.2;
+    } else {
+        lin_vel.x = 0.0;
+        lin_vel.z = 0.0;
+    }
+}
+
+pub fn jumping(
+    key_bindings: Res<KeyBindings>,
+    input: Res<ButtonInput<KeyCode>>,
+    mut player_query: Query<(&mut LinearVelocity, &Player)>,
+) {
+    for (mut lin_vel, player_promp) in player_query.iter_mut() {
+        if player_promp.on_ground {
+            if input.pressed(key_bindings.jump) {
+                lin_vel.y = 5.0
+            }
         }
     }
 }

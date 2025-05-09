@@ -258,7 +258,9 @@ pub fn velocity_text_updater(
     lin_vel: Single<&LinearVelocity, With<Player>>,
     entity: Single<Entity, With<VelocityText>>,
 ) {
-    *writer.text(*entity, 1) = format!("{:.2}", lin_vel.length());
+    let sum_vel = Vec3::new(lin_vel.x, 0.0, lin_vel.z);
+
+    *writer.text(*entity, 1) = format!("{:.2}", sum_vel.length());
 }
 
 /*

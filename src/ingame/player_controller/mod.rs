@@ -49,6 +49,7 @@ impl Plugin for PlayerControllerPlugin {
             .add_systems(
                 Update,
                 ((
+                    jumping,
                     player_look,
                     player_position_reset,
                     ground_check,
