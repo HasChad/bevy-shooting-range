@@ -157,7 +157,7 @@ pub fn ui_setup(mut commands: Commands) {
                 ..default()
             },
             BackgroundColor(Color::BLACK),
-            Name::new("UI - FPSCounter"),
+            Name::new("UI - Velocity"),
             VelocityText,
         ))
         .with_child((
@@ -255,16 +255,10 @@ pub fn fps_text_updater(
 
 pub fn velocity_text_updater(
     mut writer: TextUiWriter,
-    player_query: Query<&LinearVelocity, With<Player>>,
+    lin_vel: Single<&LinearVelocity, With<Player>>,
     entity: Single<Entity, With<VelocityText>>,
 ) {
-    for linear_velocity in player_query.iter() {
-        let sum_velocity = ((linear_velocity.x * linear_velocity.x)
-            + (linear_velocity.z * linear_velocity.z))
-            .sqrt();
-
-        *writer.text(*entity, 1) = format!("{sum_velocity:.1}");
-    }
+    *writer.text(*entity, 1) = format!("{:.2}", lin_vel.length());
 }
 
 /*

@@ -23,7 +23,7 @@ impl Default for GameSettings {
     fn default() -> Self {
         GameSettings {
             sensitivity: 1.0,
-            player_speed: 10.0,
+            player_speed: 5.0,
             fov: 90.0,
         }
     }

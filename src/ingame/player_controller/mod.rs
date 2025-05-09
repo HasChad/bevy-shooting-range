@@ -11,31 +11,31 @@ use player::*;
 
 use super::PlayableState;
 
-/// Key configuration
+// Key configuration
 #[derive(Resource)]
 pub struct KeyBindings {
-    pub fire: MouseButton,
-    pub scope: MouseButton,
     pub move_forward: KeyCode,
     pub move_backward: KeyCode,
     pub move_left: KeyCode,
     pub move_right: KeyCode,
     pub jump: KeyCode,
     pub run: KeyCode,
+    pub fire: MouseButton,
+    pub scope: MouseButton,
     pub reload: KeyCode,
 }
 
 impl Default for KeyBindings {
     fn default() -> Self {
         KeyBindings {
-            fire: MouseButton::Left,
-            scope: MouseButton::Right,
             move_forward: KeyCode::KeyW,
             move_backward: KeyCode::KeyS,
             move_left: KeyCode::KeyA,
             move_right: KeyCode::KeyD,
             jump: KeyCode::Space,
             run: KeyCode::ShiftLeft,
+            fire: MouseButton::Left,
+            scope: MouseButton::Right,
             reload: KeyCode::KeyR,
         }
     }
@@ -48,16 +48,17 @@ impl Plugin for PlayerControllerPlugin {
         app.add_systems(Startup, (player_setup,))
             .add_systems(
                 Update,
-                (
-                    //player systems
-                    (
-                        player_move,
-                        player_look,
-                        player_position_reset,
-                        ground_check,
-                    )
-                        .run_if(in_state(PlayableState::Action)),
-                ),
+                ((
+                    player_look,
+                    player_position_reset,
+                    ground_check,
+                    movement_input_controller,
+                )
+                    .run_if(in_state(PlayableState::Action)),),
+            )
+            .add_systems(
+                FixedUpdate,
+                (player_move,).run_if(in_state(PlayableState::Action)),
             )
             .add_systems(
                 PostUpdate,
@@ -67,6 +68,7 @@ impl Plugin for PlayerControllerPlugin {
                     .before(TransformSystem::TransformPropagate),
             )
             //resources
-            .init_resource::<KeyBindings>();
+            .init_resource::<KeyBindings>()
+            .init_resource::<MovementInput>();
     }
 }
