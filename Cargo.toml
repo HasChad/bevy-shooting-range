@@ -34,7 +34,7 @@ bevy = { version = "0.16.0", default-features = false, features = [
   "dynamic_linking", # Dynamic linking for faster compile-times
 ] }
 bevy-inspector-egui = "0.31.0"
-avian3d = { git = "https://github.com/Jondolf/avian", branch = "main" }
+avian3d = "0.3.0"
 bevy_kira_audio = "0.23.0"
 rand = "0.9.1"
 # https://crates.io/crates/bevy_pkv for saving game settings
