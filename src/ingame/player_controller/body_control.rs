@@ -68,14 +68,12 @@ pub fn player_move(
         let right = Vec3::new(-yaw_player.cos(), 0.0, yaw_player.sin()).normalize();
 
         // ! wishvel
-        let mut wish_vel = Vec3::new(
+        let wish_vel = Vec3::new(
             forward.x * movement.fmove + right.x * movement.smove,
             0.0,
             forward.z * movement.fmove + right.z * movement.smove,
         )
         .normalize_or_zero();
-
-        // info!("x = {}, z = {}", wish_vel.x, wish_vel.z);
 
         let mut real_lin_vel = Vec3::new(lin_vel.x, 0.0, lin_vel.z);
 
@@ -101,8 +99,6 @@ pub fn player_move(
             lin_vel.x = norm_lin_vel.x * settings.player_speed;
             lin_vel.z = norm_lin_vel.z * settings.player_speed;
         }
-
-        // info!("x = {}, z = {}", lin_vel.x, lin_vel.z);
     }
 }
 
@@ -116,8 +112,6 @@ fn friction(real_lin_vel: Vec3, lin_vel: &mut Vec3) {
     if fri_dir.z < 0.00001 && fri_dir.z > -0.00001 {
         fri_dir.z = 0.0
     }
-
-    info!("x = {}, z = {}", fri_dir.x, fri_dir.z);
 
     if real_lin_vel.length() >= 0.5 {
         lin_vel.x += fri_dir.x * 0.2;
