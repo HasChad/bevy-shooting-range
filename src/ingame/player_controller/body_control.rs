@@ -68,48 +68,63 @@ pub fn player_move(
         let right = Vec3::new(-yaw_player.cos(), 0.0, yaw_player.sin()).normalize();
 
         // ! wishvel
-        let wish_vel = Vec3::new(
+        let mut wish_vel = Vec3::new(
             forward.x * movement.fmove + right.x * movement.smove,
             0.0,
             forward.z * movement.fmove + right.z * movement.smove,
         )
         .normalize_or_zero();
 
-        let real_lin_vel = Vec3::new(lin_vel.x, 0.0, lin_vel.z);
+        // info!("x = {}, z = {}", wish_vel.x, wish_vel.z);
 
-        info!("wish vel" = wish_vel.length());
+        let mut real_lin_vel = Vec3::new(lin_vel.x, 0.0, lin_vel.z);
+
+        if real_lin_vel.length() < 0.3 {
+            lin_vel.z = 0.0;
+            lin_vel.x = 0.0;
+        }
+
+        if player_promp.on_ground && real_lin_vel.length() > 0.0 {
+            friction(real_lin_vel, &mut **lin_vel);
+        }
 
         if wish_vel.length() > 0.0 {
-            lin_vel.x += wish_vel.x * 0.2;
-            lin_vel.z += wish_vel.z * 0.2;
+            lin_vel.x += wish_vel.x * 1.0;
+            lin_vel.z += wish_vel.z * 1.0;
         }
+
+        real_lin_vel = Vec3::new(lin_vel.x, 0.0, lin_vel.z);
 
         if real_lin_vel.length() > settings.player_speed {
             let norm_lin_vel = real_lin_vel.normalize_or_zero();
 
-            lin_vel.z = norm_lin_vel.z * settings.player_speed;
             lin_vel.x = norm_lin_vel.x * settings.player_speed;
+            lin_vel.z = norm_lin_vel.z * settings.player_speed;
         }
 
-        if player_promp.on_ground {
-            friction(real_lin_vel, &mut **lin_vel);
-        }
+        // info!("x = {}, z = {}", lin_vel.x, lin_vel.z);
     }
 }
 
 fn friction(real_lin_vel: Vec3, lin_vel: &mut Vec3) {
-    let mut friction_direction = -real_lin_vel.normalize_or_zero();
+    let mut fri_dir = -real_lin_vel.normalize_or_zero();
 
-    if real_lin_vel.length() == 0.0 {
-        friction_direction = Vec3::ZERO
+    if fri_dir.x < 0.00001 && fri_dir.x > -0.00001 {
+        fri_dir.x = 0.0
     }
 
-    if real_lin_vel.length() >= 0.0 {
-        lin_vel.x += friction_direction.x * 0.2;
-        lin_vel.z += friction_direction.z * 0.2;
-    } else {
-        lin_vel.x = 0.0;
-        lin_vel.z = 0.0;
+    if fri_dir.z < 0.00001 && fri_dir.z > -0.00001 {
+        fri_dir.z = 0.0
+    }
+
+    info!("x = {}, z = {}", fri_dir.x, fri_dir.z);
+
+    if real_lin_vel.length() >= 0.5 {
+        lin_vel.x += fri_dir.x * 0.2;
+        lin_vel.z += fri_dir.z * 0.2;
+    } else if real_lin_vel.length() > 0.3 {
+        lin_vel.x += fri_dir.x * 0.2;
+        lin_vel.z += fri_dir.z * 0.2;
     }
 }
 
