@@ -26,19 +26,6 @@ pub enum WeaponState {
     AK15,
 }
 
-#[derive(Component, Clone)]
-pub struct WeaponPromp {
-    pub name: String,
-    pub mag_capacity: u8,
-    pub ammo_capacity: u8,
-    pub head_damage: u8,
-    pub body_damage: u8,
-    pub is_auto: bool,
-    pub firerate: Timer,
-    pub reload_timer: Timer,
-    //pub time_to_aim: Timer,
-}
-
 #[derive(Resource, Clone)]
 pub struct WeaponRes {
     pub p226: WeaponPromp,
@@ -52,6 +39,19 @@ impl Default for WeaponRes {
             ak15: WeaponPromp::ak15(),
         }
     }
+}
+
+#[derive(Component, Clone)]
+pub struct WeaponPromp {
+    pub name: String,
+    pub mag_capacity: u8,
+    pub ammo_capacity: u8,
+    pub head_damage: u8,
+    pub body_damage: u8,
+    pub is_auto: bool,
+    pub firerate: Timer,
+    pub reload_timer: Timer,
+    //pub time_to_aim: Timer,
 }
 
 impl WeaponPromp {

@@ -47,13 +47,9 @@ pub fn movement_input_controller(
     } else {
         movement.smove = 0.0
     }
-
-    /*
-    if key == key_bindings.jump && player_promp.on_ground {
-        lin_vel.y = 5.0
-    }
-    */
 }
+
+// TODO: need to restrict air movement
 
 pub fn player_move(
     settings: Res<GameSettings>,
@@ -129,7 +125,7 @@ pub fn jumping(
 ) {
     for (mut lin_vel, player_promp) in player_query.iter_mut() {
         if player_promp.on_ground {
-            if input.pressed(key_bindings.jump) {
+            if input.just_pressed(key_bindings.jump) {
                 lin_vel.y = 5.0
             }
         }
