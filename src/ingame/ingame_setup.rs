@@ -35,7 +35,7 @@ pub fn edit_mode_toggler(
     mut window: Single<&mut Window>,
     mut next_state: ResMut<NextState<PlayableState>>,
 ) {
-    if input.just_pressed(KeyCode::Escape) {
+    if input.just_pressed(KeyCode::Tab) {
         match window.cursor_options.grab_mode {
             CursorGrabMode::Confined => {
                 window.cursor_options.grab_mode = CursorGrabMode::None;

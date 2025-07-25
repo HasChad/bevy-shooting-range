@@ -27,7 +27,7 @@ pub fn ui_setup(mut commands: Commands) {
     // MARK: Information UI
     commands.spawn((
         Text::new(concat!(
-            "ESC - Enter/Exit play mode\n",
+            "TAB - Enter/Exit play mode\n",
             "W/A/S/D - Move\n",
             "Left Mouse Button - Shoot\n",
             "Right Mouse Button - Aim\n",
