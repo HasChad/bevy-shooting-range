@@ -1,6 +1,8 @@
 use avian3d::prelude::*;
 use bevy::{prelude::*, window::CursorGrabMode};
 
+use crate::ingame::KeyBindings;
+
 pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     //shooting range
     commands.spawn((
@@ -11,6 +13,15 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     ));
     // ! Blender models looking at positive Y direction
     // ! for true mesh setup, in blender Ctrl + A -> All Transforms
+
+    commands.spawn((
+        SceneRoot(asset_server.load("models/ammo-box.glb#Scene0")),
+        ColliderConstructorHierarchy::new(None)
+            .with_constructor_for_name("Collider_Mesh", ColliderConstructor::TrimeshFromMesh),
+        RigidBody::Dynamic,
+        Transform::from_xyz(0.0, 2.0, -3.0),
+        Name::new("Ammo Can"),
+    ));
 
     //point light
     commands.spawn((
@@ -34,8 +45,9 @@ pub fn edit_mode_toggler(
     input: ResMut<ButtonInput<KeyCode>>,
     mut window: Single<&mut Window>,
     mut next_state: ResMut<NextState<PlayableState>>,
+    key_bindings: Res<KeyBindings>,
 ) {
-    if input.just_pressed(KeyCode::Tab) {
+    if input.just_pressed(key_bindings.focus) {
         match window.cursor_options.grab_mode {
             CursorGrabMode::Confined => {
                 window.cursor_options.grab_mode = CursorGrabMode::None;

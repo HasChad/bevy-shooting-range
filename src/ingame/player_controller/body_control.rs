@@ -1,6 +1,7 @@
 use avian3d::prelude::*;
 use bevy::prelude::*;
 
+use crate::ingame::player::Head;
 use crate::ingame::GameSettings;
 
 use super::{
@@ -10,8 +11,8 @@ use super::{
 
 #[derive(Resource, Default)]
 pub struct MovementInput {
-    pub fmove: f32,
-    pub smove: f32,
+    fmove: f32,
+    smove: f32,
 }
 
 pub fn player_position_reset(
@@ -54,14 +55,15 @@ pub fn movement_input_controller(
 pub fn player_move(
     settings: Res<GameSettings>,
     movement: Res<MovementInput>,
-    mut player_query: Query<(&mut LinearVelocity, &mut Transform, &Player)>,
+    camera_transform: Single<&Transform, With<Head>>,
+    mut player_query: Query<(&mut LinearVelocity, &Player)>,
 ) {
-    for (mut lin_vel, player_transform, player_promp) in player_query.iter_mut() {
-        let (yaw_player, _, _) = player_transform.rotation.to_euler(EulerRot::YXZ);
+    for (mut lin_vel, player_promp) in player_query.iter_mut() {
+        let (yaw_head, _, _) = camera_transform.rotation.to_euler(EulerRot::YXZ);
 
         // ! player looking direction
-        let forward = Vec3::new(-yaw_player.sin(), 0.0, -yaw_player.cos()).normalize();
-        let right = Vec3::new(-yaw_player.cos(), 0.0, yaw_player.sin()).normalize();
+        let forward = Vec3::new(-yaw_head.sin(), 0.0, -yaw_head.cos()).normalize();
+        let right = Vec3::new(-yaw_head.cos(), 0.0, yaw_head.sin()).normalize();
 
         // ! wishvel
         let wish_vel = Vec3::new(
@@ -78,7 +80,7 @@ pub fn player_move(
             lin_vel.x = 0.0;
         }
 
-        if player_promp.on_ground && real_lin_vel.length() > 0.0 {
+        if player_promp.on_ground && real_lin_vel.length() >= 0.3 {
             friction(real_lin_vel, &mut **lin_vel);
         }
 

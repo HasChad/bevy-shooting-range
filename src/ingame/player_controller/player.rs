@@ -31,6 +31,7 @@ pub fn player_setup(
             RigidBody::Dynamic,
             Collider::capsule(0.25, 0.5),
             Transform::from_xyz(0.0, 1.0, 0.0),
+            TransformInterpolation,
             GravityScale(2.0),
             Restitution::new(0.0).with_combine_rule(CoefficientCombine::Min),
             LockedAxes::new().lock_rotation_x().lock_rotation_z(),

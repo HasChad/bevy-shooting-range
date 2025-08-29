@@ -23,6 +23,7 @@ pub struct KeyBindings {
     pub fire: MouseButton,
     pub scope: MouseButton,
     pub reload: KeyCode,
+    pub focus: KeyCode,
 }
 
 impl Default for KeyBindings {
@@ -37,6 +38,7 @@ impl Default for KeyBindings {
             fire: MouseButton::Left,
             scope: MouseButton::Right,
             reload: KeyCode::KeyR,
+            focus: KeyCode::Tab,
         }
     }
 }
