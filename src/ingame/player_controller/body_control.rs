@@ -55,6 +55,8 @@ pub fn movement_input_controller(
 pub fn player_move(
     settings: Res<GameSettings>,
     movement: Res<MovementInput>,
+    input: Res<ButtonInput<KeyCode>>,
+    key_bindings: Res<KeyBindings>,
     camera_transform: Single<&Transform, With<Head>>,
     mut player_query: Query<(&mut LinearVelocity, &Player)>,
 ) {
@@ -94,8 +96,14 @@ pub fn player_move(
         if real_lin_vel.length() > settings.player_speed {
             let norm_lin_vel = real_lin_vel.normalize_or_zero();
 
-            lin_vel.x = norm_lin_vel.x * settings.player_speed;
-            lin_vel.z = norm_lin_vel.z * settings.player_speed;
+            let speed = if input.pressed(key_bindings.walk) {
+                settings.player_speed - 2.0
+            } else {
+                settings.player_speed
+            };
+
+            lin_vel.x = norm_lin_vel.x * speed;
+            lin_vel.z = norm_lin_vel.z * speed;
         }
     }
 }

@@ -29,7 +29,7 @@ pub fn player_setup(
         .spawn((
             Player { on_ground: true },
             RigidBody::Dynamic,
-            Collider::capsule(0.25, 0.5),
+            Collider::cylinder(0.25, 1.0),
             Transform::from_xyz(0.0, 1.0, 0.0),
             TransformInterpolation,
             GravityScale(2.0),
