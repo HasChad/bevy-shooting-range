@@ -14,18 +14,6 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     // ! Blender models looking at positive Y direction
     // ! for true mesh setup, in blender Ctrl + A -> All Transforms
 
-    // ammo box
-    commands.spawn((
-        SceneRoot(asset_server.load("models/ammo-box.glb#Scene1")),
-        ColliderConstructorHierarchy::new(ColliderConstructor::TrimeshFromMesh),
-        // CollisionMargin(0.1),
-        Visibility::Hidden,
-        RigidBody::Dynamic,
-        Transform::from_xyz(0.0, 2.0, -3.0),
-        Name::new("Ammo Box"),
-    ));
-    //.with_child(SceneRoot(asset_server.load("models/ammo-box.glb#Scene0")));
-
     //point light
     commands.spawn((
         PointLight {
@@ -58,10 +46,16 @@ pub fn edit_mode_toggler(
                 next_state.set(PlayableState::NoAction)
             }
             _ => {
-                window.cursor_options.grab_mode = CursorGrabMode::Confined;
+                window.cursor_options.grab_mode = CursorGrabMode::Locked;
                 window.cursor_options.visible = false;
                 next_state.set(PlayableState::Action)
             }
         }
+    }
+}
+
+pub fn exit_game(mut exit: EventWriter<AppExit>, input: ResMut<ButtonInput<KeyCode>>) {
+    if input.just_pressed(KeyCode::Escape) {
+        exit.write(AppExit::Success);
     }
 }

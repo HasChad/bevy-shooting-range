@@ -15,7 +15,6 @@ use weapon_controller::*;
 #[derive(Resource)]
 pub struct GameSettings {
     pub sensitivity: f32,
-    pub player_speed: f32,
     pub fov: f32,
 }
 
@@ -23,7 +22,6 @@ impl Default for GameSettings {
     fn default() -> Self {
         GameSettings {
             sensitivity: 1.0,
-            player_speed: 5.0,
             fov: 90.0,
         }
     }
@@ -38,6 +36,7 @@ impl Plugin for InGamePlugin {
                 Update,
                 (
                     edit_mode_toggler,
+                    exit_game,
                     //target systems
                     hit_detector,
                     circle_target_controller,

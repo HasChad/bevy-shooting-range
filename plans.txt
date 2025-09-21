@@ -10,4 +10,5 @@ Guns
 
 - HELPING VIDEOS -
 - First person movement: https://www.youtube.com/watch?v=f473C43s8nE
+- Character controller: https://www.youtube.com/watch?v=z3dequX5g_E
 - Weapon animations: https://www.youtube.com/watch?v=ZJvfaorDX3Y

@@ -25,26 +25,26 @@ pub fn player_setup(
     asset_server: Res<AssetServer>,
     settings: Res<GameSettings>,
 ) {
-    commands
+    let player_entity = commands
         .spawn((
             Player { on_ground: true },
-            RigidBody::Dynamic,
+            RigidBody::Kinematic,
             Collider::cylinder(0.25, 1.0),
-            Transform::from_xyz(0.0, 1.0, 0.0),
+            Transform::from_xyz(0.0, 0.5, 0.0),
             TransformInterpolation,
-            GravityScale(2.0),
-            Restitution::new(0.0).with_combine_rule(CoefficientCombine::Min),
-            LockedAxes::new().lock_rotation_x().lock_rotation_z(),
-            Friction::new(0.0).with_combine_rule(CoefficientCombine::Min),
             Name::new("Player"),
         ))
-        .with_child((
-            GroundChecker,
-            Sensor,
-            Collider::cylinder(0.25, 0.001),
-            Transform::from_xyz(0.0, -0.5, 0.0),
-            Name::new("Ground Checker"),
-        ));
+        .id();
+
+    commands.entity(player_entity).with_child((
+        GroundChecker,
+        RayCaster::new(Vec3::ZERO, Dir3::NEG_Y)
+            .with_query_filter(SpatialQueryFilter::from_excluded_entities([player_entity]))
+            .with_max_hits(1)
+            .with_max_distance(0.55)
+            .with_solidness(false),
+        Name::new("Ground Checker"),
+    ));
 
     commands
         .spawn((
@@ -64,29 +64,17 @@ pub fn player_setup(
                 current_weapon: WeaponPromp::p226(),
             },
         ))
+        // bullet spawn position
         .with_child((
-            // bullet spawn position
             Transform::from_xyz(0.0, 0.0, -0.5),
             BulletSpawnPosition,
             Name::new("Bullet Spawn Position"),
         ))
+        // gun model
         .with_child((
-            // gun model
             SceneRoot(asset_server.load("models/weapons/P226.glb#Scene0")),
             Transform::from_xyz(0.1, -0.05, -0.15),
             WeaponPromp::p226(),
             Name::new("Weapon"),
         ));
-
-    /*
-    //RayCast
-    .with_child((
-        RayCaster::new(Vec3::ZERO, Direction3d::NEG_Z)
-            .with_query_filter(query_filter)
-            .with_max_hits(1)
-            .with_max_time_of_impact(2.0)
-            .with_solidness(false),
-        Name::new("RayCast"),
-    ));
-    */
 }

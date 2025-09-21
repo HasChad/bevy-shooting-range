@@ -51,17 +51,15 @@ impl Plugin for PlayerControllerPlugin {
             .add_systems(
                 Update,
                 (
-                    jumping,
                     player_look,
                     player_position_reset,
-                    ground_check,
                     movement_input_controller,
                 )
                     .run_if(in_state(PlayableState::Action)),
             )
             .add_systems(
                 FixedUpdate,
-                player_move.run_if(in_state(PlayableState::Action)),
+                (ground_check, player_move, friction).run_if(in_state(PlayableState::Action)),
             )
             .add_systems(
                 PostUpdate,

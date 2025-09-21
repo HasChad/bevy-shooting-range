@@ -27,7 +27,7 @@ fn main() {
         .add_plugins(AudioPlugin)
         .add_plugins(FrameTimeDiagnosticsPlugin::default())
         .add_plugins(PhysicsPlugins::default())
-        .add_plugins(PhysicsDebugPlugin::default())
+        // .add_plugins(PhysicsDebugPlugin::default())
         .add_plugins(EguiPlugin {
             enable_multipass_for_primary_context: true,
         })
