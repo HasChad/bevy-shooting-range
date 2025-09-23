@@ -1,5 +1,6 @@
 - PLANS -
 Current
+- good movement
 - spawn ammo box and get full ammo when interacting with it
 
 Mechanic

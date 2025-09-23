@@ -59,7 +59,7 @@ impl Plugin for PlayerControllerPlugin {
             )
             .add_systems(
                 FixedUpdate,
-                (ground_check, player_move, friction).run_if(in_state(PlayableState::Action)),
+                (ground_check, player_move, body_collision).run_if(in_state(PlayableState::Action)),
             )
             .add_systems(
                 PostUpdate,
@@ -69,7 +69,6 @@ impl Plugin for PlayerControllerPlugin {
                     .before(TransformSystem::TransformPropagate),
             )
             //resources
-            .init_resource::<KeyBindings>()
-            .init_resource::<MovementInput>();
+            .init_resource::<KeyBindings>();
     }
 }

@@ -9,6 +9,10 @@ pub struct BulletSpawnPosition;
 
 #[derive(Component)]
 pub struct Player {
+    pub fmove: f32,
+    pub smove: f32,
+    pub jump: bool,
+    pub walk: bool,
     pub on_ground: bool,
 }
 
@@ -27,9 +31,16 @@ pub fn player_setup(
 ) {
     let player_entity = commands
         .spawn((
-            Player { on_ground: true },
+            Player {
+                fmove: 0.0,
+                smove: 0.0,
+                jump: false,
+                walk: false,
+                on_ground: true,
+            },
             RigidBody::Kinematic,
-            Collider::cylinder(0.25, 1.0),
+            Collider::capsule(0.25, 0.5),
+            Sensor,
             Transform::from_xyz(0.0, 0.5, 0.0),
             TransformInterpolation,
             Name::new("Player"),
