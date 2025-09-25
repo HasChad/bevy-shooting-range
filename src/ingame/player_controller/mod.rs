@@ -57,10 +57,7 @@ impl Plugin for PlayerControllerPlugin {
                 )
                     .run_if(in_state(PlayableState::Action)),
             )
-            .add_systems(
-                FixedUpdate,
-                (ground_check, player_move, body_collision).run_if(in_state(PlayableState::Action)),
-            )
+            .add_systems(FixedUpdate, (ground_check, player_move, body_collision))
             .add_systems(
                 PostUpdate,
                 camera_follow_player

@@ -4,7 +4,7 @@ use avian3d::prelude::*;
 use bevy::prelude::*;
 use std::f32::consts::PI;
 
-use super::{HitConfirmEvent, WeaponPromp, WeaponShootingEvent};
+use super::{HitConfirmEvent, Weapon, WeaponShootingEvent};
 use crate::ingame::player::{BulletSpawnPosition, Head, Player};
 
 #[derive(Component)]
@@ -21,7 +21,7 @@ pub fn spawn_bullet(
     spawn_position: Single<&GlobalTransform, (With<BulletSpawnPosition>, Without<Head>)>,
     head_transform: Single<&Transform, With<Head>>,
     //
-    query: Query<(&Transform, Entity), With<WeaponPromp>>,
+    query: Query<(&Transform, Entity), With<Weapon>>,
     children: Query<&Children>,
     names: Query<&Name>,
     position: Query<&Transform>,
@@ -52,6 +52,7 @@ pub fn spawn_bullet(
                     velocity: bullet_velocity,
                 },
                 head_transform.clone(),
+                InheritedVisibility::VISIBLE,
                 Name::new("Bullet"),
             ))
             .with_child((

@@ -118,11 +118,11 @@ pub fn body_collision(
         // Get contact points
         for manifold in &contact_pair.manifolds {
             for contact_point in &manifold.points {
-                let point1 = contact_point; // Contact point on entity1
-                let normal = manifold.normal; // Contact normal
+                let point1 = contact_point;
+                let normal = manifold.normal;
 
-                println!("contact point = {:?}", point1.local_point1);
-                println!("contact normal = {:?}", normal);
+                // println!("contact point = {:?}", point1.local_point1);
+                // println!("contact normal = {:?}", normal);
             }
         }
     }

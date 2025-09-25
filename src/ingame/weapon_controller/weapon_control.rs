@@ -2,7 +2,7 @@ use bevy::{input::mouse::AccumulatedMouseMotion, prelude::*};
 use rand::random_range;
 use std::f32::consts::PI;
 
-use super::{WeaponPromp, WeaponShootingEvent};
+use super::{Weapon, WeaponShootingEvent};
 use crate::ingame::{player::Head, GameSettings};
 
 pub fn camera_recoil(
@@ -41,7 +41,7 @@ pub fn camera_recoil(
 pub fn sway_weapon(
     time: Res<Time>,
     accumulated_mouse_motion: Res<AccumulatedMouseMotion>,
-    mut weapon_transform: Single<&mut Transform, With<WeaponPromp>>,
+    mut weapon_transform: Single<&mut Transform, With<Weapon>>,
 ) {
     let delta = accumulated_mouse_motion.delta;
 
@@ -56,7 +56,7 @@ pub fn sway_weapon(
 pub fn scoped_sway_weapon(
     time: Res<Time>,
     accumulated_mouse_motion: Res<AccumulatedMouseMotion>,
-    mut weapon_transform: Single<&mut Transform, With<WeaponPromp>>,
+    mut weapon_transform: Single<&mut Transform, With<Weapon>>,
 ) {
     let delta = accumulated_mouse_motion.delta;
 

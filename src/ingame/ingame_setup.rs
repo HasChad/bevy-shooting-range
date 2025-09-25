@@ -17,11 +17,22 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     //point light
     commands.spawn((
         PointLight {
-            intensity: 10_000_000.,
+            shadows_enabled: true,
             range: 100.,
             ..default()
         },
         Transform::from_xyz(0.0, 16.0, 0.0),
+    ));
+
+    // Sun
+    commands.spawn((
+        DirectionalLight {
+            color: Color::srgb(0.7, 0.7, 0.7),
+            shadows_enabled: true,
+            ..default()
+        },
+        Transform::from_xyz(0.0, 0.0, 0.0).looking_at(Vec3::new(-0.02, -0.05, -0.02), Vec3::Y),
+        Name::new("Sun"),
     ));
 }
 
@@ -46,7 +57,7 @@ pub fn edit_mode_toggler(
                 next_state.set(PlayableState::NoAction)
             }
             _ => {
-                window.cursor_options.grab_mode = CursorGrabMode::Locked;
+                window.cursor_options.grab_mode = CursorGrabMode::Confined;
                 window.cursor_options.visible = false;
                 next_state.set(PlayableState::Action)
             }

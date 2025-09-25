@@ -2,7 +2,7 @@ use avian3d::prelude::*;
 use bevy::{core_pipeline::bloom::Bloom, prelude::*};
 use std::f32::consts::PI;
 
-use crate::ingame::{weapons::WeaponPromp, GameSettings};
+use crate::ingame::{weapons::Weapon, GameSettings};
 
 #[derive(Component)]
 pub struct BulletSpawnPosition;
@@ -18,7 +18,7 @@ pub struct Player {
 
 #[derive(Component)]
 pub struct Head {
-    pub current_weapon: WeaponPromp,
+    pub current_weapon: Weapon,
 }
 
 #[derive(Component)]
@@ -72,7 +72,7 @@ pub fn player_setup(
             Bloom::NATURAL,
             Name::new("Head"),
             Head {
-                current_weapon: WeaponPromp::p226(),
+                current_weapon: Weapon::p226(),
             },
         ))
         // bullet spawn position
@@ -84,8 +84,8 @@ pub fn player_setup(
         // gun model
         .with_child((
             SceneRoot(asset_server.load("models/weapons/P226.glb#Scene0")),
-            Transform::from_xyz(0.1, -0.05, -0.15),
-            WeaponPromp::p226(),
+            Transform::from_xyz(0.075, -0.04, -0.1),
+            Weapon::p226(),
             Name::new("Weapon"),
         ));
 }

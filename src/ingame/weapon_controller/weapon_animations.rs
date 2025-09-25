@@ -27,8 +27,8 @@ pub fn p226_animation_setup(
     ]);
 
     commands.insert_resource(P226Animations {
-        animations: node_indices,
         graph: graphs.add(graph),
+        animations: node_indices,
     });
 }
 
@@ -43,8 +43,8 @@ pub fn ak15_animation_setup(
     ]);
 
     commands.insert_resource(AK15Animations {
-        animations: node_indices,
         graph: graphs.add(graph),
+        animations: node_indices,
     });
 }
 

@@ -4,7 +4,7 @@ use bevy_kira_audio::prelude::*;
 use rand::random_range;
 
 use crate::{
-    ingame::{weapons::WeaponPromp, HitConfirmEvent},
+    ingame::{weapons::Weapon, HitConfirmEvent},
     ingame_ui::HitmarkerEvent,
 };
 
@@ -117,7 +117,7 @@ pub fn enemy_target_controller(
     mut commands: Commands,
     mut event_reader: EventReader<HitConfirmEvent>,
     mut enemytarget_query: Query<(&mut EnemyTarget, Entity)>,
-    weapon_promp: Single<&WeaponPromp>,
+    weapon_promp: Single<&Weapon>,
     query: Query<&Name>,
 ) {
     for event in event_reader.read() {
@@ -149,7 +149,7 @@ pub fn enemy_target_hostage_controller(
     mut commands: Commands,
     mut event_reader: EventReader<HitConfirmEvent>,
     mut enemytargethostage_query: Query<(&mut EnemyTargetHostage, Entity)>,
-    weapon_promp: Single<&WeaponPromp>,
+    weapon_promp: Single<&Weapon>,
     query: Query<&Name>,
 ) {
     for event in event_reader.read() {

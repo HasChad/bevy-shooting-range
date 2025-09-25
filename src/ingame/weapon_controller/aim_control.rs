@@ -3,7 +3,7 @@ use std::f32::consts::PI;
 
 use super::{
     weapons::{WeaponActionState, WeaponAimState},
-    WeaponPromp,
+    Weapon,
 };
 use crate::ingame::{
     crosshair::{CrosshairLine, CrosshairLineSettings},
@@ -32,7 +32,7 @@ pub fn scope(
     crosshair_settings: Res<CrosshairLineSettings>,
     weapon_aim_state: Res<State<WeaponAimState>>,
     mut camera_projection: Single<&mut Projection, With<Camera3d>>,
-    mut weapon_transform: Single<&mut Transform, With<WeaponPromp>>,
+    mut weapon_transform: Single<&mut Transform, With<Weapon>>,
     mut crosshair_query: Query<&mut Visibility, With<CrosshairLine>>,
 ) {
     let Projection::Perspective(persp) = camera_projection.as_mut() else {
@@ -40,30 +40,26 @@ pub fn scope(
     };
 
     if *weapon_aim_state.get() == WeaponAimState::Scope {
-        for mut croshair_visib in crosshair_query.iter_mut() {
-            *croshair_visib = Visibility::Hidden;
+        for mut cross_visib in crosshair_query.iter_mut() {
+            *cross_visib = Visibility::Hidden;
         }
-
         weapon_transform.translation.smooth_nudge(
             &Vec3::new(0.0, 0.0, -0.15),
             20.0,
             time.delta_secs(),
         );
-
         persp
             .fov
             .smooth_nudge(&(50.0 / 180.0 * PI), 20.0, time.delta_secs());
     } else {
-        for mut croshair_visib in crosshair_query.iter_mut() {
-            *croshair_visib = crosshair_settings.enable;
+        for mut cross_visib in crosshair_query.iter_mut() {
+            *cross_visib = crosshair_settings.enable;
         }
-
         weapon_transform.translation.smooth_nudge(
             &Vec3::new(0.075, -0.04, -0.1),
             20.0,
             time.delta_secs(),
         );
-
         persp
             .fov
             .smooth_nudge(&(settings.fov / 180.0 * PI), 20.0, time.delta_secs());

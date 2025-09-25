@@ -4,12 +4,15 @@ Current
 - spawn ammo box and get full ammo when interacting with it
 
 Mechanic
+-? add crouch
 -
 
 Guns
--
+- weapon raise and lower animations
+- fix crash when no ammo left
+
+Others
+- make new range with textures and all the stuff
 
 - HELPING VIDEOS -
-- First person movement: https://www.youtube.com/watch?v=f473C43s8nE
-- Character controller: https://www.youtube.com/watch?v=z3dequX5g_E
 - Weapon animations: https://www.youtube.com/watch?v=ZJvfaorDX3Y

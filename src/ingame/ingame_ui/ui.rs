@@ -6,7 +6,7 @@ use bevy::{
 };
 use palettes::css::GOLD;
 
-use crate::ingame::{player::Player, weapons::WeaponPromp};
+use crate::ingame::{player::Player, weapons::Weapon};
 
 #[derive(Component)]
 pub struct VelocityText;
@@ -226,19 +226,19 @@ pub fn ui_setup(mut commands: Commands) {
 //MARK: Updaters
 pub fn ammo_text_updater(
     mut writer: TextUiWriter,
-    weapon_promp: Single<&WeaponPromp>,
+    weapon: Single<&Weapon>,
     entity: Single<Entity, With<AmmoText>>,
 ) {
-    *writer.text(*entity, 0) = format!("{}", weapon_promp.mag_capacity);
-    *writer.text(*entity, 2) = format!("{}", weapon_promp.ammo_capacity);
+    *writer.text(*entity, 0) = format!("{}", weapon.mag_count);
+    *writer.text(*entity, 2) = format!("{}", weapon.ammo_count);
 }
 
 pub fn weapon_name_text_updater(
     mut writer: TextUiWriter,
-    weapon_promp: Single<&WeaponPromp>,
+    weapon: Single<&Weapon>,
     entity: Single<Entity, With<WeaponNameText>>,
 ) {
-    *writer.text(*entity, 0) = weapon_promp.name.to_string();
+    *writer.text(*entity, 0) = weapon.name.to_string();
 }
 
 pub fn fps_text_updater(
