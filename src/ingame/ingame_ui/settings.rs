@@ -1,9 +1,6 @@
-use bevy::{
-    prelude::*,
-    window::{CursorGrabMode, PrimaryWindow},
-};
+use bevy::{prelude::*, window::CursorGrabMode};
 use bevy_inspector_egui::{
-    bevy_egui::{egui, EguiContext},
+    bevy_egui::{egui, EguiContext, PrimaryEguiContext},
     egui::{Align2, Color32, RichText, Slider},
 };
 use bevy_kira_audio::{Audio, AudioControl};
@@ -85,7 +82,7 @@ pub fn egui_settings(
     mut window: Single<&mut Window>,
     mut next_state: ResMut<NextState<PlayableState>>,
     mut exit: EventWriter<AppExit>,
-    mut egui_context: Single<&mut EguiContext, With<PrimaryWindow>>,
+    mut egui_context: Single<&mut EguiContext, With<PrimaryEguiContext>>,
     mut settings: ResMut<GameSettings>,
     mut camera_query: Single<&mut Projection, With<Camera3d>>,
     mut crosshair_line_settings: ResMut<CrosshairLineSettings>,

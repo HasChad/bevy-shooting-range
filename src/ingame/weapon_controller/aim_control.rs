@@ -7,6 +7,7 @@ use super::{
 };
 use crate::ingame::{
     crosshair::{CrosshairLine, CrosshairLineSettings},
+    player_controller::player::WEAPON_POS,
     GameSettings, KeyBindings,
 };
 
@@ -57,11 +58,9 @@ pub fn scope(
             *visib = crosshair_settings.enable;
         }
 
-        weapon_transform.translation.smooth_nudge(
-            &Vec3::new(0.075, -0.04, -0.1),
-            20.0,
-            time.delta_secs(),
-        );
+        weapon_transform
+            .translation
+            .smooth_nudge(&WEAPON_POS, 20.0, time.delta_secs());
         persp
             .fov
             .smooth_nudge(&(settings.fov / 180.0 * PI), 20.0, time.delta_secs());

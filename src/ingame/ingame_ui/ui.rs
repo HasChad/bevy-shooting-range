@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use avian3d::prelude::LinearVelocity;
 use bevy::{
     color::*,
@@ -6,7 +8,7 @@ use bevy::{
 };
 use palettes::css::GOLD;
 
-use crate::ingame::{player::Player, weapons::Weapon};
+use crate::ingame::{player::Player, target_controller::targets::CircleTarget, weapons::Weapon};
 
 #[derive(Component)]
 pub struct VelocityText;
@@ -139,58 +141,59 @@ pub fn ui_setup(mut commands: Commands) {
             TextColor(GOLD.into()),
         ));
 
-    /*
     //MARK: Target Counter UI
-    commands.spawn((
-        TextBundle::from_sections([
-            TextSection::new(
-                "Kills: ",
-                TextStyle {
-                    font_size: 25.0,
-                    ..default()
-                },
-            ),
-            TextSection::from_style(TextStyle {
-                font_size: 25.0,
-                color: GOLD.into(),
-                ..default()
-            }),
-            TextSection::new(
-                " / 30",
-                TextStyle {
-                    font_size: 25.0,
-                    color: GOLD.into(),
-                    ..default()
-                },
-            ),
-            TextSection::new(
-                "\nTime: ",
-                TextStyle {
-                    font_size: 25.0,
-                    ..default()
-                },
-            ),
-            TextSection::from_style(TextStyle {
-                font_size: 25.0,
-                color: GOLD.into(),
-                ..default()
-            }),
-        ])
-        .with_style(Style {
-            position_type: PositionType::Absolute,
-            align_self: AlignSelf::End,
-            justify_self: JustifySelf::Center,
-            margin: UiRect {
-                bottom: Val::Px(100.0),
+    commands
+        .spawn((
+            Text::new("Kills: "),
+            TextFont {
+                font_size: 20.0,
                 ..default()
             },
-            ..default()
-        })
-        .with_background_color(Color::srgba(0.0, 0.0, 0.0, 0.5)),
-        TargetCounterText,
-        Name::new("UI - Target Counter"),
-    ));
-    */
+            Node {
+                position_type: PositionType::Absolute,
+                align_self: AlignSelf::End,
+                justify_self: JustifySelf::Center,
+                margin: UiRect {
+                    bottom: Val::Px(100.0),
+                    ..default()
+                },
+                ..default()
+            },
+            BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.5)),
+            Name::new("UI - Target Counter"),
+            TargetCounterText,
+        ))
+        .with_child((
+            TextSpan::default(),
+            TextFont {
+                font_size: 20.0,
+                ..default()
+            },
+            TextColor(GOLD.into()),
+        ))
+        .with_child((
+            TextSpan::new(" / 30"),
+            TextFont {
+                font_size: 20.0,
+                ..default()
+            },
+            TextColor(GOLD.into()),
+        ))
+        .with_child((
+            TextSpan::new("\nTime: "),
+            TextFont {
+                font_size: 20.0,
+                ..default()
+            },
+        ))
+        .with_child((
+            TextSpan::default(),
+            TextFont {
+                font_size: 20.0,
+                ..default()
+            },
+            TextColor(GOLD.into()),
+        ));
 }
 
 //MARK: Updaters
@@ -233,22 +236,20 @@ pub fn velocity_text_updater(
     *writer.text(*entity, 1) = format!("{:.2}", sum_vel.length());
 }
 
-/*
 pub fn target_text_updater(
     time: Res<Time>,
-    mut query: Query<&mut Text, With<TargetCounterText>>,
+    mut writer: TextUiWriter,
     mut circletarget_query: Query<&mut CircleTarget>,
+    entity: Single<Entity, With<TargetCounterText>>,
 ) {
-    for mut text in &mut query {
-        for mut circletarget_prop in circletarget_query.iter_mut() {
-            text.sections[1].value = format!("{}", circletarget_prop.hit_counter);
-            text.sections[4].value = format!("{:.2}", circletarget_prop.timer.elapsed_secs());
-            if circletarget_prop.hit_counter > 0 && circletarget_prop.hit_counter < 30 {
-                circletarget_prop
-                    .timer
-                    .tick(Duration::from_secs_f32(time.delta_seconds()));
-            }
+    for mut circletarget_prop in circletarget_query.iter_mut() {
+        *writer.text(*entity, 1) = format!("{}", circletarget_prop.hit_counter);
+        *writer.text(*entity, 4) = format!("{:.2}", circletarget_prop.timer.elapsed_secs());
+
+        if circletarget_prop.hit_counter > 0 && circletarget_prop.hit_counter < 30 {
+            circletarget_prop
+                .timer
+                .tick(Duration::from_secs_f32(time.delta_secs()));
         }
     }
 }
-*/

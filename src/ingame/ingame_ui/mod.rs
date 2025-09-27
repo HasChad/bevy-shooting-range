@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_inspector_egui::bevy_egui::EguiContextPass;
+use bevy_inspector_egui::bevy_egui::EguiPrimaryContextPass;
 
 pub mod crosshair;
 pub mod settings;
@@ -20,7 +20,7 @@ impl Plugin for IngameUIPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, (crosshair_setup, ui_setup))
             .add_systems(
-                EguiContextPass,
+                EguiPrimaryContextPass,
                 egui_settings.run_if(in_state(PlayableState::Menu)),
             )
             .add_systems(OnEnter(PlayableState::Menu), setting_bg)
@@ -33,7 +33,7 @@ impl Plugin for IngameUIPlugin {
                     ammo_text_updater,
                     weapon_name_text_updater,
                     velocity_text_updater,
-                    //target_text_updater,
+                    target_text_updater,
                     // hitmarker systems
                     hitmarker_spawner,
                     hitmarker_controller,

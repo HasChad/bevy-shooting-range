@@ -41,7 +41,7 @@ pub fn movement_input_controller(
 
     if input.pressed(key_bindings.walk) {
         player.walk = true;
-    } else if input.just_released(key_bindings.walk) {
+    } else {
         player.walk = false;
     }
 

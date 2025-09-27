@@ -1,8 +1,10 @@
 use avian3d::prelude::*;
-use bevy::{core_pipeline::bloom::Bloom, prelude::*};
+use bevy::{core_pipeline::bloom::Bloom, pbr::ScreenSpaceAmbientOcclusion, prelude::*};
 use std::f32::consts::PI;
 
 use crate::ingame::{weapons::Weapon, GameSettings};
+
+pub const WEAPON_POS: Vec3 = Vec3::new(0.075, -0.04, -0.1);
 
 #[derive(Component)]
 pub struct BulletSpawnPosition;
@@ -64,6 +66,8 @@ pub fn player_setup(
                 hdr: true, // HDR is required for the bloom effect
                 ..default()
             },
+            ScreenSpaceAmbientOcclusion::default(),
+            Msaa::Off,
             Projection::Perspective(PerspectiveProjection {
                 fov: settings.fov / 180.0 * PI,
                 near: 0.01,
@@ -84,7 +88,7 @@ pub fn player_setup(
         // gun model
         .with_child((
             SceneRoot(asset_server.load("models/weapons/P226.glb#Scene0")),
-            Transform::from_xyz(0.075, -0.04, -0.1),
+            Transform::from_translation(WEAPON_POS),
             Weapon::p226(),
             Name::new("Weapon"),
         ));

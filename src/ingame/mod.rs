@@ -4,13 +4,13 @@ use bevy::{prelude::*, window::CursorGrabMode};
 pub mod ingame_setup;
 pub mod ingame_ui;
 pub mod player_controller;
-pub mod targets;
+pub mod target_controller;
 pub mod weapon_controller;
 
 use ingame_setup::*;
 use ingame_ui::*;
 use player_controller::*;
-use targets::*;
+use target_controller::*;
 use weapon_controller::*;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Default, States)]
@@ -41,20 +41,8 @@ pub struct InGamePlugin;
 
 impl Plugin for InGamePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, (setup, target_setup))
-            .add_systems(
-                Update,
-                (
-                    edit_mode_toggler,
-                    //target systems
-                    hit_detector,
-                    circle_target_controller,
-                    enemy_target_controller,
-                    enemy_target_hostage_controller,
-                ),
-            )
-            //events
-            .add_event::<CircleTargetEvent>()
+        app.add_systems(Startup, (setup,))
+            .add_systems(Update, (edit_mode_toggler,))
             //resources
             .init_resource::<GameSettings>()
             //states
@@ -62,6 +50,7 @@ impl Plugin for InGamePlugin {
             //plugins
             .add_plugins(IngameUIPlugin)
             .add_plugins(PlayerControllerPlugin)
+            .add_plugins(TargetControllerPlugin)
             .add_plugins(WeaponControllerPlugin);
     }
 }
@@ -86,7 +75,7 @@ pub fn edit_mode_toggler(
                 next_state.set(PlayableState::Action);
                 time.unpause();
                 window.cursor_options.visible = false;
-                window.cursor_options.grab_mode = CursorGrabMode::Confined;
+                window.cursor_options.grab_mode = CursorGrabMode::Locked;
             }
         }
     }
