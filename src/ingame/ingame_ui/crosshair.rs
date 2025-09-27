@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{color::palettes::css::WHITE, prelude::*};
 use rand::random_range;
 use std::f32::consts::PI;
 
@@ -8,6 +8,9 @@ use super::HitmarkerEvent;
 pub struct HitMarker {
     hitmarker_lifetime: Timer,
 }
+
+#[derive(Component)]
+pub struct CrossParent;
 
 #[derive(Component)]
 pub struct CrosshairLine;
@@ -24,11 +27,11 @@ pub struct CrosshairLineSettings {
 impl Default for CrosshairLineSettings {
     fn default() -> Self {
         CrosshairLineSettings {
-            gap: 5.0,
-            color: Color::WHITE,
             length: 5.0,
             thickness: 2.0,
-            enable: Visibility::Inherited,
+            gap: 5.0,
+            color: Color::WHITE,
+            enable: Visibility::Visible,
         }
     }
 }
@@ -41,6 +44,10 @@ pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<Crosshair
                 justify_self: JustifySelf::Center,
                 ..default()
             },
+            BackgroundColor(crosshair_settings.color),
+            crosshair_settings.enable,
+            ZIndex(2),
+            CrossParent,
             Name::new("UI - Crosshair"),
         ))
         //MARK: Horizontal Lines
@@ -67,10 +74,9 @@ pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<Crosshair
                             },
                             ..default()
                         },
-                        BackgroundColor(crosshair_settings.color),
-                        crosshair_settings.enable,
-                        Name::new("Left Line"),
                         CrosshairLine,
+                        BackgroundColor(WHITE.into()),
+                        Name::new("Left Line"),
                     ));
 
                     //Right Line
@@ -87,10 +93,9 @@ pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<Crosshair
                             },
                             ..default()
                         },
-                        BackgroundColor(crosshair_settings.color),
-                        crosshair_settings.enable,
-                        Name::new("Right Line"),
                         CrosshairLine,
+                        BackgroundColor(WHITE.into()),
+                        Name::new("Right Line"),
                     ));
                 });
 
@@ -120,10 +125,9 @@ pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<Crosshair
                             },
                             ..default()
                         },
-                        BackgroundColor(crosshair_settings.color),
-                        crosshair_settings.enable,
-                        Name::new("Left Line"),
                         CrosshairLine,
+                        BackgroundColor(WHITE.into()),
+                        Name::new("Left Line"),
                     ));
 
                     //Bottom Line
@@ -140,10 +144,9 @@ pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<Crosshair
                             },
                             ..default()
                         },
-                        BackgroundColor(crosshair_settings.color),
-                        crosshair_settings.enable,
-                        Name::new("Right Line"),
                         CrosshairLine,
+                        BackgroundColor(WHITE.into()),
+                        Name::new("Right Line"),
                     ));
                 });
         });

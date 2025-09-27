@@ -33,16 +33,17 @@ pub fn scope(
     weapon_aim_state: Res<State<WeaponAimState>>,
     mut camera_projection: Single<&mut Projection, With<Camera3d>>,
     mut weapon_transform: Single<&mut Transform, With<Weapon>>,
-    mut crosshair_query: Query<&mut Visibility, With<CrosshairLine>>,
+    mut cross_query: Query<&mut Visibility, With<CrosshairLine>>,
 ) {
     let Projection::Perspective(persp) = camera_projection.as_mut() else {
         return;
     };
 
     if *weapon_aim_state.get() == WeaponAimState::Scope {
-        for mut cross_visib in crosshair_query.iter_mut() {
-            *cross_visib = Visibility::Hidden;
+        for mut visib in cross_query.iter_mut() {
+            *visib = Visibility::Hidden;
         }
+
         weapon_transform.translation.smooth_nudge(
             &Vec3::new(0.0, 0.0, -0.15),
             20.0,
@@ -52,9 +53,10 @@ pub fn scope(
             .fov
             .smooth_nudge(&(50.0 / 180.0 * PI), 20.0, time.delta_secs());
     } else {
-        for mut cross_visib in crosshair_query.iter_mut() {
-            *cross_visib = crosshair_settings.enable;
+        for mut visib in cross_query.iter_mut() {
+            *visib = crosshair_settings.enable;
         }
+
         weapon_transform.translation.smooth_nudge(
             &Vec3::new(0.075, -0.04, -0.1),
             20.0,

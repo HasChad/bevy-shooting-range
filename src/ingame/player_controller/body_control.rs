@@ -6,8 +6,9 @@ use crate::ingame::player::Head;
 use super::{player::Player, KeyBindings};
 
 const PLAYER_SPEED: f32 = 5.0;
+const PLAYER_ACCEL: f32 = 0.5;
 const WALK_SPEED: f32 = 2.0;
-const ACCEL_SPEED: f32 = 0.5;
+const WALK_ACCEL: f32 = 0.3;
 const FRICTION: f32 = 0.2;
 const GRAVITY: f32 = 0.3;
 
@@ -63,13 +64,19 @@ pub fn player_move(
         let forward = Vec3::new(-yaw_head.sin(), 0.0, -yaw_head.cos()).normalize();
         let right = Vec3::new(-yaw_head.cos(), 0.0, yaw_head.sin()).normalize();
 
+        let accel = if player_promp.walk {
+            WALK_ACCEL
+        } else {
+            PLAYER_ACCEL
+        };
+
         let wish_dir = Vec3::new(
             forward.x * player_promp.fmove + right.x * player_promp.smove,
             0.0,
             forward.z * player_promp.fmove + right.z * player_promp.smove,
         )
         .normalize_or_zero()
-            * ACCEL_SPEED;
+            * accel;
 
         let final_dir: Vec3 = match player_promp.on_ground {
             true => wish_dir + friction(lin_vel, lin_vel.length()),
@@ -81,7 +88,7 @@ pub fn player_move(
 
         if player_promp.walk && lin_vel.length() > WALK_SPEED {
             lin_vel = lin_vel.normalize_or_zero() * WALK_SPEED
-        } else if lin_vel.length() > 5.0 {
+        } else if lin_vel.length() > PLAYER_SPEED {
             lin_vel = lin_vel.normalize_or_zero() * PLAYER_SPEED
         }
 
@@ -189,9 +196,10 @@ fn calculate_slope_angle(normal: Vec3) -> f32 {
 
 pub fn player_position_reset(
     key_input: Res<ButtonInput<KeyCode>>,
-    mut player_transform: Single<&mut Transform, With<Player>>,
+    mut player: Single<(&mut Transform, &mut LinearVelocity), With<Player>>,
 ) {
     if key_input.just_pressed(KeyCode::KeyX) {
-        player_transform.translation = Vec3::new(0.0, 0.5, 0.0);
+        player.0.translation = Vec3::new(0.0, 0.5, 0.0);
+        *player.1 = LinearVelocity::ZERO;
     }
 }

@@ -1,4 +1,5 @@
-use bevy::prelude::*;
+use avian3d::prelude::{Physics, PhysicsTime};
+use bevy::{prelude::*, window::CursorGrabMode};
 
 pub mod ingame_setup;
 pub mod ingame_ui;
@@ -12,10 +13,18 @@ use player_controller::*;
 use targets::*;
 use weapon_controller::*;
 
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Default, States)]
+pub enum PlayableState {
+    #[default]
+    Action,
+    Menu,
+}
+
 #[derive(Resource)]
 pub struct GameSettings {
     pub sensitivity: f32,
     pub fov: f32,
+    pub volume: f32,
 }
 
 impl Default for GameSettings {
@@ -23,6 +32,7 @@ impl Default for GameSettings {
         GameSettings {
             sensitivity: 1.0,
             fov: 90.0,
+            volume: 0.5,
         }
     }
 }
@@ -36,7 +46,6 @@ impl Plugin for InGamePlugin {
                 Update,
                 (
                     edit_mode_toggler,
-                    exit_game,
                     //target systems
                     hit_detector,
                     circle_target_controller,
@@ -51,8 +60,34 @@ impl Plugin for InGamePlugin {
             //states
             .init_state::<PlayableState>()
             //plugins
-            .add_plugins(PlayerControllerPlugin)
             .add_plugins(IngameUIPlugin)
+            .add_plugins(PlayerControllerPlugin)
             .add_plugins(WeaponControllerPlugin);
+    }
+}
+
+pub fn edit_mode_toggler(
+    mut time: ResMut<Time<Physics>>,
+    key_bindings: Res<KeyBindings>,
+    mut window: Single<&mut Window>,
+    input: ResMut<ButtonInput<KeyCode>>,
+    state: Res<State<PlayableState>>,
+    mut next_state: ResMut<NextState<PlayableState>>,
+) {
+    if input.just_pressed(key_bindings.focus) {
+        match state.get() {
+            PlayableState::Action => {
+                next_state.set(PlayableState::Menu);
+                time.pause();
+                window.cursor_options.visible = true;
+                window.cursor_options.grab_mode = CursorGrabMode::None;
+            }
+            PlayableState::Menu => {
+                next_state.set(PlayableState::Action);
+                time.unpause();
+                window.cursor_options.visible = false;
+                window.cursor_options.grab_mode = CursorGrabMode::Confined;
+            }
+        }
     }
 }

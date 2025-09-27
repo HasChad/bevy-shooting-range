@@ -15,8 +15,9 @@ pub fn weapon_input_controller(
     mut reload_event_writer: EventWriter<WeaponReloadingEvent>,
 ) {
     //shoot
-    if (mouse_input.just_pressed(key_bindings.fire) && !weapon.is_auto)
-        || (mouse_input.pressed(key_bindings.fire) && weapon.is_auto)
+    if ((mouse_input.just_pressed(key_bindings.fire) && !weapon.is_auto)
+        || (mouse_input.pressed(key_bindings.fire) && weapon.is_auto))
+        && weapon.mag_count > 0
     {
         weapon.mag_count -= 1;
         shot_event_writer.write(WeaponShootingEvent);

@@ -38,7 +38,7 @@ impl Default for KeyBindings {
             fire: MouseButton::Left,
             scope: MouseButton::Right,
             reload: KeyCode::KeyR,
-            focus: KeyCode::Tab,
+            focus: KeyCode::Escape,
         }
     }
 }
@@ -57,7 +57,10 @@ impl Plugin for PlayerControllerPlugin {
                 )
                     .run_if(in_state(PlayableState::Action)),
             )
-            .add_systems(FixedUpdate, (ground_check, player_move, body_collision))
+            .add_systems(
+                FixedUpdate,
+                (ground_check, player_move, body_collision).run_if(in_state(PlayableState::Action)),
+            )
             .add_systems(
                 PostUpdate,
                 camera_follow_player

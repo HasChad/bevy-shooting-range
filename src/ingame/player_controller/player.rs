@@ -41,7 +41,7 @@ pub fn player_setup(
             RigidBody::Kinematic,
             Collider::capsule(0.25, 0.5),
             Sensor,
-            Transform::from_xyz(0.0, 0.5, 0.0),
+            Transform::from_xyz(0.0, 2.0, 0.0),
             TransformInterpolation,
             Name::new("Player"),
         ))

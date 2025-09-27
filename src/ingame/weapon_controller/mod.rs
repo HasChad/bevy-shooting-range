@@ -54,8 +54,7 @@ impl Plugin for WeaponControllerPlugin {
                 (
                     sway_weapon.run_if(in_state(WeaponAimState::HipFire)),
                     scoped_sway_weapon.run_if(in_state(WeaponAimState::Scope)),
-                )
-                    .run_if(in_state(PlayableState::Action)),
+                ),
                 shooting_sound,
                 spawn_bullet,
                 // action system
@@ -64,11 +63,14 @@ impl Plugin for WeaponControllerPlugin {
                 (
                     change_weapon,
                     weapon_input_controller.run_if(in_state(WeaponActionState::Ready)),
-                )
-                    .run_if(in_state(PlayableState::Action)),
-            ),
+                ),
+            )
+                .run_if(in_state(PlayableState::Action)),
         )
-        .add_systems(FixedUpdate, bullet_controller)
+        .add_systems(
+            FixedUpdate,
+            bullet_controller.run_if(in_state(PlayableState::Action)),
+        )
         //resources
         .init_resource::<WeaponRes>()
         //states

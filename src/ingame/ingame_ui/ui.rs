@@ -24,36 +24,6 @@ pub struct FpsText;
 pub struct TargetCounterText;
 
 pub fn ui_setup(mut commands: Commands) {
-    // MARK: Information UI
-    commands.spawn((
-        Text::new(concat!(
-            "TAB - Enter/Exit play mode\n",
-            "W/A/S/D - Move\n",
-            "Left Mouse Button - Shoot\n",
-            "Right Mouse Button - Aim\n",
-            "R - Reload\n",
-            "X - Reset player position\n",
-            "1 - P226\n",
-            "2 - AK-15"
-        )),
-        TextFont {
-            font_size: 15.0,
-            ..default()
-        },
-        Node {
-            position_type: PositionType::Absolute,
-            align_self: AlignSelf::Start,
-            justify_self: JustifySelf::Start,
-            margin: UiRect {
-                left: Val::Px(5.0),
-                top: Val::Px(5.0),
-                ..default()
-            },
-            ..default()
-        },
-        Name::new("UI - Information Text "),
-    ));
-
     // MARK: Ammo UI
     commands
         .spawn((
@@ -106,7 +76,7 @@ pub fn ui_setup(mut commands: Commands) {
             justify_self: JustifySelf::Center,
             margin: UiRect {
                 left: Val::Px(300.0),
-                bottom: Val::Px(60.0),
+                bottom: Val::Px(65.0),
                 ..default()
             },
             ..default()
@@ -145,7 +115,7 @@ pub fn ui_setup(mut commands: Commands) {
     //MARK: Veclocity UI
     commands
         .spawn((
-            Text::new("Velocity: "),
+            Text::new("Vel: "),
             TextFont {
                 font_size: 20.0,
                 ..default()
