@@ -11,8 +11,8 @@ pub struct BulletSpawnPosition;
 
 #[derive(Component)]
 pub struct Player {
-    pub fmove: f32,
-    pub smove: f32,
+    pub fmove: i8,
+    pub smove: i8,
     pub jump: bool,
     pub walk: bool,
     pub on_ground: bool,
@@ -34,8 +34,8 @@ pub fn player_setup(
     let player_entity = commands
         .spawn((
             Player {
-                fmove: 0.0,
-                smove: 0.0,
+                fmove: 0,
+                smove: 0,
                 jump: false,
                 walk: false,
                 on_ground: true,
@@ -54,7 +54,7 @@ pub fn player_setup(
         RayCaster::new(Vec3::ZERO, Dir3::NEG_Y)
             .with_query_filter(SpatialQueryFilter::from_excluded_entities([player_entity]))
             .with_max_hits(1)
-            .with_max_distance(0.55)
+            .with_max_distance(0.505)
             .with_solidness(false),
         Name::new("Ground Checker"),
     ));

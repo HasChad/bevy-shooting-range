@@ -1,15 +1,12 @@
 - PLANS -
 Current
-- good movement
-- spawn ammo box and get full ammo when interacting with it
+- collision and changing movement
 
 Mechanic
 -? add crouch
--
 
 Guns
 - weapon raise and lower animations
-- fix crash when no ammo left
 
 Others
 - make new range with textures and all the stuff

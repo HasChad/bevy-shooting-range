@@ -30,10 +30,18 @@ fn main() {
         .add_plugins(AudioPlugin)
         .add_plugins(FrameTimeDiagnosticsPlugin::default())
         .add_plugins(PhysicsPlugins::default())
-        //.add_plugins(PhysicsDebugPlugin::default())
+        .add_plugins(PhysicsDebugPlugin::default())
+        .insert_gizmo_config(
+            PhysicsGizmos {
+                contact_point_color: Some(Color::BLACK),
+                contact_normal_color: Some(Color::BLACK),
+                ..default()
+            },
+            GizmoConfig::default(),
+        )
         .add_plugins(EguiPlugin::default())
         .add_plugins(
-            WorldInspectorPlugin::default().run_if(input_toggle_active(true, KeyCode::Tab)),
+            WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Tab)),
         )
         //mod plugins
         .add_plugins(InGamePlugin)

@@ -90,12 +90,6 @@ pub fn bullet_controller(
         let prev_pos = bullet_transform.translation;
         bullet_transform.translation += bullet_travel;
 
-        //FIXME: need better gravity and wind calculation that effects bullet_prop.velocity
-        //gravity drop
-        // bullet_transform.translation.y -= 0.5 * time.delta_seconds() * bullet_promp.bullet_lifetime.elapsed().as_secs_f32();
-        //wind push
-        // bullet_transform.translation.x -= 0.5 * time.delta_seconds() * bullet_promp.bullet_lifetime.elapsed().as_secs_f32();
-
         if let Some(hit) = spatial_query.cast_ray(
             prev_pos,
             Dir3::new_unchecked(bullet_promp.velocity.normalize()),

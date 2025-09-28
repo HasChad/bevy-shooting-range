@@ -59,7 +59,12 @@ impl Plugin for PlayerControllerPlugin {
             )
             .add_systems(
                 FixedUpdate,
-                (ground_check, player_move, body_collision).run_if(in_state(PlayableState::Action)),
+                (
+                    player_move,
+                    ground_check,
+                    kinematic_controller_collisions.after(player_move),
+                )
+                    .run_if(in_state(PlayableState::Action)),
             )
             .add_systems(
                 PostUpdate,

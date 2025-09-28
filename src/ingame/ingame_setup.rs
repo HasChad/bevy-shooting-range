@@ -1,15 +1,7 @@
 use avian3d::prelude::*;
-use bevy::{prelude::*, window::CursorGrabMode};
+use bevy::prelude::*;
 
-pub fn setup(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut window: Single<&mut Window>,
-) {
-    window.cursor_options.grab_mode = CursorGrabMode::Confined;
-    window.cursor_options.visible = false;
-
-    //shooting range
+pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         SceneRoot(asset_server.load("models/shooting-range.glb#Scene0")),
         ColliderConstructorHierarchy::new(ColliderConstructor::TrimeshFromMesh),
@@ -19,7 +11,6 @@ pub fn setup(
     // ! Blender models looking at positive Y direction
     // ! for true mesh setup, in blender Ctrl + A -> All Transforms
 
-    //point light
     commands.spawn((
         PointLight {
             shadows_enabled: true,
@@ -27,9 +18,9 @@ pub fn setup(
             ..default()
         },
         Transform::from_xyz(0.0, 16.0, 0.0),
+        Name::new("Point Light"),
     ));
 
-    // Sun
     commands.spawn((
         DirectionalLight {
             color: Color::srgb(0.7, 0.7, 0.7),

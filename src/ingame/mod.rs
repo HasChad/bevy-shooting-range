@@ -16,8 +16,8 @@ use weapon_controller::*;
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Default, States)]
 pub enum PlayableState {
     #[default]
-    Action,
     Menu,
+    Action,
 }
 
 #[derive(Resource)]
@@ -41,8 +41,8 @@ pub struct InGamePlugin;
 
 impl Plugin for InGamePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, (setup,))
-            .add_systems(Update, (edit_mode_toggler,))
+        app.add_systems(Startup, setup)
+            .add_systems(Update, edit_mode_toggler)
             //resources
             .init_resource::<GameSettings>()
             //states
@@ -78,5 +78,10 @@ pub fn edit_mode_toggler(
                 window.cursor_options.grab_mode = CursorGrabMode::Locked;
             }
         }
+    }
+
+    if *state.get() == PlayableState::Action {
+        let center = Vec2::new(window.width() / 2.0, window.height() / 2.0);
+        window.set_cursor_position(Some(center));
     }
 }

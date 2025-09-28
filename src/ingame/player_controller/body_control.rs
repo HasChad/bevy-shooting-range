@@ -1,4 +1,9 @@
-use avian3d::{math::Scalar, prelude::*};
+use std::f32::consts::PI;
+
+use avian3d::{
+    math::{Scalar, Vector},
+    prelude::*,
+};
 use bevy::prelude::*;
 
 use crate::ingame::player::Head;
@@ -12,50 +17,37 @@ const WALK_ACCEL: f32 = 0.3;
 const FRICTION: f32 = 0.2;
 const GRAVITY: f32 = 0.3;
 
+pub fn player_position_reset(
+    key_input: Res<ButtonInput<KeyCode>>,
+    mut player: Single<(&mut Transform, &mut LinearVelocity), With<Player>>,
+) {
+    if key_input.just_pressed(KeyCode::KeyX) {
+        player.0.translation = Vec3::new(0.0, 0.5, 0.0);
+        *player.1 = LinearVelocity::ZERO;
+    }
+}
+
 pub fn movement_input_controller(
     input: Res<ButtonInput<KeyCode>>,
     mut player: Single<&mut Player>,
     key_bindings: Res<KeyBindings>,
 ) {
-    let mut raw_m = Vec2::new(0.0, 0.0);
+    let forward = input.pressed(key_bindings.move_forward);
+    let backward = input.pressed(key_bindings.move_backward);
+    let left = input.pressed(key_bindings.move_left);
+    let right = input.pressed(key_bindings.move_right);
 
-    if input.pressed(key_bindings.move_forward) {
-        raw_m.x += 1.0
-    }
-
-    if input.pressed(key_bindings.move_backward) {
-        raw_m.x -= 1.0
-    }
-
-    if input.pressed(key_bindings.move_left) {
-        raw_m.y += 1.0
-    }
-
-    if input.pressed(key_bindings.move_right) {
-        raw_m.y -= 1.0
-    }
-
-    if input.pressed(key_bindings.jump) {
-        player.jump = true;
-    }
-
-    if input.pressed(key_bindings.walk) {
-        player.walk = true;
-    } else {
-        player.walk = false;
-    }
-
-    player.fmove = raw_m.x;
-    player.smove = raw_m.y;
+    player.fmove = forward as i8 - backward as i8;
+    player.smove = left as i8 - right as i8;
+    player.jump = input.pressed(key_bindings.jump);
+    player.walk = input.pressed(key_bindings.walk);
 }
-
-// TODO: need to restrict air movement
 
 pub fn player_move(
     camera_transform: Single<&Transform, With<Head>>,
     mut player_query: Query<(&mut LinearVelocity, &Player)>,
 ) {
-    for (mut real_lin_vel, player_promp) in player_query.iter_mut() {
+    for (mut real_lin_vel, player) in player_query.iter_mut() {
         let (yaw_head, _, _) = camera_transform.rotation.to_euler(EulerRot::YXZ);
 
         let mut lin_vel = Vec3::new(real_lin_vel.x, 0.0, real_lin_vel.z);
@@ -64,29 +56,26 @@ pub fn player_move(
         let forward = Vec3::new(-yaw_head.sin(), 0.0, -yaw_head.cos()).normalize();
         let right = Vec3::new(-yaw_head.cos(), 0.0, yaw_head.sin()).normalize();
 
-        let accel = if player_promp.walk {
+        let accel = if player.walk {
             WALK_ACCEL
         } else {
             PLAYER_ACCEL
         };
 
         let wish_dir = Vec3::new(
-            forward.x * player_promp.fmove + right.x * player_promp.smove,
+            forward.x * player.fmove as f32 + right.x * player.smove as f32,
             0.0,
-            forward.z * player_promp.fmove + right.z * player_promp.smove,
+            forward.z * player.fmove as f32 + right.z * player.smove as f32,
         )
         .normalize_or_zero()
             * accel;
 
-        let final_dir: Vec3 = match player_promp.on_ground {
-            true => wish_dir + friction(lin_vel, lin_vel.length()),
-            false => wish_dir,
-        };
+        let final_dir: Vec3 = wish_dir + friction(lin_vel, lin_vel.length());
 
         lin_vel.x += final_dir.x;
         lin_vel.z += final_dir.z;
 
-        if player_promp.walk && lin_vel.length() > WALK_SPEED {
+        if player.walk && lin_vel.length() > WALK_SPEED {
             lin_vel = lin_vel.normalize_or_zero() * WALK_SPEED
         } else if lin_vel.length() > PLAYER_SPEED {
             lin_vel = lin_vel.normalize_or_zero() * PLAYER_SPEED
@@ -117,89 +106,167 @@ pub fn friction(lin_vel: Vec3, force: f32) -> Vec3 {
     fri_dir
 }
 
-pub fn body_collision(
-    contact_graph: Res<ContactGraph>,
-    player_entity: Single<Entity, With<Player>>,
-) {
-    for contact_pair in contact_graph.collisions_with(*player_entity) {
-        // Get contact points
-        for manifold in &contact_pair.manifolds {
-            for contact_point in &manifold.points {
-                let point1 = contact_point;
-                let normal = manifold.normal;
-
-                // println!("contact point = {:?}", point1.local_point1);
-                // println!("contact normal = {:?}", normal);
-            }
-        }
-    }
-}
-
 pub fn ground_check(
     raycasting: Query<(&RayCaster, &RayHits)>,
     player_query: Single<(&mut Transform, &mut Player, &mut LinearVelocity)>,
 ) {
-    let (mut player_trs, mut player_promp, mut lin_vel) = player_query.into_inner();
+    let (mut player_trs, mut player, mut lin_vel) = player_query.into_inner();
 
-    for (_ray, hits) in &raycasting {
+    for (_, hits) in &raycasting {
         if hits.is_empty() {
-            player_promp.on_ground = false;
+            player.on_ground = false;
             lin_vel.y -= GRAVITY;
+            if player.jump {
+                player.jump = false;
+            }
         } else {
-            player_promp.on_ground = true;
-            lin_vel.y = 0.0;
-
-            if player_promp.jump {
-                lin_vel.y = 5.0;
+            for hit in hits.iter() {
+                if hit.distance < 0.502 {
+                    player_trs.translation.y += (0.5 - hit.distance) / 5.0;
+                }
             }
 
-            for hit in hits.iter() {
-                let angle = calculate_slope_angle(hit.normal);
+            player.on_ground = true;
+            lin_vel.y = 0.0;
 
-                if angle <= 45.0 {
-                    player_trs.translation.y += 0.5 - hit.distance;
-                } else if angle > 45.0 {
-                    // Calculate the component of gravity along the slope
-                    let gravity = Vec3::new(0.0, -GRAVITY, 0.0);
-                    let gravity_along_slope = gravity - hit.normal * hit.normal.dot(gravity);
-
-                    // Apply sliding acceleration
-                    let slide_acceleration = gravity_along_slope;
-                    lin_vel.x += slide_acceleration.x;
-                    lin_vel.y += slide_acceleration.y;
-                    lin_vel.z += slide_acceleration.z;
-                }
-
-                // if hit.distance < 0.515 {
-                //    player_trs.translation.y += (0.5 - hit.distance) / 500000.0;
-                // }
+            if player.jump {
+                lin_vel.y = 5.0;
+                player.jump = false;
             }
         }
     }
-
-    if player_promp.jump {
-        player_promp.jump = false;
-    }
 }
 
-fn calculate_slope_angle(normal: Vec3) -> f32 {
-    let up = Vec3::Y;
-
-    // Calculate angle between normal and up vector
-    let dot_product = normal.dot(up);
-    let angle_radians = dot_product.acos();
-
-    let angle_degrees = angle_radians.to_degrees();
-
-    angle_degrees
-}
-
-pub fn player_position_reset(
-    key_input: Res<ButtonInput<KeyCode>>,
-    mut player: Single<(&mut Transform, &mut LinearVelocity), With<Player>>,
+pub fn kinematic_controller_collisions(
+    time: Res<Time>,
+    cg: Res<ContactGraph>,
+    bodies: Query<&RigidBody>,
+    player_entity: Single<Entity, With<Player>>,
+    mut player_query: Query<(&mut Position, &mut LinearVelocity), With<Player>>,
 ) {
-    if key_input.just_pressed(KeyCode::KeyX) {
-        player.0.translation = Vec3::new(0.0, 0.5, 0.0);
-        *player.1 = LinearVelocity::ZERO;
+    for contact_pair in cg.collisions_with(*player_entity) {
+        let cp1 = contact_pair.collider1;
+        let cp2 = contact_pair.collider2;
+
+        let is_first: bool;
+        let is_other_dynamic: bool;
+        let max_slope_angle: Scalar = PI * 0.45;
+
+        let (mut position, mut linear_velocity) = if let Ok(character) = player_query.get_mut(cp1) {
+            is_first = true;
+            is_other_dynamic = bodies.get(cp2).is_ok_and(|rb| rb.is_dynamic());
+            character
+        } else if let Ok(character) = player_query.get_mut(cp2) {
+            is_first = false;
+            is_other_dynamic = bodies.get(cp1).is_ok_and(|rb| rb.is_dynamic());
+            character
+        } else {
+            continue;
+        };
+
+        for manifold in contact_pair.manifolds.iter() {
+            let normal = if is_first {
+                -manifold.normal
+            } else {
+                manifold.normal
+            };
+
+            let mut deepest_penetration: Scalar = Scalar::MIN;
+
+            let mut auto_step: Option<f32> = None;
+
+            // Solve each penetrating contact in the manifold.
+            for contact in manifold.points.iter() {
+                let point = if is_first {
+                    contact.local_point1
+                } else {
+                    contact.local_point2
+                };
+
+                if point.y < -0.25 && point.y > -0.5 {
+                    info!("point = {}", point.y);
+                    if let Some(pt) = auto_step {
+                        if pt < point.y {
+                            auto_step = Some(point.y);
+                        }
+                    } else {
+                        auto_step = Some(point.y);
+                    }
+                }
+
+                deepest_penetration = deepest_penetration.max(contact.penetration);
+            }
+
+            // For now, this system only handles velocity corrections for collisions against static geometry.
+            if is_other_dynamic {
+                continue;
+            }
+
+            // Determine if the slope is climbable or if it's too steep to walk on.
+            let slope_angle = normal.angle_between(Vector::Y);
+            let climbable = slope_angle.abs() <= max_slope_angle;
+
+            if deepest_penetration > 0.0 {
+                if let Some(height) = auto_step {
+                    if height < -0.45 {
+                        position.0 += (0.5 + height) / 2.0;
+                    } else {
+                        position.0 += 0.5 + height;
+                    }
+                } else if climbable {
+                    // Points in the normal's direction in the XZ plane.
+                    let normal_direction_xz =
+                        normal.reject_from_normalized(Vector::Y).normalize_or_zero();
+
+                    // The movement speed along the direction above.
+                    let linear_velocity_xz = linear_velocity.dot(normal_direction_xz);
+
+                    // let max_y_speed = -linear_velocity_xz * slope_angle.tan();
+                    // linear_velocity.y = linear_velocity.y.max(max_y_speed);
+                } else {
+                    position.0 += normal * deepest_penetration;
+
+                    // Don't apply an impulse if the character is moving away from the surface.
+                    if linear_velocity.dot(normal) > 0.0 {
+                        continue;
+                    }
+
+                    // Slide along the surface, rejecting the velocity along the contact normal.
+                    let impulse = linear_velocity.reject_from_normalized(normal);
+                    linear_velocity.0 = impulse;
+                }
+            }
+
+            /*
+            else {
+                // The character is not yet intersecting the other object,
+                // but the narrow phase detected a speculative collision.
+                //
+                // We need to push back the part of the velocity
+                // that would cause penetration within the next frame.
+
+                let normal_speed = linear_velocity.dot(normal);
+
+                // Don't apply an impulse if the character is moving away from the surface.
+                if normal_speed > 0.0 {
+                    continue;
+                }
+
+                // Compute the impulse to apply.
+                let impulse_magnitude = normal_speed - (deepest_penetration / time.delta_secs());
+                let mut impulse = impulse_magnitude * normal;
+
+                // Apply the impulse differently depending on the slope angle.
+                if climbable {
+                    // Avoid sliding down slopes.
+                    linear_velocity.y -= impulse.y.min(0.0);
+                } else {
+                    // Avoid climbing up walls.
+                    impulse.y = impulse.y.max(0.0);
+                    linear_velocity.0 -= impulse;
+                }
+            }
+             */
+        }
     }
 }
