@@ -84,7 +84,7 @@ pub fn weapon_animation_player(
     }
 }
 
-pub fn shooting_sound(
+pub fn weapon_sounds(
     audio: Res<Audio>,
     asset_server: Res<AssetServer>,
     weapon_state: Res<State<WeaponState>>,

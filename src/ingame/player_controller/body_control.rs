@@ -1,14 +1,12 @@
-use std::f32::consts::PI;
-
 use avian3d::{
     math::{Scalar, Vector},
     prelude::*,
 };
 use bevy::prelude::*;
-
-use crate::ingame::player::Head;
+use std::f32::consts::PI;
 
 use super::{player::Player, KeyBindings};
+use crate::ingame::player::Head;
 
 const PLAYER_SPEED: f32 = 5.0;
 const PLAYER_ACCEL: f32 = 0.5;
