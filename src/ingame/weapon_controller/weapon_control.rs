@@ -2,13 +2,13 @@ use bevy::{input::mouse::AccumulatedMouseMotion, prelude::*};
 use rand::random_range;
 use std::f32::consts::PI;
 
-use super::{Weapon, WeaponShootingEvent};
+use super::{Weapon, WeaponShootingMessage};
 use crate::ingame::{player::Head, GameSettings};
 
 pub fn camera_recoil(
     time: Res<Time>,
     settings: ResMut<GameSettings>,
-    mut event_reader: EventReader<WeaponShootingEvent>,
+    mut mes_reader: MessageReader<WeaponShootingMessage>,
     mut camera_projection: Single<&mut Projection, With<Camera3d>>,
     mut head_transform: Single<&mut Transform, With<Head>>,
 ) {
@@ -16,7 +16,7 @@ pub fn camera_recoil(
         return;
     };
 
-    for _event in event_reader.read() {
+    for _event in mes_reader.read() {
         let (mut yaw_camera, mut pitch_camera, _) = head_transform.rotation.to_euler(EulerRot::YXZ);
 
         pitch_camera += 0.015;

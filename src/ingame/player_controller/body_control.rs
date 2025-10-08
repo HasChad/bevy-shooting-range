@@ -135,6 +135,7 @@ pub fn ground_check(
     }
 }
 
+/*
 pub fn kinematic_controller_collisions(
     time: Res<Time>,
     cg: Res<ContactGraph>,
@@ -268,3 +269,4 @@ pub fn kinematic_controller_collisions(
         }
     }
 }
+*/

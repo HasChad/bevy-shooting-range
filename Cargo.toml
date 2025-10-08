@@ -5,37 +5,13 @@ edition = "2021"
 authors = ["HasChad"]
 
 [dependencies]
-bevy = { version = "0.16.1", default-features = false, features = [
-  # Default features:
-  "animation",          # Enable animation support, and glTF animation loading
-  "bevy_animation",     # Provides animation functionality
-  "bevy_asset",         # Provides asset functionality
-  "bevy_color",         # Provides shared color types and operations
-  "bevy_core_pipeline", # Provides cameras and other basic render pipeline features
-  "bevy_gizmos",        # Adds support for rendering gizmos
-  "bevy_gltf",          # glTF support
-  "bevy_pbr",           # Adds PBR rendering
-  "bevy_render",        # Provides rendering functionality
-  "bevy_scene",         # Provides scene functionality
-  "bevy_sprite",        # Provides sprite functionality
-  "bevy_state",         # Enable built in global state machines
-  "bevy_text",          # Provides text functionality
-  "bevy_ui",            # A custom ECS-driven UI framework
-  "bevy_window",        # Windowing layer
-  "bevy_winit",         # winit window and input backend
-  "default_font",       # Include a default font, containing only ASCII characters, at the cost of a 20kB binary size increase
-  "multi_threaded",     # Enables multithreaded parallelism in the engine. Disabling it forces all engine tasks to run on a single thread.
-  "png",                # PNG image format support
-  "tonemapping_luts",   # Include tonemapping Look Up Tables KTX2 files. If everything is pink, you need to enable this feature or change the Tonemapping method for your Camera2d or Camera3d.
-
-  # Optional features:
-  "asset_processor",    # Asset processing
-  "serialize",          # Support for `serde` Serialize/Deserialize
-  "dynamic_linking",    # Dynamic linking for faster compile-times
+bevy = { version = "0.17.2", features = [
+    "asset_processor",
+    "serialize",
+    "dynamic_linking",
 ] }
-bevy-inspector-egui = "0.33.1"
-avian3d = "0.3.1"
-bevy_kira_audio = "0.23.0"
+bevy-inspector-egui = "0.34.0"
+avian3d = { git = "https://github.com/Jondolf/avian", branch = "main" }
 rand = "0.9.2"
 # https://crates.io/crates/bevy_pkv for saving game settings
 

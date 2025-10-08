@@ -1,5 +1,5 @@
 use avian3d::prelude::*;
-use bevy::{prelude::*, transform::TransformSystem};
+use bevy::prelude::*;
 
 pub mod body_control;
 pub mod head_control;
@@ -62,16 +62,15 @@ impl Plugin for PlayerControllerPlugin {
                 (
                     player_move,
                     ground_check,
-                    kinematic_controller_collisions.after(player_move),
+                    // kinematic_controller_collisions.after(player_move),
                 )
                     .run_if(in_state(PlayableState::Action)),
             )
             .add_systems(
                 PostUpdate,
-                camera_follow_player
-                    .after(player_move)
-                    .after(PhysicsSet::Sync)
-                    .before(TransformSystem::TransformPropagate),
+                camera_follow_player.after(player_move),
+                //.after(PhysicsSet::Sync)
+                //.before(TransformSystem::TransformPropagate),
             )
             //resources
             .init_resource::<KeyBindings>();

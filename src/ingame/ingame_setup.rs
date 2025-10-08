@@ -4,6 +4,7 @@ use bevy::prelude::*;
 pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         SceneRoot(asset_server.load("models/shooting-range.glb#Scene0")),
+        Transform::from_xyz(0.0, 0.0, 0.0),
         ColliderConstructorHierarchy::new(ColliderConstructor::TrimeshFromMesh),
         RigidBody::Static,
         Name::new("Shooting Range"),

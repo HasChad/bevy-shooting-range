@@ -4,7 +4,7 @@ use avian3d::prelude::*;
 use bevy::prelude::*;
 use std::f32::consts::PI;
 
-use super::{HitConfirmEvent, Weapon, WeaponShootingEvent};
+use super::{HitConfirmMessage, Weapon, WeaponShootingMessage};
 use crate::ingame::player::{BulletSpawnPosition, Head, Player};
 
 #[derive(Component)]
@@ -15,7 +15,7 @@ pub struct Bullet {
 
 pub fn spawn_bullet(
     mut commands: Commands,
-    mut event_reader: EventReader<WeaponShootingEvent>,
+    mut mes_reader: MessageReader<WeaponShootingMessage>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     spawn_position: Single<&GlobalTransform, (With<BulletSpawnPosition>, Without<Head>)>,
@@ -26,7 +26,7 @@ pub fn spawn_bullet(
     names: Query<&Name>,
     position: Query<&Transform>,
 ) {
-    for _event in event_reader.read() {
+    for _ in mes_reader.read() {
         let bullet_velocity =
             (spawn_position.translation() - head_transform.translation).normalize();
 
@@ -77,7 +77,7 @@ pub fn bullet_controller(
     time: Res<Time>,
     mut commands: Commands,
     spatial_query: SpatialQuery,
-    mut event_writer: EventWriter<HitConfirmEvent>,
+    mut mes_writer: MessageWriter<HitConfirmMessage>,
     children_query: Query<&Children>,
     player_id: Single<Entity, With<Player>>,
     mut bullet_query: Query<(&mut Transform, &mut Bullet, Entity)>,
@@ -99,7 +99,7 @@ pub fn bullet_controller(
         ) {
             commands.entity(bullet_entity).despawn();
 
-            event_writer.write(HitConfirmEvent {
+            mes_writer.write(HitConfirmMessage {
                 hit_entity: hit.entity,
                 hit_normal: hit.normal,
             });
@@ -114,7 +114,7 @@ pub fn bullet_controller(
         }
 
         bullet_promp.bullet_lifetime.tick(time.delta());
-        if bullet_promp.bullet_lifetime.finished() {
+        if bullet_promp.bullet_lifetime.is_finished() {
             commands.entity(bullet_entity).despawn();
         }
     }

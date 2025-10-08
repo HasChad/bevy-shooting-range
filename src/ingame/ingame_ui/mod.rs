@@ -11,8 +11,8 @@ use ui::*;
 
 use crate::ingame::PlayableState;
 
-#[derive(Event)]
-pub struct HitmarkerEvent;
+#[derive(Message)]
+pub struct HitmarkerMessage;
 
 pub struct IngameUIPlugin;
 
@@ -40,7 +40,7 @@ impl Plugin for IngameUIPlugin {
                 ),
             )
             // events
-            .add_event::<HitmarkerEvent>()
+            .add_message::<HitmarkerMessage>()
             // resources
             .init_resource::<CrosshairLineSettings>();
     }

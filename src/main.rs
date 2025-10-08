@@ -3,10 +3,9 @@
 use avian3d::prelude::*;
 use bevy::{
     diagnostic::FrameTimeDiagnosticsPlugin, input::common_conditions::input_toggle_active,
-    prelude::*, window::WindowMode,
+    prelude::*,
 };
 use bevy_inspector_egui::{bevy_egui::EguiPlugin, quick::WorldInspectorPlugin};
-use bevy_kira_audio::prelude::*;
 
 pub mod ingame;
 
@@ -19,7 +18,7 @@ fn main() {
                 .set(WindowPlugin {
                     primary_window: Some(Window {
                         title: "Bevy Shooting Range".into(),
-                        mode: WindowMode::Windowed,
+
                         ..default()
                     }),
                     ..default()
@@ -27,7 +26,6 @@ fn main() {
                 .build(),
         )
         //plugins
-        .add_plugins(AudioPlugin)
         .add_plugins(FrameTimeDiagnosticsPlugin::default())
         .add_plugins(PhysicsPlugins::default())
         .add_plugins(PhysicsDebugPlugin::default())

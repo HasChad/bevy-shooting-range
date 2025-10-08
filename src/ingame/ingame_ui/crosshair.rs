@@ -2,7 +2,7 @@ use bevy::{color::palettes::css::WHITE, prelude::*};
 use rand::random_range;
 use std::f32::consts::PI;
 
-use super::HitmarkerEvent;
+use crate::ingame::ingame_ui::HitmarkerMessage;
 
 #[derive(Component)]
 pub struct HitMarker {
@@ -44,6 +44,7 @@ pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<Crosshair
                 justify_self: JustifySelf::Center,
                 ..default()
             },
+            Transform::from_translation(Vec3::ZERO),
             BackgroundColor(crosshair_settings.color),
             crosshair_settings.enable,
             ZIndex(2),
@@ -53,11 +54,15 @@ pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<Crosshair
         //MARK: Horizontal Lines
         .with_children(|parent| {
             parent
-                .spawn(Node {
-                    align_self: AlignSelf::Center,
-                    justify_self: JustifySelf::Center,
-                    ..default()
-                })
+                .spawn((
+                    Node {
+                        align_self: AlignSelf::Center,
+                        justify_self: JustifySelf::Center,
+                        ..default()
+                    },
+                    Transform::from_translation(Vec3::ZERO),
+                    Name::new("Horizontal Lines"),
+                ))
                 .with_children(|parent| {
                     //Left Line
                     parent.spawn((
@@ -108,6 +113,7 @@ pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<Crosshair
                         ..default()
                     },
                     Transform::from_rotation(Quat::from_rotation_z(PI / 2.)),
+                    Name::new("Vertical Lines"),
                 ))
                 .with_children(|parent| {
                     //Top Line
@@ -127,7 +133,7 @@ pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<Crosshair
                         },
                         CrosshairLine,
                         BackgroundColor(WHITE.into()),
-                        Name::new("Left Line"),
+                        Name::new("Top Line"),
                     ));
 
                     //Bottom Line
@@ -146,15 +152,15 @@ pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<Crosshair
                         },
                         CrosshairLine,
                         BackgroundColor(WHITE.into()),
-                        Name::new("Right Line"),
+                        Name::new("Bottom Line"),
                     ));
                 });
         });
 }
 
 //MARK: Hitmarker
-pub fn hitmarker_spawner(mut commands: Commands, mut event_reader: EventReader<HitmarkerEvent>) {
-    for _event in event_reader.read() {
+pub fn hitmarker_spawner(mut commands: Commands, mut mes_reader: MessageReader<HitmarkerMessage>) {
+    for _ in mes_reader.read() {
         commands
             .spawn((
                 Node {
@@ -244,7 +250,7 @@ pub fn hitmarker_controller(
     for (mut hitmarker_promp, hitmarker_entity) in hitmarker_query.iter_mut() {
         hitmarker_promp.hitmarker_lifetime.tick(time.delta());
 
-        if hitmarker_promp.hitmarker_lifetime.finished() {
+        if hitmarker_promp.hitmarker_lifetime.is_finished() {
             commands.entity(hitmarker_entity).despawn();
         }
     }

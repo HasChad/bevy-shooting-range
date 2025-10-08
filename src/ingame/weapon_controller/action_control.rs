@@ -2,7 +2,7 @@
 
 use bevy::prelude::*;
 
-use super::{Weapon, WeaponActionState, WeaponReloadingEvent, WeaponShootingEvent};
+use super::{Weapon, WeaponActionState, WeaponReloadingMessage, WeaponShootingMessage};
 use crate::ingame::KeyBindings;
 
 pub fn weapon_input_controller(
@@ -11,8 +11,8 @@ pub fn weapon_input_controller(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut weapon: Single<&mut Weapon>,
     mut next_weapon_action_state: ResMut<NextState<WeaponActionState>>,
-    mut shot_event_writer: EventWriter<WeaponShootingEvent>,
-    mut reload_event_writer: EventWriter<WeaponReloadingEvent>,
+    mut shot_mes_writer: MessageWriter<WeaponShootingMessage>,
+    mut reload_mes_writer: MessageWriter<WeaponReloadingMessage>,
 ) {
     //shoot
     if ((mouse_input.just_pressed(key_bindings.fire) && !weapon.is_auto)
@@ -20,7 +20,7 @@ pub fn weapon_input_controller(
         && weapon.mag_count > 0
     {
         weapon.mag_count -= 1;
-        shot_event_writer.write(WeaponShootingEvent);
+        shot_mes_writer.write(WeaponShootingMessage);
         next_weapon_action_state.set(WeaponActionState::Shoot);
     }
 
@@ -29,7 +29,7 @@ pub fn weapon_input_controller(
         && weapon.ammo_count > 0
         && weapon.mag_count < weapon.mag_capacity
     {
-        reload_event_writer.write(WeaponReloadingEvent);
+        reload_mes_writer.write(WeaponReloadingMessage);
         next_weapon_action_state.set(WeaponActionState::Reload);
     }
 }
@@ -41,7 +41,7 @@ pub fn firerate_timer(
 ) {
     weapon.firerate.tick(time.delta());
 
-    if weapon.firerate.finished() {
+    if weapon.firerate.is_finished() {
         weapon.firerate.reset();
         next_state.set(WeaponActionState::Ready);
     }
@@ -54,7 +54,7 @@ pub fn reload_timer(
 ) {
     weapon.reload_timer.tick(time.delta());
 
-    if weapon.reload_timer.finished() {
+    if weapon.reload_timer.is_finished() {
         weapon.reload_timer.reset();
 
         if weapon.ammo_count + weapon.mag_count >= weapon.mag_capacity {

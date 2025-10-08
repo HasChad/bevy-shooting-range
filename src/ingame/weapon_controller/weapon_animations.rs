@@ -1,8 +1,7 @@
 use bevy::prelude::*;
-use bevy_kira_audio::{Audio, AudioControl};
 use std::time::Duration;
 
-use super::{WeaponReloadingEvent, WeaponShootingEvent, WeaponState};
+use super::{WeaponReloadingMessage, WeaponShootingMessage, WeaponState};
 
 #[derive(Resource)]
 pub struct P226Animations {
@@ -69,27 +68,28 @@ pub fn weapon_animation_setup(
 }
 
 pub fn weapon_animation_player(
-    mut shot_event_reader: EventReader<WeaponShootingEvent>,
-    mut reload_event_reader: EventReader<WeaponReloadingEvent>,
+    mut shot_mes_reader: MessageReader<WeaponShootingMessage>,
+    mut reload_mes_reader: MessageReader<WeaponReloadingMessage>,
     mut animation_players: Query<(&mut AnimationPlayer, &mut AnimationTransitions)>,
 ) {
     for (mut player, mut transitions) in &mut animation_players {
-        for _event in shot_event_reader.read() {
+        for _ in shot_mes_reader.read() {
             transitions.play(&mut player, AnimationNodeIndex::new(1), Duration::ZERO);
         }
 
-        for _event in reload_event_reader.read() {
+        for _ in reload_mes_reader.read() {
             transitions.play(&mut player, AnimationNodeIndex::new(2), Duration::ZERO);
         }
     }
 }
 
+/*
 pub fn weapon_sounds(
     audio: Res<Audio>,
     asset_server: Res<AssetServer>,
     weapon_state: Res<State<WeaponState>>,
-    mut shot_event_reader: EventReader<WeaponShootingEvent>,
-    mut reload_event_reader: EventReader<WeaponReloadingEvent>,
+    mut shot_event_reader: MessageReader<WeaponShootingMessage>,
+    mut reload_event_reader: MessageReader<WeaponReloadingMessage>,
 ) {
     // shooting sound
     for _event in shot_event_reader.read() {
@@ -110,3 +110,4 @@ pub fn weapon_sounds(
     // raising sound
     // lowering sound
 }
+*/

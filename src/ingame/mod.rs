@@ -1,5 +1,8 @@
 use avian3d::prelude::{Physics, PhysicsTime};
-use bevy::{prelude::*, window::CursorGrabMode};
+use bevy::{
+    prelude::*,
+    window::{CursorGrabMode, CursorOptions},
+};
 
 pub mod ingame_setup;
 pub mod ingame_ui;
@@ -58,7 +61,7 @@ impl Plugin for InGamePlugin {
 pub fn edit_mode_toggler(
     mut time: ResMut<Time<Physics>>,
     key_bindings: Res<KeyBindings>,
-    mut window: Single<&mut Window>,
+    mut cursor_options: Single<&mut CursorOptions>,
     input: ResMut<ButtonInput<KeyCode>>,
     state: Res<State<PlayableState>>,
     mut next_state: ResMut<NextState<PlayableState>>,
@@ -68,20 +71,15 @@ pub fn edit_mode_toggler(
             PlayableState::Action => {
                 next_state.set(PlayableState::Menu);
                 time.pause();
-                window.cursor_options.visible = true;
-                window.cursor_options.grab_mode = CursorGrabMode::None;
+                cursor_options.visible = true;
+                cursor_options.grab_mode = CursorGrabMode::None;
             }
             PlayableState::Menu => {
                 next_state.set(PlayableState::Action);
                 time.unpause();
-                window.cursor_options.visible = false;
-                window.cursor_options.grab_mode = CursorGrabMode::Locked;
+                cursor_options.visible = false;
+                cursor_options.grab_mode = CursorGrabMode::Locked;
             }
         }
-    }
-
-    if *state.get() == PlayableState::Action {
-        let center = Vec2::new(window.width() / 2.0, window.height() / 2.0);
-        window.set_cursor_position(Some(center));
     }
 }

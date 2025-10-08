@@ -1,11 +1,10 @@
 use avian3d::prelude::*;
 use bevy::{prelude::*, time::Stopwatch};
-use bevy_kira_audio::prelude::*;
 use rand::random_range;
 
 use crate::{
-    ingame::{weapons::Weapon, HitConfirmEvent},
-    ingame_ui::HitmarkerEvent,
+    ingame::{weapons::Weapon, HitConfirmMessage},
+    ingame_ui::HitmarkerMessage,
 };
 
 #[derive(Component)]
@@ -24,33 +23,28 @@ pub struct EnemyTargetHostage {
     health: i8,
 }
 
-#[derive(Event)]
-pub struct CircleTargetEvent {
+#[derive(Message)]
+pub struct CircleTargetMessage {
     entity: Entity,
 }
 
 pub fn hit_detector(
-    audio: Res<Audio>,
     query: Query<&Name>,
-    asset_server: Res<AssetServer>,
-    mut event_reader: EventReader<HitConfirmEvent>,
-    mut circletarget_event_writer: EventWriter<CircleTargetEvent>,
-    mut hitmarker_event_writer: EventWriter<HitmarkerEvent>,
+    mut mes_reader: MessageReader<HitConfirmMessage>,
+    mut circletarget_mes_writer: MessageWriter<CircleTargetMessage>,
+    mut hitmarker_mes_writer: MessageWriter<HitmarkerMessage>,
     parent_query: Query<&ChildOf>,
 ) {
-    for event in event_reader.read() {
-        let hit_entity_name = query.get(event.hit_entity).unwrap().as_str();
+    for mes in mes_reader.read() {
+        let hit_entity_name = query.get(mes.hit_entity).unwrap().as_str();
 
         if hit_entity_name == "Cylinder" {
-            let ancestor = parent_query
-                .iter_ancestors(event.hit_entity)
-                .last()
-                .unwrap();
+            let ancestor = parent_query.iter_ancestors(mes.hit_entity).last().unwrap();
 
-            circletarget_event_writer.write(CircleTargetEvent { entity: ancestor });
+            circletarget_mes_writer.write(CircleTargetMessage { entity: ancestor });
 
-            hitmarker_event_writer.write(HitmarkerEvent);
-            audio.play(asset_server.load("sounds/hitmarker.ogg"));
+            hitmarker_mes_writer.write(HitmarkerMessage);
+            // audio.play(asset_server.load("sounds/hitmarker.ogg"));
         }
     }
 }
@@ -90,17 +84,17 @@ pub fn target_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 pub fn circle_target_controller(
-    mut event_reader: EventReader<CircleTargetEvent>,
+    mut mes_reader: MessageReader<CircleTargetMessage>,
     mut circletarget_query: Query<(&mut Transform, &mut CircleTarget, Entity)>,
 ) {
-    for event in event_reader.read() {
+    for mes in mes_reader.read() {
         for (mut circletarget_transform, mut circletarget_prop, circletarget_entity) in
             circletarget_query.iter_mut()
         {
-            info!("{:?}", event.entity);
+            info!("{:?}", mes.entity);
             info!("{:?}", circletarget_entity);
 
-            if event.entity == circletarget_entity {
+            if mes.entity == circletarget_entity {
                 let old_position = circletarget_transform.translation.x;
                 if circletarget_prop.hit_counter < 30 {
                     circletarget_prop.hit_counter += 1;
@@ -115,13 +109,13 @@ pub fn circle_target_controller(
 
 pub fn enemy_target_controller(
     mut commands: Commands,
-    mut event_reader: EventReader<HitConfirmEvent>,
+    mut mes_reader: MessageReader<HitConfirmMessage>,
     mut enemytarget_query: Query<(&mut EnemyTarget, Entity)>,
     weapon_promp: Single<&Weapon>,
     query: Query<&Name>,
 ) {
-    for event in event_reader.read() {
-        match query.get(event.hit_entity).unwrap().as_str() {
+    for mes in mes_reader.read() {
+        match query.get(mes.hit_entity).unwrap().as_str() {
             "silhouette-target-head" => {
                 for (mut enemytarget_prop, _) in &mut enemytarget_query {
                     enemytarget_prop.health -= weapon_promp.head_damage as i8;
@@ -147,13 +141,13 @@ pub fn enemy_target_controller(
 
 pub fn enemy_target_hostage_controller(
     mut commands: Commands,
-    mut event_reader: EventReader<HitConfirmEvent>,
+    mut mes_reader: MessageReader<HitConfirmMessage>,
     mut enemytargethostage_query: Query<(&mut EnemyTargetHostage, Entity)>,
     weapon_promp: Single<&Weapon>,
     query: Query<&Name>,
 ) {
-    for event in event_reader.read() {
-        match query.get(event.hit_entity).unwrap().as_str() {
+    for mes in mes_reader.read() {
+        match query.get(mes.hit_entity).unwrap().as_str() {
             "silhouette-target-gun-head" => {
                 for (mut enemytargethostage_prop, _) in &mut enemytargethostage_query {
                     enemytargethostage_prop.health -= weapon_promp.head_damage as i8;

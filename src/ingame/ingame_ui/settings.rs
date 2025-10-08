@@ -1,9 +1,11 @@
-use bevy::{prelude::*, window::CursorGrabMode};
+use bevy::{
+    prelude::*,
+    window::{CursorGrabMode, CursorOptions},
+};
 use bevy_inspector_egui::{
     bevy_egui::{egui, EguiContext, PrimaryEguiContext},
     egui::{Align2, Color32, RichText, Slider},
 };
-use bevy_kira_audio::{Audio, AudioControl};
 use std::f32::consts::PI;
 
 use super::{CrosshairLine, CrosshairLineSettings};
@@ -78,10 +80,9 @@ pub fn despawn_bg(
 }
 
 pub fn egui_settings(
-    audio: Res<Audio>,
-    mut window: Single<&mut Window>,
     mut next_state: ResMut<NextState<PlayableState>>,
-    mut exit: EventWriter<AppExit>,
+    mut exit: MessageWriter<AppExit>,
+    mut cursor_options: Single<&mut CursorOptions>,
     mut egui_context: Single<&mut EguiContext, With<PrimaryEguiContext>>,
     mut settings: ResMut<GameSettings>,
     mut camera_query: Single<&mut Projection, With<Camera3d>>,
@@ -222,6 +223,7 @@ pub fn egui_settings(
                     ui.end_row();
                     ui.end_row();
 
+                    /*
                     //Audio Settings
                     ui.heading(RichText::new("- Audio Settings -").color(Color32::WHITE));
                     ui.end_row();
@@ -239,6 +241,7 @@ pub fn egui_settings(
                     }
                     ui.end_row();
                     ui.end_row();
+                    */
 
                     //Quit
                     ui.heading(RichText::new("- Quit Game -").color(Color32::WHITE));
@@ -250,8 +253,8 @@ pub fn egui_settings(
                         }
 
                         if ui.button("Resume").clicked() {
-                            window.cursor_options.grab_mode = CursorGrabMode::Confined;
-                            window.cursor_options.visible = false;
+                            cursor_options.grab_mode = CursorGrabMode::Confined;
+                            cursor_options.visible = false;
                             next_state.set(PlayableState::Action)
                         }
                         ui.end_row();

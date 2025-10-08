@@ -16,14 +16,14 @@ use weapons::*;
 
 use super::PlayableState;
 
-#[derive(Event)]
-pub struct WeaponShootingEvent;
+#[derive(Message)]
+pub struct WeaponShootingMessage;
 
-#[derive(Event)]
-pub struct WeaponReloadingEvent;
+#[derive(Message)]
+pub struct WeaponReloadingMessage;
 
-#[derive(Event)]
-pub struct HitConfirmEvent {
+#[derive(Message)]
+pub struct HitConfirmMessage {
     pub hit_entity: Entity,
     pub hit_normal: Vec3,
 }
@@ -55,7 +55,7 @@ impl Plugin for WeaponControllerPlugin {
                     sway_weapon.run_if(in_state(WeaponAimState::HipFire)),
                     scoped_sway_weapon.run_if(in_state(WeaponAimState::Scope)),
                 ),
-                weapon_sounds,
+                //weapon_sounds,
                 spawn_bullet,
                 // action system
                 firerate_timer.run_if(in_state(WeaponActionState::Shoot)),
@@ -71,15 +71,15 @@ impl Plugin for WeaponControllerPlugin {
             FixedUpdate,
             bullet_controller.run_if(in_state(PlayableState::Action)),
         )
-        //resources
+        // resources
         .init_resource::<WeaponRes>()
-        //states
+        // states
         .init_state::<WeaponActionState>()
         .init_state::<WeaponAimState>()
         .init_state::<WeaponState>()
-        //events
-        .add_event::<WeaponShootingEvent>()
-        .add_event::<WeaponReloadingEvent>()
-        .add_event::<HitConfirmEvent>();
+        // messages
+        .add_message::<WeaponShootingMessage>()
+        .add_message::<WeaponReloadingMessage>()
+        .add_message::<HitConfirmMessage>();
     }
 }

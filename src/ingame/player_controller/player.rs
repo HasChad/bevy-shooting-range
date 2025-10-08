@@ -1,5 +1,7 @@
 use avian3d::prelude::*;
-use bevy::{core_pipeline::bloom::Bloom, pbr::ScreenSpaceAmbientOcclusion, prelude::*};
+use bevy::{
+    pbr::ScreenSpaceAmbientOcclusion, post_process::bloom::Bloom, prelude::*, render::view::Hdr,
+};
 use std::f32::consts::PI;
 
 use crate::ingame::{weapons::Weapon, GameSettings};
@@ -62,10 +64,7 @@ pub fn player_setup(
     commands
         .spawn((
             Camera3d::default(),
-            Camera {
-                hdr: true, // HDR is required for the bloom effect
-                ..default()
-            },
+            Hdr,
             ScreenSpaceAmbientOcclusion::default(),
             Msaa::Off,
             Projection::Perspective(PerspectiveProjection {

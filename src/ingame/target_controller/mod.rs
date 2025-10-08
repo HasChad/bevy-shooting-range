@@ -20,6 +20,6 @@ impl Plugin for TargetControllerPlugin {
                 ),
             )
             //events
-            .add_event::<CircleTargetEvent>();
+            .add_message::<CircleTargetMessage>();
     }
 }
