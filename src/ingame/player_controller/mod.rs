@@ -61,16 +61,19 @@ impl Plugin for PlayerControllerPlugin {
                 FixedUpdate,
                 (
                     player_move,
-                    ground_check,
-                    // kinematic_controller_collisions.after(player_move),
+                    apply_gravity,
+                    kinematic_controller_collisions
+                        .after(player_move)
+                        .after(apply_gravity),
                 )
                     .run_if(in_state(PlayableState::Action)),
             )
             .add_systems(
                 PostUpdate,
-                camera_follow_player.after(player_move),
-                //.after(PhysicsSet::Sync)
-                //.before(TransformSystem::TransformPropagate),
+                camera_follow_player
+                    .after(player_move)
+                    .after(PhysicsSystems::Writeback)
+                    .before(TransformSystems::Propagate),
             )
             //resources
             .init_resource::<KeyBindings>();

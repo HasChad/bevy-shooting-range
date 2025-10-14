@@ -43,9 +43,8 @@ pub fn player_setup(
                 on_ground: true,
             },
             RigidBody::Kinematic,
-            Collider::capsule(0.25, 0.5),
-            Sensor,
-            Transform::from_xyz(0.0, 2.0, 0.0),
+            Collider::cylinder(0.25, 1.0),
+            Transform::from_xyz(0.0, 0.5, 0.0),
             TransformInterpolation,
             Name::new("Player"),
         ))
@@ -55,9 +54,8 @@ pub fn player_setup(
         GroundChecker,
         RayCaster::new(Vec3::ZERO, Dir3::NEG_Y)
             .with_query_filter(SpatialQueryFilter::from_excluded_entities([player_entity]))
-            .with_max_hits(1)
-            .with_max_distance(0.505)
-            .with_solidness(false),
+            .with_max_hits(2)
+            .with_max_distance(0.505),
         Name::new("Ground Checker"),
     ));
 

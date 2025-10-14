@@ -248,7 +248,10 @@ pub fn egui_settings(
                     ui.end_row();
 
                     ui.horizontal_centered(|ui| {
-                        if ui.button("Quit").clicked() {
+                        if ui
+                            .button(RichText::new("Quit").color(Color32::RED))
+                            .clicked()
+                        {
                             exit.write(AppExit::Success);
                         }
 
