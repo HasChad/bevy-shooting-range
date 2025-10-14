@@ -33,30 +33,19 @@ pub fn player_setup(
     asset_server: Res<AssetServer>,
     settings: Res<GameSettings>,
 ) {
-    let player_entity = commands
-        .spawn((
-            Player {
-                fmove: 0,
-                smove: 0,
-                jump: false,
-                walk: false,
-                on_ground: true,
-            },
-            RigidBody::Kinematic,
-            Collider::cylinder(0.25, 1.0),
-            Transform::from_xyz(0.0, 0.5, 0.0),
-            TransformInterpolation,
-            Name::new("Player"),
-        ))
-        .id();
-
-    commands.entity(player_entity).with_child((
-        GroundChecker,
-        RayCaster::new(Vec3::ZERO, Dir3::NEG_Y)
-            .with_query_filter(SpatialQueryFilter::from_excluded_entities([player_entity]))
-            .with_max_hits(2)
-            .with_max_distance(0.505),
-        Name::new("Ground Checker"),
+    commands.spawn((
+        Player {
+            fmove: 0,
+            smove: 0,
+            jump: false,
+            walk: false,
+            on_ground: true,
+        },
+        RigidBody::Kinematic,
+        Collider::cylinder(0.25, 1.0),
+        Transform::from_xyz(0.0, 0.5, 0.0),
+        TransformInterpolation,
+        Name::new("Player"),
     ));
 
     commands

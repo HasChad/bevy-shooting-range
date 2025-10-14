@@ -6,14 +6,14 @@ use bevy::prelude::*;
 use std::f32::consts::PI;
 
 use super::{player::Player, KeyBindings};
-use crate::ingame::{player::Head, player_controller::player::GroundChecker};
+use crate::ingame::player::Head;
 
 const PLAYER_SPEED: f32 = 5.0;
 const PLAYER_ACCEL: f32 = 0.5;
 const WALK_SPEED: f32 = 2.0;
 const WALK_ACCEL: f32 = 0.3;
 const FRICTION: f32 = 0.2;
-const GRAVITY: f32 = 0.3;
+const GRAVITY: f32 = 0.5;
 
 pub fn player_position_reset(
     key_input: Res<ButtonInput<KeyCode>>,
@@ -116,142 +116,151 @@ pub fn kinematic_controller_collisions(
     mut player_query: Query<(&mut Position, &mut LinearVelocity), With<Player>>,
 ) {
     for contact_pair in cg.contact_pairs_with(*player_entity) {
-        let cp1 = contact_pair.collider1;
-        let cp2 = contact_pair.collider2;
+        if contact_pair.is_touching() {
+            let cp1 = contact_pair.collider1;
+            let cp2 = contact_pair.collider2;
 
-        let is_first: bool;
-        let is_other_dynamic: bool;
+            let is_first: bool;
+            let is_other_dynamic: bool;
 
-        let (mut position, mut lin_vel) = if let Ok(character) = player_query.get_mut(cp1) {
-            is_first = true;
-            is_other_dynamic = bodies.get(cp2).is_ok_and(|rb| rb.is_dynamic());
-            character
-        } else if let Ok(character) = player_query.get_mut(cp2) {
-            is_first = false;
-            is_other_dynamic = bodies.get(cp1).is_ok_and(|rb| rb.is_dynamic());
-            character
-        } else {
-            continue;
-        };
-
-        for manifold in contact_pair.manifolds.iter() {
-            let normal = if is_first {
-                -manifold.normal
+            let (mut position, mut lin_vel) = if let Ok(character) = player_query.get_mut(cp1) {
+                is_first = true;
+                is_other_dynamic = bodies.get(cp2).is_ok_and(|rb| rb.is_dynamic());
+                character
+            } else if let Ok(character) = player_query.get_mut(cp2) {
+                is_first = false;
+                is_other_dynamic = bodies.get(cp1).is_ok_and(|rb| rb.is_dynamic());
+                character
             } else {
-                manifold.normal
+                continue;
             };
 
-            let mut deepest_penetration: Scalar = Scalar::MIN;
-
-            let mut auto_step: Option<f32> = None;
-
-            // Solve each penetrating contact in the manifold.
-            for contact in manifold.points.iter() {
-                let point = if is_first {
-                    contact.anchor1
+            for manifold in contact_pair.manifolds.iter() {
+                let normal = if is_first {
+                    -manifold.normal
                 } else {
-                    contact.anchor2
+                    manifold.normal
                 };
 
-                if point.y < -0.25 && point.y > -0.5 {
-                    //info!("point y = {}", point.y);
-                    if let Some(pt) = auto_step {
-                        if pt < point.y {
+                let mut deepest_penetration: Scalar = Scalar::MIN;
+
+                let mut auto_step: Option<f32> = None;
+
+                // Solve each penetrating contact in the manifold.
+                for contact in manifold.points.iter() {
+                    let mut point = if is_first {
+                        contact.anchor1
+                    } else {
+                        contact.anchor2
+                    };
+
+                    if point.y < -0.5 {
+                        point.y = -0.5
+                    }
+
+                    info!("point y = {}", point.y);
+
+                    if point.y < -0.25 {
+                        lin_vel.y = 0.0;
+                    }
+
+                    if point.y < -0.25 && point.y > -0.5 {
+                        if let Some(pt) = auto_step {
+                            if pt < point.y {
+                                auto_step = Some(point.y);
+                            }
+                        } else {
                             auto_step = Some(point.y);
                         }
                     } else {
-                        auto_step = Some(point.y);
+                        auto_step = None;
                     }
-                } else {
-                    auto_step = None;
+
+                    deepest_penetration = deepest_penetration.max(contact.penetration);
                 }
 
-                deepest_penetration = deepest_penetration.max(contact.penetration);
-            }
-
-            // For now, this system only handles velocity corrections for collisions against static geometry.
-            if is_other_dynamic {
-                continue;
-            }
-
-            // Determine if the slope is climbable or if it's too steep to walk on.
-            let max_slope_angle: Scalar = PI * 0.25;
-            let slope_angle = normal.angle_between(Vector::Y);
-            let climbable = slope_angle.abs() <= max_slope_angle;
-
-            if deepest_penetration > 0.0 {
-                if climbable {
-                    lin_vel.y = 0.0;
-                    if let Some(height) = auto_step {
-                        position.y += 0.5 + height;
-                    }
-
-                    // Points in the normal's direction in the XZ plane.
-                    let normal_direction_xz =
-                        normal.reject_from_normalized(Vector::Y).normalize_or_zero();
-
-                    // info!("test = {}", normal_direction_xz);
-
-                    // The movement speed along the direction above.
-                    // let linear_velocity_xz = lin_vel.dot(normal_direction_xz);
-                    // let max_y_speed = -linear_velocity_xz * slope_angle.tan();
-                    // lin_vel.y = lin_vel.y.max(max_y_speed);
-                } else {
-                    if let Some(height) = auto_step {
-                        lin_vel.y = 0.0;
-
-                        info!("pos y = {}", position.y);
-
-                        if height < -0.45 {
-                            position.y += 0.5 + height;
-                        } else {
-                            position.y += (0.5 + height) / 2.0;
-                        }
-                    } else {
-                        position.0 += normal * deepest_penetration;
-
-                        // Don't apply an impulse if the character is moving away from the surface.
-                        if lin_vel.dot(normal) > 0.0 {
-                            continue;
-                        }
-
-                        // Slide along the surface, rejecting the velocity along the contact normal.
-                        //let impulse = lin_vel.reject_from_normalized(normal);
-                        //lin_vel.0 = impulse;
-                    }
-                }
-            }
-
-            /*
-            else {
-                // The character is not yet intersecting the other object,
-                // but the narrow phase detected a speculative collision.
-                //
-                // We need to push back the part of the velocity
-                // that would cause penetration within the next frame.
-
-                let normal_speed = lin_vel.dot(normal);
-
-                // Don't apply an impulse if the character is moving away from the surface.
-                if normal_speed > 0.0 {
+                // For now, this system only handles velocity corrections for collisions against static geometry.
+                if is_other_dynamic {
                     continue;
                 }
 
-                // Compute the impulse to apply.
-                let impulse_magnitude = normal_speed - (deepest_penetration / time.delta_secs());
-                let mut impulse = impulse_magnitude * normal;
+                // Determine if the slope is climbable or if it's too steep to walk on.
+                let max_slope_angle: Scalar = PI * 0.25;
+                let slope_angle = normal.angle_between(Vector::Y);
+                let climbable = slope_angle.abs() <= max_slope_angle;
 
-                // Apply the impulse differently depending on the slope angle.
-                if climbable {
-                    // Avoid sliding down slopes.
-                    lin_vel.y -= impulse.y.min(0.0);
-                } else {
-                    // Avoid climbing up walls.
-                    impulse.y = impulse.y.max(0.0);
-                    lin_vel.0 -= impulse;
+                if deepest_penetration > 0.0 {
+                    if climbable {
+                        if let Some(height) = auto_step {
+                            position.y += 0.5 + height;
+                        }
+
+                        // Points in the normal's direction in the XZ plane.
+                        //let normal_direction_xz = normal.reject_from_normalized(Vector::Y).normalize_or_zero();
+                        // info!("test = {}", normal_direction_xz);
+                        // The movement speed along the direction above.
+                        // let linear_velocity_xz = lin_vel.dot(normal_direction_xz);
+                        // let max_y_speed = -linear_velocity_xz * slope_angle.tan();
+                        // lin_vel.y = lin_vel.y.max(max_y_speed);
+                    }
+                    /*else {
+                            if let Some(height) = auto_step {
+                                lin_vel.y = 0.0;
+
+                                info!("pos y = {}", position.y);
+
+                                if height < -0.45 {
+                                    position.y += 0.5 + height;
+                                } else {
+                                    position.y += (0.5 + height) / 2.0;
+                                }
+                            } else {
+                                position.0 += normal * deepest_penetration;
+
+                                // Don't apply an impulse if the character is moving away from the surface.
+                                if lin_vel.dot(normal) > 0.0 {
+                                    continue;
+                                }
+
+                                // Slide along the surface, rejecting the velocity along the contact normal.
+                                //let impulse = lin_vel.reject_from_normalized(normal);
+                                //lin_vel.0 = impulse;
+                            }
+                        }
+                    */
                 }
+
+                /*
+                else {
+                    // The character is not yet intersecting the other object,
+                    // but the narrow phase detected a speculative collision.
+                    //
+                    // We need to push back the part of the velocity
+                    // that would cause penetration within the next frame.
+
+                    let normal_speed = lin_vel.dot(normal);
+
+                    // Don't apply an impulse if the character is moving away from the surface.
+                    if normal_speed > 0.0 {
+                        continue;
+                    }
+
+                    // Compute the impulse to apply.
+                    let impulse_magnitude = normal_speed - (deepest_penetration / time.delta_secs());
+                    let mut impulse = impulse_magnitude * normal;
+
+                    // Apply the impulse differently depending on the slope angle.
+                    if climbable {
+                        // Avoid sliding down slopes.
+                        lin_vel.y -= impulse.y.min(0.0);
+                    } else {
+                        // Avoid climbing up walls.
+                        impulse.y = impulse.y.max(0.0);
+                        lin_vel.0 -= impulse;
+                    }
+                }
+                 */
             }
-             */
         }
     }
 }
