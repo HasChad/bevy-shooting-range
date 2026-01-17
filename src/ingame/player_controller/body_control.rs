@@ -158,8 +158,6 @@ pub fn kinematic_controller_collisions(
                         point.y = -0.5
                     }
 
-                    info!("point y = {}", point.y);
-
                     if point.y < -0.25 {
                         lin_vel.y = 0.0;
                     }
