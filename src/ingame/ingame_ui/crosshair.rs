@@ -1,13 +1,4 @@
 use bevy::{color::palettes::css::WHITE, prelude::*};
-use rand::random_range;
-use std::f32::consts::PI;
-
-use crate::ingame::ingame_ui::HitmarkerMessage;
-
-#[derive(Component)]
-pub struct HitMarker {
-    hitmarker_lifetime: Timer,
-}
 
 #[derive(Component)]
 pub struct CrossParent;
@@ -44,7 +35,7 @@ pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<Crosshair
                 justify_self: JustifySelf::Center,
                 ..default()
             },
-            Transform::from_translation(Vec3::ZERO),
+            UiTransform::from_translation(Val2::ZERO),
             BackgroundColor(crosshair_settings.color),
             crosshair_settings.enable,
             ZIndex(2),
@@ -60,7 +51,7 @@ pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<Crosshair
                         justify_self: JustifySelf::Center,
                         ..default()
                     },
-                    Transform::from_translation(Vec3::ZERO),
+                    UiTransform::from_translation(Val2::ZERO),
                     Name::new("Horizontal Lines"),
                 ))
                 .with_children(|parent| {
@@ -112,7 +103,7 @@ pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<Crosshair
                         justify_self: JustifySelf::Center,
                         ..default()
                     },
-                    Transform::from_rotation(Quat::from_rotation_z(PI / 2.)),
+                    UiTransform::from_rotation(Rot2::degrees(90.0)),
                     Name::new("Vertical Lines"),
                 ))
                 .with_children(|parent| {
@@ -156,102 +147,4 @@ pub fn crosshair_setup(mut commands: Commands, crosshair_settings: Res<Crosshair
                     ));
                 });
         });
-}
-
-//MARK: Hitmarker
-pub fn hitmarker_spawner(mut commands: Commands, mut mes_reader: MessageReader<HitmarkerMessage>) {
-    for _ in mes_reader.read() {
-        commands
-            .spawn((
-                Node {
-                    align_self: AlignSelf::Center,
-                    justify_self: JustifySelf::Center,
-
-                    ..default()
-                },
-                Transform::from_rotation(Quat::from_rotation_z(PI / random_range(3.5..4.5))),
-                HitMarker {
-                    hitmarker_lifetime: Timer::from_seconds(0.1, TimerMode::Once),
-                },
-            ))
-            .with_children(|parent| {
-                parent.spawn((
-                    Node {
-                        position_type: PositionType::Absolute,
-                        height: Val::Px(10.0),
-                        width: Val::Px(2.0),
-                        align_self: AlignSelf::Center,
-                        justify_self: JustifySelf::Center,
-                        margin: UiRect {
-                            left: Val::Px(-1.0),
-                            top: Val::Px(-20.0),
-                            ..default()
-                        },
-
-                        ..default()
-                    },
-                    BackgroundColor(Color::WHITE),
-                ));
-                parent.spawn((
-                    Node {
-                        position_type: PositionType::Absolute,
-                        height: Val::Px(10.0),
-                        width: Val::Px(2.0),
-                        align_self: AlignSelf::Center,
-                        justify_self: JustifySelf::Center,
-                        margin: UiRect {
-                            left: Val::Px(-1.0),
-                            top: Val::Px(20.0),
-                            ..default()
-                        },
-                        ..default()
-                    },
-                    BackgroundColor(Color::WHITE),
-                ));
-                parent.spawn((
-                    Node {
-                        position_type: PositionType::Absolute,
-                        height: Val::Px(2.0),
-                        width: Val::Px(10.0),
-                        align_self: AlignSelf::Center,
-                        justify_self: JustifySelf::Center,
-                        margin: UiRect {
-                            left: Val::Px(-15.0),
-                            ..default()
-                        },
-                        ..default()
-                    },
-                    BackgroundColor(Color::WHITE),
-                ));
-                parent.spawn((
-                    Node {
-                        position_type: PositionType::Absolute,
-                        height: Val::Px(2.0),
-                        width: Val::Px(10.0),
-                        align_self: AlignSelf::Center,
-                        justify_self: JustifySelf::Center,
-                        margin: UiRect {
-                            left: Val::Px(5.0),
-                            ..default()
-                        },
-                        ..default()
-                    },
-                    BackgroundColor(Color::WHITE),
-                ));
-            });
-    }
-}
-
-pub fn hitmarker_controller(
-    mut commands: Commands,
-    mut hitmarker_query: Query<(&mut HitMarker, Entity)>,
-    time: Res<Time>,
-) {
-    for (mut hitmarker_promp, hitmarker_entity) in hitmarker_query.iter_mut() {
-        hitmarker_promp.hitmarker_lifetime.tick(time.delta());
-
-        if hitmarker_promp.hitmarker_lifetime.is_finished() {
-            commands.entity(hitmarker_entity).despawn();
-        }
-    }
 }

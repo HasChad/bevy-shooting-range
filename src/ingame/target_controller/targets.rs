@@ -38,7 +38,7 @@ pub fn hit_detector(
     for mes in mes_reader.read() {
         let hit_entity_name = query.get(mes.hit_entity).unwrap().as_str();
 
-        if hit_entity_name == "Cylinder" {
+        if hit_entity_name.contains("Cylinder") {
             let ancestor = parent_query.iter_ancestors(mes.hit_entity).last().unwrap();
 
             circletarget_mes_writer.write(CircleTargetMessage { entity: ancestor });

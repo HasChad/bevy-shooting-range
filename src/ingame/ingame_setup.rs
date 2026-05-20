@@ -10,7 +10,7 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         Name::new("Shooting Range"),
     ));
     // ! Blender models looking at positive Y direction
-    // ! for true mesh setup, in blender Ctrl + A -> All Transforms
+    // ! For true mesh setup, in blender Ctrl + A -> All Transforms
 
     commands.spawn((
         PointLight {

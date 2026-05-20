@@ -2,10 +2,12 @@ use bevy::prelude::*;
 use bevy_inspector_egui::bevy_egui::EguiPrimaryContextPass;
 
 pub mod crosshair;
+pub mod hitmarker;
 pub mod settings;
 pub mod ui;
 
 use crosshair::*;
+use hitmarker::*;
 use settings::*;
 use ui::*;
 
@@ -18,7 +20,7 @@ pub struct IngameUIPlugin;
 
 impl Plugin for IngameUIPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, (crosshair_setup, ui_setup))
+        app.add_systems(Startup, (crosshair_setup, ui_setup, spawn_hitmarker))
             .add_systems(
                 EguiPrimaryContextPass,
                 egui_settings.run_if(in_state(PlayableState::Menu)),
