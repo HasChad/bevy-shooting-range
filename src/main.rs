@@ -33,6 +33,7 @@ fn main() {
             PhysicsGizmos {
                 contact_point_color: Some(Color::BLACK),
                 contact_normal_color: Some(Color::BLACK),
+                shapecast_normal_color: Some(Color::BLACK),
                 ..default()
             },
             GizmoConfig::default(),

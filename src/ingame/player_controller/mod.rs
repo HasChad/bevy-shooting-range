@@ -51,6 +51,7 @@ impl Plugin for PlayerControllerPlugin {
             .add_systems(
                 Update,
                 (
+                    check_ground,
                     player_look,
                     player_position_reset,
                     movement_input_controller,

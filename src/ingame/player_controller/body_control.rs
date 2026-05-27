@@ -2,7 +2,7 @@ use avian3d::{
     math::{Scalar, Vector},
     prelude::*,
 };
-use bevy::prelude::*;
+use bevy::{asset::meta::ProcessedInfo, prelude::*};
 use std::f32::consts::PI;
 
 use super::{player::Player, KeyBindings};
@@ -104,16 +104,38 @@ pub fn friction(lin_vel: Vec3, force: f32) -> Vec3 {
     fri_dir
 }
 
-pub fn apply_gravity(mut lin_vel: Single<&mut LinearVelocity, With<Player>>) {
-    lin_vel.y -= GRAVITY;
+pub fn check_ground(
+    spatial_query: SpatialQuery,
+    player: Single<(Entity, &mut Player, &Transform)>,
+) {
+    let (player_id, mut player, transform) = player.into_inner();
+
+    let hit = spatial_query.cast_shape(
+        &Collider::cylinder(0.25, 0.05),
+        transform.translation,
+        Quat::default(),
+        Dir3::NEG_Y,
+        &ShapeCastConfig::from_max_distance(0.53),
+        &SpatialQueryFilter::from_mask(0b1011).with_excluded_entities([player_id]),
+    );
+
+    player.on_ground = hit.is_some();
+}
+
+pub fn apply_gravity(player: Single<(&Player, &mut LinearVelocity)>) {
+    let (player_prop, mut player_linvel) = player.into_inner();
+
+    if !player_prop.on_ground {
+        player_linvel.y -= GRAVITY;
+    }
 }
 
 pub fn kinematic_controller_collisions(
-    time: Res<Time>,
+    _time: Res<Time>,
     cg: Res<ContactGraph>,
     bodies: Query<&RigidBody>,
     player_entity: Single<Entity, With<Player>>,
-    mut player_query: Query<(&mut Position, &mut LinearVelocity), With<Player>>,
+    mut player_query: Query<(&mut Position, &mut LinearVelocity)>,
 ) {
     for contact_pair in cg.contact_pairs_with(*player_entity) {
         if contact_pair.is_touching() {
@@ -185,47 +207,49 @@ pub fn kinematic_controller_collisions(
                 // Determine if the slope is climbable or if it's too steep to walk on.
                 let max_slope_angle: Scalar = PI * 0.25;
                 let slope_angle = normal.angle_between(Vector::Y);
+
+                // println!("slope: {}, max: {}", slope_angle.abs(), max_slope_angle);
+
                 let climbable = slope_angle.abs() <= max_slope_angle;
 
                 if deepest_penetration > 0.0 {
                     if climbable {
-                        if let Some(height) = auto_step {
-                            position.y += 0.5 + height;
-                        }
+                        // if let Some(height) = auto_step {
+                        //     position.y += deepest_penetration;
+                        // }
+
+                        position.y += deepest_penetration;
 
                         // Points in the normal's direction in the XZ plane.
-                        //let normal_direction_xz = normal.reject_from_normalized(Vector::Y).normalize_or_zero();
+                        // let normal_direction_xz = normal.reject_from_normalized(Vector::Y).normalize_or_zero();
                         // info!("test = {}", normal_direction_xz);
+
                         // The movement speed along the direction above.
                         // let linear_velocity_xz = lin_vel.dot(normal_direction_xz);
                         // let max_y_speed = -linear_velocity_xz * slope_angle.tan();
                         // lin_vel.y = lin_vel.y.max(max_y_speed);
-                    }
-                    /*else {
-                            if let Some(height) = auto_step {
-                                lin_vel.y = 0.0;
+                    } else {
+                        if let Some(height) = auto_step {
+                            lin_vel.y = 0.0;
 
-                                info!("pos y = {}", position.y);
-
-                                if height < -0.45 {
-                                    position.y += 0.5 + height;
-                                } else {
-                                    position.y += (0.5 + height) / 2.0;
-                                }
+                            if height < -0.45 {
+                                position.y += 0.5 + height;
                             } else {
-                                position.0 += normal * deepest_penetration;
-
-                                // Don't apply an impulse if the character is moving away from the surface.
-                                if lin_vel.dot(normal) > 0.0 {
-                                    continue;
-                                }
-
-                                // Slide along the surface, rejecting the velocity along the contact normal.
-                                //let impulse = lin_vel.reject_from_normalized(normal);
-                                //lin_vel.0 = impulse;
+                                position.y += (0.5 + height) / 2.0;
                             }
+                        } else {
+                            position.0 += normal * deepest_penetration;
+
+                            // Don't apply an impulse if the character is moving away from the surface.
+                            if lin_vel.dot(normal) > 0.0 {
+                                continue;
+                            }
+
+                            // Slide along the surface, rejecting the velocity along the contact normal.
+                            //let impulse = lin_vel.reject_from_normalized(normal);
+                            //lin_vel.0 = impulse;
                         }
-                    */
+                    }
                 }
 
                 /*
