@@ -43,7 +43,7 @@ pub fn player_setup(
         },
         RigidBody::Kinematic,
         Collider::cylinder(0.25, 1.0),
-        Transform::from_xyz(0.0, 1.0, 0.0),
+        Transform::from_xyz(0.0, 2.0, 0.0),
         TransformInterpolation,
         Name::new("Player"),
     ));

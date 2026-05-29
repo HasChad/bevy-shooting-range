@@ -11,8 +11,6 @@ use hitmarker::*;
 use settings::*;
 use ui::*;
 
-use crate::ingame::PlayableState;
-
 #[derive(Message)]
 pub struct HitmarkerMessage;
 
@@ -20,30 +18,28 @@ pub struct IngameUIPlugin;
 
 impl Plugin for IngameUIPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, (crosshair_setup, ui_setup, spawn_hitmarker))
-            .add_systems(
-                EguiPrimaryContextPass,
-                egui_settings.run_if(in_state(PlayableState::Menu)),
-            )
-            .add_systems(OnEnter(PlayableState::Menu), setting_bg)
-            .add_systems(OnExit(PlayableState::Menu), despawn_bg)
-            .add_systems(
-                FixedUpdate,
-                (
-                    // ui systems
-                    fps_text_updater,
-                    ammo_text_updater,
-                    weapon_name_text_updater,
-                    velocity_text_updater,
-                    target_text_updater,
-                    // hitmarker systems
-                    hitmarker_spawner,
-                    hitmarker_controller,
-                ),
-            )
-            // events
-            .add_message::<HitmarkerMessage>()
-            // resources
-            .init_resource::<CrosshairLineSettings>();
+        app.add_systems(
+            Startup,
+            (crosshair_setup, ui_setup, hitmarker_setup, setting_bg),
+        )
+        .add_systems(EguiPrimaryContextPass, egui_settings)
+        .add_systems(
+            FixedUpdate,
+            (
+                // ui systems
+                fps_text_updater,
+                ammo_text_updater,
+                weapon_name_text_updater,
+                velocity_text_updater,
+                target_text_updater,
+                // hitmarker systems
+                hitmarker_spawner,
+                hitmarker_controller,
+            ),
+        )
+        // events
+        .add_message::<HitmarkerMessage>()
+        // resources
+        .init_resource::<CrosshairLineSettings>();
     }
 }

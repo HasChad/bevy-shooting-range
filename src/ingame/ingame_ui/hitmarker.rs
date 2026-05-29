@@ -8,7 +8,7 @@ pub struct HitMarker {
     lifetime: Timer,
 }
 
-pub fn spawn_hitmarker(mut commands: Commands) {
+pub fn hitmarker_setup(mut commands: Commands) {
     commands
         .spawn((
             Node {

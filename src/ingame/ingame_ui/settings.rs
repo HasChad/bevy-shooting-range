@@ -1,7 +1,4 @@
-use bevy::{
-    prelude::*,
-    window::{CursorGrabMode, CursorOptions},
-};
+use bevy::prelude::*;
 use bevy_inspector_egui::{
     bevy_egui::{egui, EguiContext, PrimaryEguiContext},
     egui::{Align2, Color32, RichText, Slider},
@@ -9,31 +6,12 @@ use bevy_inspector_egui::{
 use std::f32::consts::PI;
 
 use super::{CrosshairLine, CrosshairLineSettings};
-use crate::ingame::{ingame_ui::crosshair::CrossParent, GameSettings, PlayableState};
+use crate::ingame::GameSettings;
 
 #[derive(Component)]
 pub struct SettingsUI;
 
-pub fn setting_bg(mut commands: Commands, mut cross: Single<&mut Node, With<CrossParent>>) {
-    cross.margin.right = Val::Px(500.0);
-
-    commands.spawn((
-        Node {
-            width: Val::Vw(100.),
-            height: Val::Vh(100.),
-            flex_wrap: FlexWrap::Wrap,
-            ..default()
-        },
-        BackgroundColor(Color::Hsla(Hsla {
-            hue: 0.0,
-            saturation: 0.0,
-            lightness: 0.0,
-            alpha: 0.7,
-        })),
-        ZIndex(1),
-        SettingsUI,
-    ));
-
+pub fn setting_bg(mut commands: Commands) {
     commands.spawn((
         Text::new(concat!(
             "ESC - Enter/Exit play mode\n",
@@ -67,22 +45,7 @@ pub fn setting_bg(mut commands: Commands, mut cross: Single<&mut Node, With<Cros
     ));
 }
 
-pub fn despawn_bg(
-    mut commands: Commands,
-    query: Query<Entity, With<SettingsUI>>,
-    mut cross: Single<&mut Node, With<CrossParent>>,
-) {
-    cross.margin.right = Val::Px(0.0);
-
-    for entity in query.iter() {
-        commands.entity(entity).despawn();
-    }
-}
-
 pub fn egui_settings(
-    mut next_state: ResMut<NextState<PlayableState>>,
-    mut exit: MessageWriter<AppExit>,
-    mut cursor_options: Single<&mut CursorOptions>,
     mut egui_context: Single<&mut EguiContext, With<PrimaryEguiContext>>,
     mut settings: ResMut<GameSettings>,
     mut camera_query: Single<&mut Projection, With<Camera3d>>,
@@ -94,8 +57,8 @@ pub fn egui_settings(
 ) {
     egui::Window::new("SETTINGS")
         .resizable(false)
-        .collapsible(false)
-        .anchor(Align2::CENTER_CENTER, (0.0, 0.0))
+        .collapsible(true)
+        .anchor(Align2::RIGHT_BOTTOM, (0.0, 0.0))
         .show(egui_context.get_mut(), |ui| {
             egui::Grid::new("my_grid")
                 .num_columns(2)
@@ -221,7 +184,6 @@ pub fn egui_settings(
                         }
                     };
                     ui.end_row();
-                    ui.end_row();
 
                     /*
                     //Audio Settings
@@ -242,26 +204,6 @@ pub fn egui_settings(
                     ui.end_row();
                     ui.end_row();
                     */
-
-                    //Quit
-                    ui.heading(RichText::new("- Quit Game -").color(Color32::WHITE));
-                    ui.end_row();
-
-                    ui.horizontal_centered(|ui| {
-                        if ui
-                            .button(RichText::new("Quit").color(Color32::RED))
-                            .clicked()
-                        {
-                            exit.write(AppExit::Success);
-                        }
-
-                        if ui.button("Resume").clicked() {
-                            cursor_options.grab_mode = CursorGrabMode::Confined;
-                            cursor_options.visible = false;
-                            next_state.set(PlayableState::Action)
-                        }
-                        ui.end_row();
-                    });
                 });
         });
 }

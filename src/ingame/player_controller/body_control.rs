@@ -2,7 +2,7 @@ use avian3d::{
     math::{Scalar, Vector},
     prelude::*,
 };
-use bevy::{asset::meta::ProcessedInfo, prelude::*};
+use bevy::prelude::*;
 use std::f32::consts::PI;
 
 use super::{player::Player, KeyBindings};
@@ -130,6 +130,15 @@ pub fn apply_gravity(player: Single<(&Player, &mut LinearVelocity)>) {
     }
 }
 
+pub fn apply_jump(player: Single<(&mut Player, &mut LinearVelocity)>) {
+    let (mut player_prop, mut player_linvel) = player.into_inner();
+
+    if player_prop.on_ground && player_prop.jump {
+        player_linvel.y = 10.0;
+        player_prop.jump = false;
+    }
+}
+
 pub fn kinematic_controller_collisions(
     _time: Res<Time>,
     cg: Res<ContactGraph>,
@@ -230,7 +239,7 @@ pub fn kinematic_controller_collisions(
                         // lin_vel.y = lin_vel.y.max(max_y_speed);
                     } else {
                         if let Some(height) = auto_step {
-                            lin_vel.y = 0.0;
+                            // lin_vel.y = 0.0;
 
                             if height < -0.45 {
                                 position.y += 0.5 + height;

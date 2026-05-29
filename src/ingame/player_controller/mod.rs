@@ -53,6 +53,7 @@ impl Plugin for PlayerControllerPlugin {
                 (
                     check_ground,
                     player_look,
+                    apply_jump,
                     player_position_reset,
                     movement_input_controller,
                 )
