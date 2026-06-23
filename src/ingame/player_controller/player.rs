@@ -1,7 +1,5 @@
 use avian3d::prelude::*;
-use bevy::{
-    pbr::ScreenSpaceAmbientOcclusion, post_process::bloom::Bloom, prelude::*, render::view::Hdr,
-};
+use bevy::{camera::Hdr, pbr::ScreenSpaceAmbientOcclusion, post_process::bloom::Bloom, prelude::*};
 use std::f32::consts::PI;
 
 use crate::ingame::{weapons::Weapon, GameSettings};
@@ -73,7 +71,7 @@ pub fn player_setup(
         ))
         // gun model
         .with_child((
-            SceneRoot(asset_server.load("models/weapons/P226.glb#Scene0")),
+            WorldAssetRoot(asset_server.load("models/weapons/P226.glb#Scene0")),
             Transform::from_translation(WEAPON_POS),
             Weapon::p226(),
             Name::new("Weapon"),

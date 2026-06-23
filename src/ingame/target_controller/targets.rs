@@ -52,7 +52,7 @@ pub fn hit_detector(
 pub fn target_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     //circle target
     commands.spawn((
-        SceneRoot(asset_server.load("models/targets/circle_target.glb#Scene0")),
+        WorldAssetRoot(asset_server.load("models/targets/circle_target.glb#Scene0")),
         ColliderConstructorHierarchy::new(ColliderConstructor::TrimeshFromMesh),
         Transform::from_xyz(0.0, 0.75, -4.0),
         Name::new("CircleTarget"),

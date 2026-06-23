@@ -31,7 +31,7 @@ pub fn ui_setup(mut commands: Commands) {
         .spawn((
             Text::default(),
             TextFont {
-                font_size: 50.0,
+                font_size: FontSize::Px(50.0),
                 ..default()
             },
             Node {
@@ -51,14 +51,14 @@ pub fn ui_setup(mut commands: Commands) {
         .with_child((
             TextSpan::new("/"),
             TextFont {
-                font_size: 50.0,
+                font_size: FontSize::Px(50.0),
                 ..default()
             },
         ))
         .with_child((
             TextSpan::default(),
             TextFont {
-                font_size: 30.0,
+                font_size: FontSize::Px(30.0),
                 ..default()
             },
             TextColor(GOLD.into()),
@@ -68,7 +68,7 @@ pub fn ui_setup(mut commands: Commands) {
     commands.spawn((
         Text::default(),
         TextFont {
-            font_size: 25.0,
+            font_size: FontSize::Px(25.0),
             ..default()
         },
         TextColor(GOLD.into()),
@@ -93,7 +93,7 @@ pub fn ui_setup(mut commands: Commands) {
         .spawn((
             Text::new("FPS: "),
             TextFont {
-                font_size: 15.0,
+                font_size: FontSize::Px(15.0),
                 ..default()
             },
             Node {
@@ -108,7 +108,7 @@ pub fn ui_setup(mut commands: Commands) {
         .with_child((
             TextSpan::default(),
             TextFont {
-                font_size: 15.0,
+                font_size: FontSize::Px(15.0),
                 ..default()
             },
             TextColor(GOLD.into()),
@@ -119,7 +119,7 @@ pub fn ui_setup(mut commands: Commands) {
         .spawn((
             Text::new("Vel: "),
             TextFont {
-                font_size: 20.0,
+                font_size: FontSize::Px(20.0),
                 ..default()
             },
             Node {
@@ -135,7 +135,7 @@ pub fn ui_setup(mut commands: Commands) {
         .with_child((
             TextSpan::default(),
             TextFont {
-                font_size: 20.0,
+                font_size: FontSize::Px(20.0),
                 ..default()
             },
             TextColor(GOLD.into()),
@@ -146,7 +146,7 @@ pub fn ui_setup(mut commands: Commands) {
         .spawn((
             Text::new("Kills: "),
             TextFont {
-                font_size: 20.0,
+                font_size: FontSize::Px(20.0),
                 ..default()
             },
             Node {
@@ -166,7 +166,7 @@ pub fn ui_setup(mut commands: Commands) {
         .with_child((
             TextSpan::default(),
             TextFont {
-                font_size: 20.0,
+                font_size: FontSize::Px(20.0),
                 ..default()
             },
             TextColor(GOLD.into()),
@@ -174,7 +174,7 @@ pub fn ui_setup(mut commands: Commands) {
         .with_child((
             TextSpan::new(" / 30"),
             TextFont {
-                font_size: 20.0,
+                font_size: FontSize::Px(20.0),
                 ..default()
             },
             TextColor(GOLD.into()),
@@ -182,14 +182,14 @@ pub fn ui_setup(mut commands: Commands) {
         .with_child((
             TextSpan::new("\nTime: "),
             TextFont {
-                font_size: 20.0,
+                font_size: FontSize::Px(20.0),
                 ..default()
             },
         ))
         .with_child((
             TextSpan::default(),
             TextFont {
-                font_size: 20.0,
+                font_size: FontSize::Px(20.0),
                 ..default()
             },
             TextColor(GOLD.into()),

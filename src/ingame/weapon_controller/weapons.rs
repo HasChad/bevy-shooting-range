@@ -105,7 +105,7 @@ pub fn change_weapon(
     weapon_action_state: Res<State<WeaponActionState>>,
     //mut next_weapon_action_state: ResMut<NextState<WeaponActionState>>,
     mut next_weapon_state: ResMut<NextState<WeaponState>>,
-    mut weapon_query: Query<(&mut Weapon, &mut SceneRoot)>,
+    mut weapon_query: Query<(&mut Weapon, &mut WorldAssetRoot)>,
 ) {
     for key in input.get_just_pressed() {
         if *weapon_action_state.get() == WeaponActionState::Ready
@@ -121,14 +121,14 @@ pub fn change_weapon(
                     KeyCode::Digit1 => {
                         *weapon = weapon_res.p226.clone();
                         *weapon_scene =
-                            SceneRoot(asset_server.load("models/weapons/P226.glb#Scene0"));
+                            WorldAssetRoot(asset_server.load("models/weapons/P226.glb#Scene0"));
                         next_weapon_state.set(WeaponState::P226);
                         //next_weapon_action_state.set(WeaponActionState::Raise);
                     }
                     KeyCode::Digit2 => {
                         *weapon = weapon_res.ak15.clone();
                         *weapon_scene =
-                            SceneRoot(asset_server.load("models/weapons/AK15.glb#Scene0"));
+                            WorldAssetRoot(asset_server.load("models/weapons/AK15.glb#Scene0"));
                         next_weapon_state.set(WeaponState::AK15);
                         //next_weapon_action_state.set(WeaponActionState::Raise);
                     }

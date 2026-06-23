@@ -40,7 +40,7 @@ fn main() {
         )
         .add_plugins(EguiPlugin::default())
         .add_plugins(
-            WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Tab)),
+            WorldInspectorPlugin::default().run_if(input_toggle_active(true, KeyCode::Tab)),
         )
         //mod plugins
         .add_plugins(InGamePlugin)

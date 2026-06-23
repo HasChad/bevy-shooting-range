@@ -26,7 +26,7 @@ pub fn setting_bg(mut commands: Commands) {
         )),
         ZIndex(2),
         TextFont {
-            font_size: 15.0,
+            font_size: FontSize::Px(15.0),
             ..default()
         },
         Node {
